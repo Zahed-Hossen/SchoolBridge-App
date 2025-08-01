@@ -58,8 +58,8 @@ A modern, role-based educational platform built with React Native and Node.js, d
 4. **Environment Setup:**
    ```bash
    # Copy environment files
-   cp frontend/.env.example frontend/.env
-   cp backend/.env.example backend/.env
+   cp frontend/.env frontend/.env
+   cp backend/.env backend/.env
 
    # Edit .env files with your configurations
    ```
