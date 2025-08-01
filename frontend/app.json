@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "SchoolBridge",
+    "slug": "schoolbridge-app",
+    "scheme": "com.pixelmind.schoolbridge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2E86AB"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pixelmind.schoolbridge",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "com.pixelmind.schoolbridge.oauth",
+            "CFBundleURLSchemes": [
+              "com.pixelmind.schoolbridge"
+            ]
+          }
+        ],
+        "LSApplicationQueriesSchemes": [
+          "googlegmail",
+          "googleplus"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.pixelmind.schoolbridge",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ],
+          "data": {
+            "scheme": "com.pixelmind.schoolbridge"
+          }
+        }
+      ],
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
