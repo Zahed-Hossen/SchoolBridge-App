@@ -6,6 +6,7 @@ import { AuthStackNavigator, getRoleBasedNavigator } from './src/navigation/AppN
 import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RoleSelectionScreen from './src/screens/Common/RoleSelectionScreen';
+// import ConnectionTest from './src/components/ConnectionTest';
 
 const Stack = createNativeStackNavigator();
 

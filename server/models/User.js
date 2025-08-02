@@ -1,184 +1,239 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { ROLES, PROVIDERS } from '../utils/constants.js';
 
 const userSchema = new mongoose.Schema({
-  // Basic Information
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true, // Allows null values but ensures uniqueness when present
-  },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
     trim: true,
-  },
-  firstName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  avatar: {
-    type: String,
-    default: null,
+    validate: {
+      validator: function(email) {
+        return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+      },
+      message: 'Please enter a valid email address'
+    }
   },
 
-  // Authentication
   password: {
     type: String,
     required: function() {
-      return !this.googleId; // Password required only if not OAuth user
+      return this.provider === PROVIDERS.EMAIL;
     },
-  },
-  emailVerified: {
-    type: Boolean,
-    default: false,
-  },
-  provider: {
-    type: String,
-    enum: ['local', 'google'],
-    default: 'local',
+    minlength: [6, 'Password must be at least 6 characters long'],
+    select: false
   },
 
-  // Role & Permissions
+  fullName: {
+    type: String,
+    required: [true, 'Full name is required'],
+    trim: true,
+    maxlength: [100, 'Full name cannot exceed 100 characters']
+  },
+
+  firstName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'First name cannot exceed 50 characters']
+  },
+
+  lastName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'Last name cannot exceed 50 characters']
+  },
+
+  phone: {
+    type: String,
+    trim: true,
+    validate: {
+      validator: function(phone) {
+        return !phone || /^[\+]?[1-9][\d]{0,15}$/.test(phone);
+      },
+      message: 'Please enter a valid phone number'
+    }
+  },
+
   role: {
     type: String,
-    enum: ['Student', 'Teacher', 'Parent', 'Admin'],
-    required: true,
+    enum: Object.values(ROLES),
+    default: ROLES.STUDENT,
+    required: true
   },
+
+  avatar: {
+    type: String,
+    default: null
+  },
+
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+
+  provider: {
+    type: String,
+    enum: Object.values(PROVIDERS),
+    default: PROVIDERS.EMAIL
+  },
+
+  verified: {
+    type: Boolean,
+    default: false
+  },
+
   isActive: {
     type: Boolean,
-    default: true,
+    default: true
   },
 
-  // Profile Information
-  profile: {
-    phone: String,
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: {
-        type: String,
-        default: 'US',
-      },
-    },
-    dateOfBirth: Date,
-    gender: {
-      type: String,
-      enum: ['male', 'female', 'other', 'prefer-not-to-say'],
-    },
-  },
-
-  // Role-specific Information
-  studentInfo: {
-    studentId: String,
-    grade: String,
-    class: String,
-    enrollmentDate: Date,
-    parentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  },
-
-  teacherInfo: {
-    employeeId: String,
-    department: String,
-    subjects: [String],
-    hireDate: Date,
-    qualifications: [String],
-  },
-
-  parentInfo: {
-    children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    emergencyContact: {
-      name: String,
-      phone: String,
-      relationship: String,
-    },
-  },
-
-  adminInfo: {
-    employeeId: String,
-    department: String,
-    permissions: [String],
-  },
-
-  // Security & Tracking
   lastLogin: {
     type: Date,
-    default: Date.now,
+    default: null
   },
-  loginAttempts: {
+
+  // ✅ Token management
+  tokenVersion: {
     type: Number,
-    default: 0,
+    default: 0
   },
-  lockUntil: Date,
-  refreshTokens: [String],
 
-  // Timestamps
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  refreshTokens: [{
+    type: String
+  }],
+
+  // Student-specific fields
+  studentId: {
+    type: String,
+    unique: true,
+    sparse: true
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
+
+  grade: {
+    type: String,
+    trim: true
   },
+
+  section: {
+    type: String,
+    trim: true
+  },
+
+  // Teacher-specific fields
+  employeeId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+
+  subjects: [{
+    type: String,
+    trim: true
+  }],
+
+  // Parent-specific fields
+  children: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
+  // Settings
+  preferences: {
+    language: {
+      type: String,
+      default: 'en'
+    },
+    timezone: {
+      type: String,
+      default: 'UTC'
+    },
+    notifications: {
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false }
+    }
+  }
+
+}, {
+  timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      delete ret.password;
+      delete ret.refreshTokens;
+      delete ret.tokenVersion;
+      delete ret.__v;
+      return ret;
+    }
+  }
 });
 
-// Indexes for better performance
-userSchema.index({ email: 1 });
-userSchema.index({ googleId: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ 'studentInfo.studentId': 1 });
-userSchema.index({ 'teacherInfo.employeeId': 1 });
 
-// Virtual for full name
-userSchema.virtual('fullName').get(function() {
-  return `${this.firstName} ${this.lastName}`;
-});
-
-// Pre-save middleware to hash password
+// ✅ Pre-save middleware for password hashing
 userSchema.pre('save', async function(next) {
-  // Only hash password if it's been modified
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) {
+    return next();
+  }
 
-  // Hash password
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+  try {
+    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Update the updatedAt field before saving
+// ✅ Pre-save middleware to generate fullName from firstName/lastName
 userSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
+  if (this.firstName && this.lastName && !this.fullName) {
+    this.fullName = `${this.firstName} ${this.lastName}`;
+  } else if (this.fullName && !this.firstName && !this.lastName) {
+    const names = this.fullName.split(' ');
+    this.firstName = names[0];
+    this.lastName = names.slice(1).join(' ');
+  }
   next();
 });
 
-// Instance method to check password
+// ✅ Instance methods
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  if (!this.password) return false;
+  if (!this.password) {
+    return false;
+  }
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Instance method to check if account is locked
-userSchema.methods.isLocked = function() {
-  return !!(this.lockUntil && this.lockUntil > Date.now());
+userSchema.methods.updateLastLogin = function() {
+  this.lastLogin = new Date();
+  return this.save();
 };
 
-// Static method to find by email or Google ID
+userSchema.methods.incrementTokenVersion = function() {
+  this.tokenVersion += 1;
+  return this.save();
+};
+
+// ✅ Static methods
+userSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email: email.toLowerCase() }).select('+password');
+};
+
+userSchema.statics.findByGoogleId = function(googleId) {
+  return this.findOne({ googleId });
+};
+
 userSchema.statics.findByEmailOrGoogleId = function(email, googleId) {
-  const query = { $or: [{ email }] };
-  if (googleId) {
-    query.$or.push({ googleId });
-  }
-  return this.findOne(query);
+  return this.findOne({
+    $or: [
+      { email: email.toLowerCase() },
+      { googleId: googleId }
+    ]
+  });
 };
 
-export default mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+export default User;

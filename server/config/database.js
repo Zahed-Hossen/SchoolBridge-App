@@ -7,34 +7,76 @@ const connectDB = async () => {
   try {
     console.log('🔗 Connecting to MongoDB...');
 
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // Modern Mongoose doesn't need these options, but included for clarity
-      // useNewUrlParser: true,
-      // useUnifiedTopology: true,
-    });
+    // ✅ FIXED: Remove deprecated options and ensure correct database
+    const connectionOptions = {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      retryWrites: true,
+      w: 'majority',
+      appName: 'SchoolBridge-Cluster0',
+      // ✅ FORCE DATABASE NAME
+      dbName: process.env.DB_NAME || 'schoolbridge',
+    };
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    let mongoURI = process.env.MONGODB_URI;
+
+    if (!mongoURI) {
+      throw new Error('MONGODB_URI not found in environment variables');
+    }
+
+    // ✅ Ensure database name is in the URI
+    if (!mongoURI.includes('/schoolbridge?') && !mongoURI.includes('dbName=')) {
+      // Add database to URI if not present
+      mongoURI = mongoURI.replace('mongodb.net/', 'mongodb.net/schoolbridge');
+    }
+
+    // ✅ Log connection attempt (hide password)
+    const safeURI = mongoURI.replace(/\/\/.*:.*@/, '//****:****@');
+    console.log('🔗 Attempting connection to:', safeURI);
+
+    const conn = await mongoose.connect(mongoURI, connectionOptions);
+
+    console.log('✅ MongoDB Connected Successfully!');
     console.log(`📊 Database: ${conn.connection.name}`);
+    console.log(`🌐 Host: ${conn.connection.host}`);
+    console.log(`📡 Port: ${conn.connection.port}`);
+    console.log(`🔄 Ready State: ${conn.connection.readyState}`);
 
-    // Set up connection event listeners
+    // ✅ VERIFY DATABASE NAME
+    const actualDbName = conn.connection.name;
+    const expectedDbName = process.env.DB_NAME || 'schoolbridge';
+
+    if (actualDbName !== expectedDbName) {
+      console.log(`⚠️ Warning: Connected to "${actualDbName}" but expected "${expectedDbName}"`);
+      console.log('💡 This will still work, but data will be stored in the "test" database');
+    } else {
+      console.log(`✅ Connected to correct database: ${actualDbName}`);
+    }
+
+    // Test database access
+    await conn.connection.db.admin().ping();
+    console.log('✅ Database ping successful');
+
+    // ✅ Connection event handlers
+    mongoose.connection.on('error', (error) => {
+      console.error('❌ MongoDB connection error:', error);
+    });
+
     mongoose.connection.on('disconnected', () => {
-      console.log('❌ MongoDB disconnected');
+      console.log('⚠️ MongoDB disconnected');
     });
 
-    mongoose.connection.on('error', (err) => {
-      console.error('❌ MongoDB connection error:', err);
+    mongoose.connection.on('reconnected', () => {
+      console.log('🔄 MongoDB reconnected');
     });
 
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('🔚 MongoDB connection closed due to app termination');
-      process.exit(0);
-    });
+    return conn;
 
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
-    process.exit(1);
+    console.log('🔄 Continuing without database for development...');
+    return null;
   }
 };
 

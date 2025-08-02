@@ -18,6 +18,7 @@
     "axios": "^1.11.0",
     "expo": "~53.0.20",
     "expo-auth-session": "~6.2.1",
+    "expo-build-properties": "~0.14.8",
     "expo-crypto": "~14.1.5",
     "expo-facebook": "^12.2.0",
     "expo-font": "^13.3.2",
@@ -31,13 +32,13 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.60.0",
     "react-native": "0.79.5",
+    "react-native-device-info": "^14.0.4",
     "react-native-paper": "^5.14.5",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-web": "^0.20.0",
     "yup": "^1.6.1",
-    "zustand": "^5.0.6",
-    "expo-build-properties": "~0.14.8"
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

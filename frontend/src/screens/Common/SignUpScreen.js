@@ -48,6 +48,60 @@ const SignUpScreen = () => {
     }
   }, [user, role, isAuthenticated, googleLoading, loading, navigation]);
 
+   const navigateToLogin = () => {
+    try {
+      console.log('🔄 Starting navigation to Login...');
+      console.log('🔍 Navigation state before:', navigation.getState());
+
+      // Reset form state
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+        role: '',
+      });
+      setTermsAccepted(false);
+      setErrors({});
+      setLoading(false);
+      setGoogleLoading(false);
+
+      console.log('🚀 Executing navigation...');
+
+      // ✅ FIXED: Use replace to properly change screens
+      navigation.replace('Login');
+
+      console.log('✅ navigation.replace executed');
+
+      // Check navigation state after a short delay
+      setTimeout(() => {
+        console.log('🔍 Navigation state after:', navigation.getState());
+      }, 100);
+
+    } catch (error) {
+      console.error('❌ Navigation failed:', error);
+      Alert.alert('Error', 'Navigation failed. Please go to Login manually.');
+    }
+  };
+
+  const getPasswordStrength = (password) => {
+    let strength = 0;
+    const checks = {
+      length: password.length >= 6,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /\d/.test(password),
+      symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+
+    Object.values(checks).forEach(check => {
+      if (check) strength++;
+    });
+
+    return { strength, checks };
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -62,14 +116,25 @@ const SignUpScreen = () => {
       newErrors.email = 'Please enter a valid email';
     }
 
+    // ✅ FIXED: Validate cleaned phone number
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
+    } else {
+      // Clean phone for validation
+      const cleanPhone = formData.phone.replace(/\D/g, '');
+
+      if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+        newErrors.phone = 'Please enter a valid phone number (10-15 digits)';
+      }
     }
 
+    // ✅ Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -88,11 +153,45 @@ const SignUpScreen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ FIXED: Better phone formatting and validation
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    if (field === 'phone') {
+      // Remove all non-digits for processing
+      let cleanPhone = value.replace(/\D/g, '');
+
+      // Limit length to prevent overly long numbers
+      if (cleanPhone.length > 15) {
+        cleanPhone = cleanPhone.substring(0, 15);
+      }
+
+      // Format for display (but keep clean version for submission)
+      let displayPhone = cleanPhone;
+
+      // Add formatting for better UX (only for display)
+      if (cleanPhone.length >= 6) {
+        if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
+          // Bangladesh format: 01888227599 -> 018-8822-7599
+          displayPhone = cleanPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (cleanPhone.length >= 10) {
+          // General format: 1234567890 -> 123-456-7890
+          displayPhone = cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        } else if (cleanPhone.length >= 7) {
+          displayPhone = cleanPhone.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3');
+        } else if (cleanPhone.length >= 4) {
+          displayPhone = cleanPhone.replace(/(\d{3})(\d+)/, '$1-$2');
+        }
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        [field]: displayPhone,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
 
     if (errors[field]) {
       setErrors((prev) => ({
@@ -111,36 +210,46 @@ const SignUpScreen = () => {
     try {
       console.log('📝 Submitting signup form...');
 
+      // ✅ FIXED: Clean phone number before sending
+      const cleanPhone = formData.phone.replace(/\D/g, ''); // Remove all non-digits
+      let finalPhone = cleanPhone;
+
+      // ✅ Add country code if needed
+      if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
+        // Bangladesh format: 01888227599 -> +8801888227599
+        finalPhone = '+88' + cleanPhone;
+      } else if (cleanPhone.length === 10 && !cleanPhone.startsWith('1')) {
+        // US format: add +1
+        finalPhone = '+1' + cleanPhone;
+      } else if (cleanPhone.length >= 10 && !cleanPhone.startsWith('+')) {
+        // Generic international: add +
+        finalPhone = '+' + cleanPhone;
+      }
+
+      console.log('📞 Original phone:', formData.phone);
+      console.log('📞 Clean phone:', cleanPhone);
+      console.log('📞 Final phone:', finalPhone);
+
       const result = await signup({
         fullName: formData.fullName,
         email: formData.email,
-        phone: formData.phone,
+        phone: finalPhone, // ✅ Use cleaned phone
         password: formData.password,
         role: formData.role,
       });
 
-      // ✅ Enhanced success handling
+      // ✅ FIXED: Enhanced success handling with better navigation
       if (result.success) {
         Alert.alert(
           '🎉 Account Created!',
           'Your account has been created successfully! You can now log in with your email and password.',
-          [{
-            text: 'Go to Login',
-            onPress: () => {
-              // Reset form
-              setFormData({
-                fullName: '',
-                email: '',
-                phone: '',
-                password: '',
-                confirmPassword: '',
-                role: '',
-              });
-              setTermsAccepted(false);
-              setErrors({});
-              navigation.navigate('Login');
+          [
+            {
+              text: 'Go to Login',
+              onPress: navigateToLogin
             }
-          }],
+          ],
+          { cancelable: false }
         );
       } else {
         throw new Error(result.error || 'Registration failed');
@@ -153,6 +262,8 @@ const SignUpScreen = () => {
 
       if (error.message.includes('email already exists') || error.message.includes('already registered')) {
         errorMessage = 'An account with this email already exists. Please use a different email or try logging in.';
+      } else if (error.message.includes('phone number')) {
+        errorMessage = 'Please enter a valid phone number (e.g., 01888227599 or +8801888227599)';
       } else if (error.message.includes('validation')) {
         errorMessage = 'Please check your input and try again.';
       } else if (error.message.includes('Network Error') || error.message.includes('ECONNREFUSED')) {
@@ -229,6 +340,61 @@ const SignUpScreen = () => {
     </View>
   );
 
+
+// ✅ ADD: OAuth test function
+const testOAuth = async () => {
+  try {
+    console.log('🧪 Testing OAuth configuration...');
+
+    // Import GoogleOAuthService at the top if not already imported
+    // import GoogleOAuthService from '../../services/GoogleOAuthService';
+
+    // Debug redirect URIs
+    await GoogleOAuthService.debugRedirectUri();
+
+    // Get configuration status
+    const status = GoogleOAuthService.getConfigurationStatus();
+    console.log('📊 Configuration status:', status);
+
+    // Test sign-in
+    console.log('🚀 Testing OAuth sign-in...');
+    const result = await GoogleOAuthService.signIn();
+
+    console.log('📋 OAuth test result:', {
+      success: result.success,
+      hasUser: !!result.user,
+      method: result.method,
+      simulated: result.simulated,
+      error: result.error
+    });
+
+    if (result.success) {
+      Alert.alert(
+        'OAuth Test Success! ✅',
+        `Signed in as: ${result.user.email}\n` +
+        `Method: ${result.method || 'unknown'}\n` +
+        `Simulated: ${result.simulated ? 'Yes' : 'No'}`,
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        'OAuth Test Failed ❌',
+        result.error || 'Unknown error',
+        [{ text: 'OK' }]
+      );
+    }
+
+  } catch (error) {
+    console.error('❌ OAuth test error:', error);
+    Alert.alert(
+      'Test Error ⚠️',
+      `Error: ${error.message}\n\nCheck console for details.`,
+      [{ text: 'OK' }]
+    );
+  }
+};
+
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -288,6 +454,12 @@ const SignUpScreen = () => {
               keyboardType="phone-pad"
               editable={!loading && !googleLoading}
             />
+
+            {/* ✅ Phone format helper */}
+            <Text style={styles.phoneHint}>
+              Format: +8801234567890 (with country code) or 01234567890
+            </Text>
+
             {errors.phone && (
               <Text style={styles.errorText}>{errors.phone}</Text>
             )}
@@ -305,10 +477,119 @@ const SignUpScreen = () => {
               secureTextEntry
               editable={!loading && !googleLoading}
             />
+
+            <Text style={styles.passwordHint}>
+              Must contain: uppercase letter, lowercase letter, and number
+              (minimum 6 characters)
+            </Text>
+
             {errors.password && (
               <Text style={styles.errorText}>{errors.password}</Text>
             )}
           </View>
+
+          {/* ✅ Dynamic Password Strength Indicator */}
+          {formData.password.length > 0 && (
+            <View style={styles.passwordStrengthContainer}>
+              {(() => {
+                const { strength, checks } = getPasswordStrength(
+                  formData.password,
+                );
+                const strengthText =
+                  ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][strength] ||
+                  'Very Strong';
+                const strengthColor =
+                  ['#E74C3C', '#E67E22', '#F39C12', '#27AE60', '#16A085'][
+                    strength
+                  ] || '#E74C3C';
+
+                return (
+                  <>
+                    {/* Strength Bar */}
+                    <View style={styles.strengthBarContainer}>
+                      <Text style={styles.strengthLabel}>Strength: </Text>
+                      <View style={styles.strengthBar}>
+                        <View
+                          style={[
+                            styles.strengthFill,
+                            {
+                              width: `${(strength / 5) * 100}%`,
+                              backgroundColor: strengthColor,
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text
+                        style={[styles.strengthText, { color: strengthColor }]}
+                      >
+                        {strengthText}
+                      </Text>
+                    </View>
+
+                    {/* Requirements Checklist */}
+                    <View style={styles.requirementsContainer}>
+                      <Text style={styles.requirementsTitle}>
+                        Requirements:
+                      </Text>
+                      <View style={styles.requirementsList}>
+                        <Text
+                          style={[
+                            styles.requirement,
+                            checks.length
+                              ? styles.requirementMet
+                              : styles.requirementUnmet,
+                          ]}
+                        >
+                          {checks.length ? '✅' : '❌'} At least 6 characters
+                        </Text>
+                        <Text
+                          style={[
+                            styles.requirement,
+                            checks.lowercase
+                              ? styles.requirementMet
+                              : styles.requirementUnmet,
+                          ]}
+                        >
+                          {checks.lowercase ? '✅' : '❌'} Lowercase letter
+                        </Text>
+                        <Text
+                          style={[
+                            styles.requirement,
+                            checks.uppercase
+                              ? styles.requirementMet
+                              : styles.requirementUnmet,
+                          ]}
+                        >
+                          {checks.uppercase ? '✅' : '❌'} Uppercase letter
+                        </Text>
+                        <Text
+                          style={[
+                            styles.requirement,
+                            checks.number
+                              ? styles.requirementMet
+                              : styles.requirementUnmet,
+                          ]}
+                        >
+                          {checks.number ? '✅' : '❌'} Number
+                        </Text>
+                        <Text
+                          style={[
+                            styles.requirement,
+                            checks.symbol
+                              ? styles.requirementMet
+                              : styles.requirementUnmet,
+                          ]}
+                        >
+                          {checks.symbol ? '🎯' : '⭕'} Special character
+                          (optional)
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                );
+              })()}
+            </View>
+          )}
 
           {/* Confirm Password */}
           <View style={styles.inputGroup}>
@@ -396,7 +677,7 @@ const SignUpScreen = () => {
             <View style={styles.divider} />
           </View>
 
-          {/* ✅ FIXED: Google OAuth Button with proper ActivityIndicator */}
+          {/* ✅ Google OAuth Button */}
           <TouchableOpacity
             style={[
               styles.googleButton,
@@ -427,6 +708,18 @@ const SignUpScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+
+      {/* ✅ NEW: Floating debug button (only in development) */}
+      {__DEV__ && (
+        <TouchableOpacity
+          style={styles.floatingDebugButton}
+          onPress={testOAuth}
+          disabled={loading || googleLoading}
+        >
+          <Text style={styles.floatingDebugText}>🧪</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Role Picker Modal */}
       {showRolePicker && (
@@ -489,6 +782,78 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333333',
     backgroundColor: '#FFFFFF',
+  },
+  // ✅ Password Strength Styles
+  passwordStrengthContainer: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  strengthBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  strengthLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#495057',
+    marginRight: 8,
+  },
+  strengthBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#E9ECEF',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginRight: 8,
+  },
+  strengthFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  strengthText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    minWidth: 60,
+  },
+  requirementsContainer: {
+    marginTop: 4,
+  },
+  requirementsTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#495057',
+    marginBottom: 4,
+  },
+  requirementsList: {
+    gap: 2,
+  },
+  requirement: {
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  requirementMet: {
+    color: '#27AE60',
+    fontWeight: '600',
+  },
+  requirementUnmet: {
+    color: '#6C757D',
+  },
+  phoneHint: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  passwordHint: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   inputError: {
     borderColor: '#E74C3C',
@@ -595,6 +960,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+    // ✅ Floating debug button styles
+    floatingDebugButton: {
+      position: 'absolute',
+      bottom: 20,
+      right: 20,
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: '#9B59B6',
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 8,
+      zIndex: 1000,
+    },
+    floatingDebugText: {
+      fontSize: 20,
+      color: '#FFFFFF',
+    },
   loginLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

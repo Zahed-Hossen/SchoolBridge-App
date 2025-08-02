@@ -132,6 +132,12 @@ const SupportScreen = ({ navigation }) => {
     }
   };
 
+  // ✅ NEW: Handle Connection Test Navigation
+  const handleConnectionTest = () => {
+    // Navigate to Connection Test screen or show as modal
+    navigation.navigate('ConnectionTest'); // Adjust this based on your navigation structure
+  };
+
   const handleSubmitTicket = () => {
     if (!ticketForm.name || !ticketForm.email || !ticketForm.subject || !ticketForm.message) {
       Alert.alert('Error', 'Please fill in all required fields');
@@ -226,6 +232,12 @@ const SupportScreen = ({ navigation }) => {
       answer: 'Try restarting the app. If the problem persists, update to the latest version or contact support.',
       category: 'technical',
     },
+    // ✅ NEW: Connection-related FAQ
+    {
+      question: 'The app won\'t connect to the server. What should I do?',
+      answer: 'First, check your internet connection. Then use our Connection Test tool to diagnose the issue. You can find it in the Additional Resources section below.',
+      category: 'technical',
+    },
   ];
 
   const filteredFaqs = faqData.filter(faq => faq.category === selectedCategory);
@@ -285,6 +297,34 @@ const SupportScreen = ({ navigation }) => {
             </FloatingCard>
           ))}
         </View>
+      </View>
+
+      {/* ✅ NEW: Connection Test Quick Access */}
+      <View style={styles.connectionTestSection}>
+        <Text style={styles.connectionTestTitle}>Having Connection Issues?</Text>
+        <Text style={styles.connectionTestSubtitle}>
+          Test your connection to our servers and get instant troubleshooting help
+        </Text>
+
+        <InteractiveCard
+          style={styles.connectionTestButton}
+          onPress={handleConnectionTest}
+          scaleValue={0.96}
+        >
+          <LinearGradient
+            colors={['#4ECDC4', '#44A08D']}
+            style={styles.connectionTestGradient}
+          >
+            <Text style={styles.connectionTestIcon}>🔗</Text>
+            <View style={styles.connectionTestContent}>
+              <Text style={styles.connectionTestButtonTitle}>Connection Test</Text>
+              <Text style={styles.connectionTestButtonSubtitle}>
+                Diagnose & Fix Connection Problems
+              </Text>
+            </View>
+            <Text style={styles.connectionTestArrow}>▶</Text>
+          </LinearGradient>
+        </InteractiveCard>
       </View>
 
       {/* ✅ FAQ Section */}
@@ -481,15 +521,33 @@ const SupportScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* ✅ FIXED: Additional Resources */}
+      {/* ✅ Enhanced Additional Resources with Connection Test */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Additional Resources</Text>
         <Text style={styles.sectionSubtitle}>
-          Explore more ways to get help
+          Explore more ways to get help and diagnostic tools
         </Text>
 
         <View style={styles.resourcesContainer}>
+          {/* ✅ First Row with Connection Test */}
           <View style={styles.resourceRow}>
+            <InteractiveCard
+              style={styles.resourceCardWrapper}
+              onPress={handleConnectionTest}
+              scaleValue={0.95}
+            >
+              <View style={[styles.resourceCardContent, styles.connectionTestResource]}>
+                <Text style={styles.resourceIcon}>🔗</Text>
+                <Text style={styles.resourceTitle}>Connection Test</Text>
+                <Text style={styles.resourceSubtitle}>
+                  Diagnose connection issues
+                </Text>
+                <View style={styles.connectionTestBadge}>
+                  <Text style={styles.connectionTestBadgeText}>DIAGNOSTIC</Text>
+                </View>
+              </View>
+            </InteractiveCard>
+
             <InteractiveCard
               style={styles.resourceCardWrapper}
               onPress={() =>
@@ -505,7 +563,10 @@ const SupportScreen = ({ navigation }) => {
                 </Text>
               </View>
             </InteractiveCard>
+          </View>
 
+          {/* ✅ Second Row */}
+          <View style={styles.resourceRow}>
             <InteractiveCard
               style={styles.resourceCardWrapper}
               onPress={() =>
@@ -521,9 +582,7 @@ const SupportScreen = ({ navigation }) => {
                 </Text>
               </View>
             </InteractiveCard>
-          </View>
 
-          <View style={styles.resourceRow}>
             <InteractiveCard
               style={styles.resourceCardWrapper}
               onPress={() =>
@@ -540,7 +599,10 @@ const SupportScreen = ({ navigation }) => {
                 <Text style={styles.resourceSubtitle}>Connect with users</Text>
               </View>
             </InteractiveCard>
+          </View>
 
+          {/* ✅ Third Row */}
+          <View style={styles.resourceRow}>
             <InteractiveCard
               style={styles.resourceCardWrapper}
               onPress={() =>
@@ -556,9 +618,28 @@ const SupportScreen = ({ navigation }) => {
                 </Text>
               </View>
             </InteractiveCard>
+
+            <InteractiveCard
+              style={styles.resourceCardWrapper}
+              onPress={() =>
+                Alert.alert('Download Logs', 'Log download feature coming soon!')
+              }
+              scaleValue={0.95}
+            >
+              <View style={styles.resourceCardContent}>
+                <Text style={styles.resourceIcon}>📋</Text>
+                <Text style={styles.resourceTitle}>Download Logs</Text>
+                <Text style={styles.resourceSubtitle}>
+                  Get diagnostic data
+                </Text>
+              </View>
+            </InteractiveCard>
           </View>
         </View>
       </View>
+
+      {/* ✅ Bottom spacing */}
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 };
@@ -658,6 +739,71 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+
+  // ✅ NEW: Connection Test Section
+  connectionTestSection: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginTop: 20,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  connectionTestTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A202C',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  connectionTestSubtitle: {
+    fontSize: 14,
+    color: '#718096',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  connectionTestButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#4ECDC4',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  connectionTestGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+  },
+  connectionTestIcon: {
+    fontSize: 28,
+    marginRight: 16,
+  },
+  connectionTestContent: {
+    flex: 1,
+  },
+  connectionTestButtonTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  connectionTestButtonSubtitle: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
+  connectionTestArrow: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
 
   // Section Styles
@@ -832,7 +978,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // ✅ FIXED: Resources Grid
+  // ✅ Enhanced Resources Grid
   resourcesContainer: {
     width: '100%',
   },
@@ -864,6 +1010,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    position: 'relative',
+  },
+  // ✅ NEW: Connection Test Resource Special Styling
+  connectionTestResource: {
+    borderColor: '#4ECDC4',
+    borderWidth: 2,
+    backgroundColor: '#F7FFFE',
+  },
+  connectionTestBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#4ECDC4',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  connectionTestBadgeText: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   resourceIcon: {
     fontSize: 36,

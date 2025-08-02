@@ -49,8 +49,6 @@ export const AuthProvider = ({ children }) => {
 
         // ✅ FIXED: For Google OAuth users, check if they need role selection
         if (loginMethod === 'google') {
-          // For Google OAuth, we want to ensure proper role selection flow
-          // Check if user has a proper role setup
           if (userRole && parsedUser.role) {
             // User has completed role selection
             setRole(parsedUser.role);
@@ -103,60 +101,68 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password, role) => {
-    try {
-      console.log('🔐 Attempting email login with:', { email, role });
-      setIsLoading(true);
+const login = async (email, password, role) => {
+  setIsLoading(true);
+  console.log('📝 Starting login process...');
+  console.log('📝 Attempting login for:', email);
+  console.log('📋 Login data:', { email, role });
 
-      const response = await apiService.auth.login({
-        email,
-        password,
-        role,
+  try {
+    // ✅ FIXED: Use the auth.login method from your apiService
+    const response = await apiService.auth.login({
+      email,
+      password,
+      role,
+    });
+
+    console.log('📨 Login response:', response);
+
+    // ✅ Your API service already handles token storage, so check the response
+    if (response.success && response.data) {
+      const { user, accessToken, refreshToken } = response.data;
+
+      console.log('✅ Login successful for:', user.email);
+      console.log('🔑 Tokens received:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
       });
 
-      console.log('📨 Login response:', response);
+      // ✅ Update state (tokens already stored by apiService)
+      setUser(user);
+      setRole(user.role);
+      setIsAuthenticated(true);
 
-      // ✅ FIXED: Handle response format properly
-      const userData = response.user;
-      const accessToken = response.accessToken;
-      const refreshToken = response.refreshToken;
+      console.log('✅ Login completed successfully');
+      console.log('👤 User set:', user.fullName);
+      console.log('🎭 Role set:', user.role);
 
-      if (accessToken && userData) {
-        // Store tokens and user data
-        await AsyncStorage.setItem('accessToken', accessToken);
-        await AsyncStorage.setItem('refreshToken', refreshToken || '');
-        await AsyncStorage.setItem('userData', JSON.stringify(userData));
-        await AsyncStorage.setItem('userRole', userData.role || role);
-        await AsyncStorage.setItem('loginMethod', 'email');
+      return {
+        success: true,
+        user,
+        message: 'Login successful',
+      };
+    } else {
+      // ✅ Handle API error responses
+      const errorMessage = response.message || response.error || 'Login failed';
+      console.log('❌ Login failed:', errorMessage);
 
-        setUser(userData);
-        setRole(userData.role || role);
-        setIsAuthenticated(true);
-
-        console.log('✅ Email login successful for:', userData.email);
-        return { success: true, user: userData };
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (error) {
-      console.error('❌ Email login error:', error);
-
-      // ✅ ENHANCED: Better error message handling
-      let errorMessage = 'Login failed';
-
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message?.includes('Network Error')) {
-        errorMessage = 'Unable to connect to server. Please check your internet connection.';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
+      return {
+        success: false,
+        error: errorMessage,
+      };
     }
-  };
+  } catch (error) {
+    console.error('❌ Login error:', error);
+
+    // ✅ Your apiService already provides user-friendly error messages
+    return {
+      success: false,
+      error: error.message || 'Login failed',
+    };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const signup = async (userData) => {
     try {
