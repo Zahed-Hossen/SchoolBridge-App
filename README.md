@@ -39,7 +39,7 @@ A modern, role-based educational platform built with React Native and Node.js, d
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/schoolbridge.git
+   git clone https://github.com/Zahed-Hossen/schoolbridge.git
    cd schoolbridge
    ```
 
@@ -133,11 +133,11 @@ schoolbridge/
 ```bash
 # Run frontend tests
 cd frontend
-npm test
+npm run dev
 
 # Run backend tests
 cd backend
-npm test
+npx expo start
 ```
 
 ## 🚀 Deployment
