@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GoogleOAuthService from '../services/GoogleOAuthService';
-import { apiService } from '../api/apiService';
+import { authService } from '../api/services/authService';
 
 const AuthContext = createContext();
 
@@ -109,7 +109,7 @@ const login = async (email, password, role) => {
 
   try {
     // ✅ FIXED: Use the auth.login method from your apiService
-    const response = await apiService.auth.login({
+    const response = await authService.login({
       email,
       password,
       role,
@@ -170,7 +170,7 @@ const login = async (email, password, role) => {
       console.log('📝 Starting signup process...');
 
       // ✅ Use the updated API service
-      const response = await apiService.auth.register(userData);
+      const response = await authService.register(userData);
 
       console.log('✅ Registration successful:', response);
 
@@ -311,34 +311,84 @@ const login = async (email, password, role) => {
     }
   };
 
+  // Update the logout method in AuthContext:
+
   const logout = async () => {
     try {
-      console.log('🚪 Logging out...');
+      console.log('🚪 Starting comprehensive logout...');
       setIsLoading(true);
 
       // Check login method to clear appropriate tokens
       const loginMethod = await AsyncStorage.getItem('loginMethod');
+      console.log('🔍 Login method detected:', loginMethod);
 
+      // ✅ Enhanced logout for different login methods
       if (loginMethod === 'google') {
-        await GoogleOAuthService.signOut();
+        try {
+          console.log('🔐 Signing out from Google services...');
+          await GoogleOAuthService.signOut();
+          console.log('✅ Google sign-out completed');
+        } catch (googleError) {
+          console.warn('⚠️ Google sign-out error:', googleError.message);
+          // Continue with local logout even if Google sign-out fails
+        }
       }
 
-      // Clear stored data
+      // ✅ Call backend logout endpoint if available
+      try {
+        console.log('🌐 Notifying backend of logout...');
+        const refreshToken = await AsyncStorage.getItem('refreshToken');
+
+        if (refreshToken) {
+          await apiService.auth.logout();
+          console.log('✅ Backend logout notification sent');
+        }
+      } catch (backendError) {
+        console.warn('⚠️ Backend logout error:', backendError.message);
+        // Continue with local logout even if backend fails
+      }
+
+      // ✅ Clear all stored authentication data
+      console.log('🧹 Clearing all authentication data...');
       await AsyncStorage.multiRemove([
         'accessToken',
         'refreshToken',
         'userData',
         'userRole',
         'loginMethod',
+        'googleIdToken', // Clear Google ID token if exists
       ]);
 
+      // ✅ Clear application state
       setUser(null);
       setRole(null);
       setIsAuthenticated(false);
 
-      console.log('✅ Logout successful');
+      console.log('✅ Logout completed successfully');
+      console.log('🔄 User will be redirected to login screen');
+
     } catch (error) {
       console.error('❌ Logout error:', error);
+
+      // ✅ Even if there's an error, clear local state for security
+      try {
+        await AsyncStorage.multiRemove([
+          'accessToken',
+          'refreshToken',
+          'userData',
+          'userRole',
+          'loginMethod',
+          'googleIdToken',
+        ]);
+
+        setUser(null);
+        setRole(null);
+        setIsAuthenticated(false);
+
+        console.log('✅ Local cleanup completed despite errors');
+      } catch (cleanupError) {
+        console.error('❌ Critical: Local cleanup failed:', cleanupError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -360,167 +410,3 @@ const login = async (email, password, role) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { createContext, useContext, useState, useEffect } from 'react';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { apiService } from '../api/apiService';
-
-// const AuthContext = createContext();
-
-// export const useAuth = () => {
-//   const context = useContext(AuthContext);
-//   if (!context) {
-//     throw new Error('useAuth must be used within an AuthProvider');
-//   }
-//   return context;
-// };
-
-// export const AuthProvider = ({ children }) => {
-//   const [isAuthenticated, setIsAuthenticated] = useState(false);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [user, setUser] = useState(null);
-//   const [role, setRole] = useState(null);
-
-//   // Check authentication status on app start
-//   useEffect(() => {
-//     checkAuthStatus();
-//   }, []);
-
-//   const checkAuthStatus = async () => {
-//     try {
-//       console.log('Checking auth status...');
-//       const accessToken = await AsyncStorage.getItem('accessToken');
-//       const refreshToken = await AsyncStorage.getItem('refreshToken');
-//       const userData = await AsyncStorage.getItem('userData');
-//       const userRole = await AsyncStorage.getItem('userRole');
-
-//       console.log('Stored tokens:', { accessToken: !!accessToken, refreshToken: !!refreshToken });
-
-//       if (accessToken && refreshToken && userData && userRole) {
-//         setUser(JSON.parse(userData));
-//         setRole(userRole);
-//         setIsAuthenticated(true);
-//         console.log('User authenticated from storage');
-//       } else {
-//         console.log('No valid authentication found');
-//         setIsAuthenticated(false);
-//       }
-//     } catch (error) {
-//       console.error('Error checking auth status:', error);
-//       setIsAuthenticated(false);
-//     } finally {
-//       setIsLoading(false);
-//       console.log('Auth check completed');
-//     }
-//   };
-
-//   const login = async (email, password, role) => {
-//     try {
-//       console.log('Attempting login with:', { email, role });
-//       setIsLoading(true);
-
-//       const response = await apiService.auth.login({
-//         email,
-//         password,
-//         role,
-//       });
-
-//       console.log('Login response:', response.data);
-
-//       const { accessToken, refreshToken, user: userData } = response.data;
-
-//       if (accessToken && refreshToken && userData) {
-//         // Store tokens and user data
-//         await AsyncStorage.setItem('accessToken', accessToken);
-//         await AsyncStorage.setItem('refreshToken', refreshToken);
-//         await AsyncStorage.setItem('userData', JSON.stringify(userData));
-//         await AsyncStorage.setItem('userRole', userData.role || role);
-
-//         setUser(userData);
-//         setRole(userData.role || role);
-//         setIsAuthenticated(true);
-
-//         console.log('Login successful');
-//         return { success: true, user: userData };
-//       } else {
-//         throw new Error('Invalid response from server');
-//       }
-//     } catch (error) {
-//       console.error('Login error:', error);
-//       const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-//       throw new Error(errorMessage);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const signup = async (userData) => {
-//     try {
-//       console.log('Attempting signup with:', userData);
-//       setIsLoading(true);
-
-//       const response = await apiService.auth.register(userData);
-//       console.log('Signup response:', response.data);
-
-//       return { success: true, message: 'Account created successfully' };
-//     } catch (error) {
-//       console.error('Signup error:', error);
-//       const errorMessage = error.response?.data?.message || error.message || 'Signup failed';
-//       throw new Error(errorMessage);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const logout = async () => {
-//     try {
-//       console.log('Logging out...');
-//       setIsLoading(true);
-
-//       // Clear stored data
-//       await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'userData', 'userRole']);
-
-//       setUser(null);
-//       setRole(null);
-//       setIsAuthenticated(false);
-
-//       console.log('Logout successful');
-//     } catch (error) {
-//       console.error('Logout error:', error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const value = {
-//     isAuthenticated,
-//     isLoading,
-//     user,
-//     role,
-//     login,
-//     signup,
-//     logout,
-//     checkAuthStatus,
-//   };
-
-//   return (
-//     <AuthContext.Provider value={value}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };

@@ -1,18 +1,28 @@
+import NetworkDetectionService from '../services/NetworkDetectionService';
+
 // ✅ ENHANCED: API Configuration with dynamic IP detection
 export const API_CONFIG = {
   BASE_URL: (() => {
     if (__DEV__) {
-      const possibleIPs = [
-        'http://192.168.0.102:5000/api', // ✅ CORRECT IP from server logs
-        'http://192.168.0.101:5000/api', // Previous IP (fallback)
-        'http://192.168.0.106:5000/api', // Alternative IP
-        'http://localhost:5000/api',     // Localhost fallback
-      ];
-      return possibleIPs[0]; // Use the first IP - can be enhanced to test connectivity
+      // Enable auto-detection in development
+      return null; // Will be set dynamically
     }
     return 'https://your-production-api.com/api';
   })(),
 
+  // ✅ Fallback URLs (your existing ones, now used as backup)
+  FALLBACK_URLS: [
+    'http://192.168.0.103:5000/api', // Your current working IP
+    'http://192.168.0.101:5000/api',
+    'http://192.168.0.102:5000/api',
+    'http://localhost:5000/api',
+    'http://10.0.2.2:5000/api', // Android emulator
+  ],
+
+  // ✅ Auto-detection settings
+  AUTO_DETECT: __DEV__, // Enable in development
+  DETECTION_TIMEOUT: 3000,
+  HEALTH_CHECK_ENDPOINT: '/health',
   TIMEOUT: 15000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
@@ -117,6 +127,26 @@ export const API_CONFIG = {
       update: '/role/update',
     },
   },
+};
+
+// ✅ ADD this function to get dynamic base URL
+export const getDynamicBaseUrl = async () => {
+  if (!API_CONFIG.AUTO_DETECT) {
+    return API_CONFIG.BASE_URL || API_CONFIG.FALLBACK_URLS[0];
+  }
+
+  try {
+    const networkService = NetworkDetectionService.getInstance();
+    const detectedUrl = await networkService.detectBackendServer();
+
+    // Update the config for other parts of the app
+    API_CONFIG.BASE_URL = detectedUrl;
+
+    return detectedUrl;
+  } catch (error) {
+    console.error('❌ Failed to detect backend server:', error);
+    return API_CONFIG.FALLBACK_URLS[0];
+  }
 };
 
 // ✅ ENHANCED: User Roles with additional metadata
@@ -243,16 +273,13 @@ export const APP_CONFIG = {
 export const GOOGLE_CONFIG = {
   CLIENT_ID: {
     // ✅ CRITICAL: Your actual client IDs from Google Cloud Console
-    ANDROID: '180500502231-k7g7otj3g2bafhaijntg044ldvq009kl.apps.googleusercontent.com',
+    ANDROID:
+      '180500502231-k7g7otj3g2bafhaijntg044ldvq009kl.apps.googleusercontent.com',
     IOS: '180500502231-mfuon46n3bvj34u0dv2rm7s5feclgekt.apps.googleusercontent.com',
     WEB: '180500502231-ahps6va5050rs23oboniu290mho9l8sg.apps.googleusercontent.com',
   },
 
-  SCOPES: [
-    'openid',
-    'profile',
-    'email',
-  ],
+  SCOPES: ['openid', 'profile', 'email'],
 
   // ✅ FIXED: OAuth settings
   OAUTH_SETTINGS: {
@@ -279,7 +306,7 @@ export const GOOGLE_CONFIG = {
   },
 
   // ✅ NEW: Configuration validation
-  isConfigured: function() {
+  isConfigured: function () {
     return !!(
       this.CLIENT_ID.WEB &&
       !this.CLIENT_ID.WEB.includes('YOUR_') &&
@@ -368,7 +395,8 @@ export const VALIDATION_RULES = {
     minLength: 6, // Reduced for better UX
     maxLength: 128,
     pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-    message: 'Password must be at least 6 characters with uppercase, lowercase, and number',
+    message:
+      'Password must be at least 6 characters with uppercase, lowercase, and number',
     required: true,
   },
 
@@ -384,7 +412,8 @@ export const VALIDATION_RULES = {
     minLength: 2,
     maxLength: 50,
     pattern: /^[a-zA-Z\s'-]+$/,
-    message: 'Name should contain only letters, spaces, hyphens and apostrophes',
+    message:
+      'Name should contain only letters, spaces, hyphens and apostrophes',
     required: true,
   },
 
@@ -392,7 +421,8 @@ export const VALIDATION_RULES = {
     minLength: 3,
     maxLength: 100,
     pattern: /^[a-zA-Z\s'-]+$/,
-    message: 'Full name should contain only letters, spaces, hyphens and apostrophes',
+    message:
+      'Full name should contain only letters, spaces, hyphens and apostrophes',
     required: true,
   },
 
@@ -436,13 +466,15 @@ export const API_STATUS_CODES = {
 // ✅ ENHANCED: Error Messages
 export const ERROR_MESSAGES = {
   NETWORK: {
-    CONNECTION_FAILED: 'Unable to connect to server. Please check your internet connection.',
+    CONNECTION_FAILED:
+      'Unable to connect to server. Please check your internet connection.',
     TIMEOUT: 'Request timed out. Please try again.',
     OFFLINE: 'You are offline. Please check your internet connection.',
   },
   AUTH: {
     INVALID_CREDENTIALS: 'Invalid email or password.',
-    ACCOUNT_LOCKED: 'Account temporarily locked due to multiple failed attempts.',
+    ACCOUNT_LOCKED:
+      'Account temporarily locked due to multiple failed attempts.',
     SESSION_EXPIRED: 'Your session has expired. Please log in again.',
     OAUTH_FAILED: 'OAuth authentication failed. Please try again.',
     OAUTH_CANCELLED: 'Authentication was cancelled.',
@@ -655,7 +687,10 @@ if (__DEV__) {
   if (isFeatureEnabled('GOOGLE_AUTH')) {
     if (isGoogleOAuthConfigured()) {
       console.log('✅ Google OAuth properly configured');
-      console.log('🔑 Client ID for platform:', getGoogleClientId().substring(0, 30) + '...');
+      console.log(
+        '🔑 Client ID for platform:',
+        getGoogleClientId().substring(0, 30) + '...',
+      );
       console.log('🔄 Redirect URI:', getGoogleRedirectUri());
     } else {
       console.warn('⚠️ Google OAuth configuration incomplete');
@@ -664,7 +699,10 @@ if (__DEV__) {
 
   // ✅ Test key configurations
   const testValidation = validateField('email', 'test@example.com');
-  console.log('🧪 Validation test (email):', testValidation.isValid ? 'PASS' : 'FAIL');
+  console.log(
+    '🧪 Validation test (email):',
+    testValidation.isValid ? 'PASS' : 'FAIL',
+  );
 }
 
 // ✅ Export default configuration object with all configs
@@ -682,86 +720,3 @@ export default {
   DEV_CONFIG,
   CONFIG_HELPERS,
 };
-
-
-
-
-
-
-
-// // API Configuration
-// export const API_CONFIG = {
-//   // Use your test server URL
-//   BASE_URL: 'http://192.168.0.107:5000/api',
-//   TIMEOUT: 10000,
-//   ENDPOINTS: {
-//     auth: {
-//       login: '/auth/login',
-//       register: '/auth/signup',
-//       logout: '/auth/logout',
-//       forgotPassword: '/auth/forgot-password',
-//       resetPassword: '/auth/reset-password',
-//     },
-//     user: {
-//       profile: '/user/profile',
-//       updateProfile: '/user/profile',
-//       uploadAvatar: '/user/avatar',
-//     },
-//     student: {
-//       dashboard: '/student/dashboard',
-//       grades: '/student/grades',
-//       assignments: '/student/assignments',
-//       attendance: '/student/attendance',
-//       schedule: '/student/schedule',
-//     },
-//     teacher: {
-//       dashboard: '/teacher/dashboard',
-//       classes: '/teacher/classes',
-//       students: '/teacher/students',
-//       assignments: '/teacher/assignments',
-//       attendance: '/teacher/attendance',
-//     },
-//     parent: {
-//       dashboard: '/parent/dashboard',
-//       children: '/parent/children',
-//       reports: '/parent/reports',
-//       notifications: '/parent/notifications',
-//     },
-//     admin: {
-//       dashboard: '/admin/dashboard',
-//       users: '/admin/users',
-//     },
-//   },
-// };
-
-// // User Roles - ADD THIS
-// export const USER_ROLES = {
-//   STUDENT: 'Student',
-//   TEACHER: 'Teacher',
-//   PARENT: 'Parent',
-//   ADMIN: 'Admin',
-// };
-
-// // Storage Keys
-// export const STORAGE_KEYS = {
-//   USER_TOKEN: 'accessToken',
-//   USER_DATA: 'userData',
-//   USER_ROLE: 'userRole',
-//   REFRESH_TOKEN: 'refreshToken',
-// };
-
-// // App Configuration
-// export const APP_CONFIG = {
-//   NAME: 'SchoolBridge',
-//   VERSION: '1.0.0',
-//   ENVIRONMENT: __DEV__ ? 'development' : 'production',
-// };
-
-
-
-// // Instead of hardcoding URLs everywhere:
-// // ❌ fetch('http://192.168.0.107:5000/api/auth/login')
-
-// // ✅ Use centralized config:
-// //const loginUrl = API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.auth.login;
-// // Result: 'http://192.168.0.107:5000/api/auth/login'

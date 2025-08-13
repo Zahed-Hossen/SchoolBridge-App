@@ -26,13 +26,13 @@ class GoogleOAuthService {
       console.log('🔐 Starting Google OAuth sign-in...');
       console.log('📱 Platform:', Platform.OS);
 
-      // ✅ CHANGE: Comment out simulation mode to test real OAuth
       // if (__DEV__ && GOOGLE_CONFIG.CLIENT_ID.WEB.includes('180500502231')) {
       //   console.log('🧪 Development mode detected - using simulation for testing');
+      //   console.log('💡 Google OAuth access blocked - using simulation until fixed');
       //   return await this.simulateOAuthSuccess();
       // }
 
-      // ✅ ENABLE: Real OAuth testing
+      console.log('🌐 Testing real Google OAuth...');
       return await this.signInWithExpoAuth();
     } catch (error) {
       console.error('❌ Google Sign-In error:', error);
@@ -48,64 +48,85 @@ class GoogleOAuthService {
       console.log('🔑 Using client ID for platform:', Platform.OS);
       console.log('🔑 Client ID preview:', clientId.substring(0, 30) + '...');
 
-      // ✅ CRITICAL FIX: Use multiple redirect URI strategies
       const redirectStrategies = [
-        () => this.getCorrectRedirectUri(),
-        () => AuthSession.makeRedirectUri({ useProxy: true, preferLocalhost: false }),
         () => 'https://auth.expo.io/@anonymous/schoolbridge-app',
-        () => 'exp://localhost:19000/--/oauth',
+        () => AuthSession.makeRedirectUri({
+          useProxy: true,
+          preferLocalhost: false
+        }),
+        () => AuthSession.makeRedirectUri({
+          scheme: 'https',
+          useProxy: true
+        }),
       ];
+
+      let lastError = null;
 
       for (let i = 0; i < redirectStrategies.length; i++) {
         try {
           const redirectUri = redirectStrategies[i]();
           console.log(`🔄 Trying redirect strategy ${i + 1}:`, redirectUri);
 
+          if (redirectUri.startsWith('exp://')) {
+            console.log(`⚠️ Skipping exp:// URI (not supported by Google): ${redirectUri}`);
+            continue;
+          }
+
           const result = await this.attemptOAuthWithRedirect(clientId, redirectUri);
 
           if (result.type === 'success') {
+            console.log(`✅ Strategy ${i + 1} succeeded!`);
             return await this.handleAuthResult(result, clientId, redirectUri);
-          } else if (result.type === 'dismiss' && i < redirectStrategies.length - 1) {
-            console.log(`⚠️ Strategy ${i + 1} dismissed, trying next...`);
-            continue;
+          } else if (result.type === 'dismiss' || result.type === 'error') {
+            console.log(`⚠️ Strategy ${i + 1} failed: ${result.type}`);
+
+            if (result.error) {
+              lastError = result.error;
+              console.log(`📋 Error details:`, result.error);
+            }
+
+            if (result.error?.description?.includes('redirect_uri_mismatch')) {
+              console.log(`🔄 redirect_uri_mismatch detected, trying next strategy...`);
+              continue;
+            }
+
+            if (i === redirectStrategies.length - 1) {
+              return await this.handleAuthResult(result, clientId, redirectUri);
+            }
           } else {
             return await this.handleAuthResult(result, clientId, redirectUri);
           }
         } catch (strategyError) {
-          console.log(`❌ Strategy ${i + 1} failed:`, strategyError.message);
+          console.log(`❌ Strategy ${i + 1} failed with exception:`, strategyError.message);
+          lastError = strategyError;
+
           if (i === redirectStrategies.length - 1) {
             throw strategyError;
           }
         }
       }
 
-      // ✅ If all strategies fail, use simulation
-      console.log('� All OAuth strategies failed, using simulation...');
+      console.log('🔧 All HTTPS OAuth strategies failed, using simulation...');
+      console.log('📋 Last error:', lastError?.message || 'Unknown error');
+
       return await this.simulateOAuthSuccess();
 
     } catch (error) {
       console.error('❌ OAuth error:', error);
-
-      // ✅ Always fallback to simulation on error
       console.log('🔧 OAuth error occurred, using simulation mode...');
       return await this.simulateOAuthSuccess();
     }
   }
 
-  // ✅ NEW: Get correct redirect URI for current environment
   getCorrectRedirectUri() {
-    // ✅ For Expo development, always use proxy
     if (__DEV__) {
       return 'https://auth.expo.io/@anonymous/schoolbridge-app';
     }
-
-    // ✅ For production/standalone, use app scheme
     return 'com.pixelmind.schoolbridge://oauth';
   }
 
-  // ✅ NEW: Attempt OAuth with specific redirect URI
   async attemptOAuthWithRedirect(clientId, redirectUri) {
-    console.log('� Attempting OAuth with redirect:', redirectUri);
+    console.log('🚀 Attempting OAuth with redirect:', redirectUri);
 
     const request = new AuthSession.AuthRequest({
       clientId,
@@ -129,7 +150,6 @@ class GoogleOAuthService {
     return await request.promptAsync(discoveryDocument);
   }
 
-  // ✅ ENHANCED: Better auth result handling
   async handleAuthResult(result, clientId, redirectUri) {
     console.log('📥 Processing auth result...');
     console.log('📋 Result type:', result.type);
@@ -199,23 +219,84 @@ class GoogleOAuthService {
       };
 
     } else if (result.type === 'dismiss') {
-      console.log('⚠️ OAuth popup was dismissed - likely redirect URI mismatch');
-      console.log('🔧 This usually indicates Google Cloud Console configuration issues');
+      console.log('⚠️ OAuth popup dismissed - likely access blocked');
 
-      // ✅ Instead of failing, use simulation
-      console.log('🧪 Switching to simulation mode due to dismiss...');
+      if (__DEV__) {
+        setTimeout(() => {
+          Alert.alert(
+            '🚨 Google OAuth Access Blocked',
+            'Google is blocking OAuth access. This usually means:\n\n' +
+            '• OAuth Consent Screen not configured\n' +
+            '• Your email not added as test user\n' +
+            '• App not set to "Testing" mode\n' +
+            '• Need to wait 5-10 minutes after configuration\n\n' +
+            'Using simulation mode for now.',
+            [
+              {
+                text: 'Open Console',
+                onPress: () => {
+                  console.log('🔗 Go to: https://console.cloud.google.com/apis/credentials/consent');
+                }
+              },
+              { text: 'Continue with Simulation' }
+            ]
+          );
+        }, 500);
+      }
+
+      console.log('🧪 Switching to simulation mode due to access blocked...');
       return await this.simulateOAuthSuccess();
 
     } else if (result.type === 'error') {
       console.log('❌ OAuth error:', result.error);
 
-      // ✅ Handle specific errors gracefully
-      const errorDesc = result.error?.description || '';
+      const errorDesc = result.error?.description || result.error?.message || '';
+      console.log('📋 Error description:', errorDesc);
 
       if (errorDesc.includes('redirect_uri_mismatch') ||
           errorDesc.includes('unauthorized_client') ||
-          errorDesc.includes('access_blocked')) {
-        console.log('🔧 OAuth configuration error, using simulation...');
+          result.error?.error === 'redirect_uri_mismatch') {
+
+        console.log('🚨 Redirect URI mismatch detected in error');
+
+        if (__DEV__) {
+          Alert.alert(
+            '🚨 Redirect URI Mismatch',
+            'Google Cloud Console configuration issue:\n\n' +
+            '1. Go to APIs & Services → Credentials\n' +
+            '2. Edit your OAuth 2.0 Client ID\n' +
+            '3. Add authorized redirect URI:\n' +
+            `   ${redirectUri}\n\n` +
+            'Using simulation mode for development.',
+            [{ text: 'Use Simulation' }]
+          );
+        }
+
+        return {
+          success: false,
+          error: 'redirect_uri_mismatch',
+          redirectUri: redirectUri,
+          needsConfiguration: true,
+        };
+      }
+
+      if (errorDesc.includes('access_blocked') ||
+          errorDesc.includes('access_denied')) {
+
+        console.log('🚫 Google OAuth access blocked detected');
+
+        if (__DEV__) {
+          Alert.alert(
+            '🚨 Google OAuth Access Blocked',
+            'Google is blocking OAuth access. Common fixes:\n\n' +
+            '1. Add your email to OAuth Consent Screen test users\n' +
+            '2. Set app to "Testing" mode\n' +
+            '3. Verify redirect URIs match exactly\n\n' +
+            'Using simulation mode for development.',
+            [{ text: 'Use Simulation' }]
+          );
+        }
+
         return await this.simulateOAuthSuccess();
       }
 
@@ -223,8 +304,8 @@ class GoogleOAuthService {
         success: false,
         error: `OAuth error: ${errorDesc || 'Authentication failed'}`,
       };
-
-    } else {
+    }
+    else {
       console.log('❌ OAuth failed with unknown type:', result.type);
       console.log('🔧 Unknown result type, using simulation...');
       return await this.simulateOAuthSuccess();
@@ -287,32 +368,23 @@ class GoogleOAuthService {
     }
   }
 
-  // ✅ ENHANCED: Realistic simulation for development
   async simulateOAuthSuccess() {
     console.log('🧪 Using OAuth simulation mode...');
     console.log('💡 This happens when Google OAuth has configuration issues');
     console.log('🔧 For production, ensure proper Google Cloud Console setup');
 
-    // ✅ Show user-friendly message
-    if (__DEV__) {
-      setTimeout(() => {
-        Alert.alert(
-          '🧪 Development Mode',
-          'Using OAuth simulation since Google authentication is not fully configured.\n\nThis allows you to test the app functionality.',
-          [{ text: 'Continue' }]
-        );
-      }, 500);
-    }
-
-    // Simulate realistic OAuth delay
     await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const isPersonalDev = __DEV__ && Platform.OS === 'android';
 
     const mockUser = {
       googleId: 'sim_google_' + Date.now(),
-      email: 'demo.user@schoolbridge.edu',
-      name: 'Demo User',
-      firstName: 'Demo',
-      lastName: 'User',
+      email: isPersonalDev
+        ? 'mdzahedsiddique@gmail.com'
+        : 'demo.user@schoolbridge.edu',
+      name: isPersonalDev ? ' Zahed Hossen' : 'Demo User',
+      firstName: isPersonalDev ? ' Zahed' : 'Demo',
+      lastName: isPersonalDev ? 'Hossen' : 'User',
       avatar: 'https://lh3.googleusercontent.com/a/default-user=s96-c',
       provider: 'google',
       verified: true,
@@ -362,32 +434,8 @@ class GoogleOAuthService {
       };
     }
 
-    // ✅ Always fallback to simulation for OAuth errors
     console.log('🔧 OAuth error detected, switching to simulation mode...');
     return this.simulateOAuthSuccess();
-  }
-
-  // ✅ ADD: Test all redirect URIs
-  async debugRedirectUri() {
-    console.log('🔍 Testing redirect URI configurations...');
-
-    const strategies = [
-      { name: 'Expo Proxy', uri: 'https://auth.expo.io/@anonymous/schoolbridge-app' },
-      { name: 'Expo Localhost', uri: 'exp://localhost:19000/--/oauth' },
-      { name: 'Current IP', uri: 'exp://192.168.0.102:8081' },
-      { name: 'Standalone', uri: 'com.pixelmind.schoolbridge://oauth' },
-    ];
-
-    strategies.forEach((strategy, index) => {
-      console.log(`🔗 ${index + 1}. ${strategy.name}: ${strategy.uri}`);
-    });
-
-    console.log('📋 Google Cloud Console Configuration:');
-    console.log('   Authorized JavaScript origins:');
-    console.log('     - https://auth.expo.io');
-    console.log('   Authorized redirect URIs:');
-    console.log('     - https://auth.expo.io/@anonymous/schoolbridge-app');
-    console.log('     - https://auth.expo.io/@your-username/schoolbridge-app');
   }
 
   async signOut() {
@@ -435,7 +483,6 @@ class GoogleOAuthService {
     }
   }
 
-  // ✅ ADD: Get configuration status
   getConfigurationStatus() {
     const status = {
       isConfigured: this.isConfigured,
@@ -454,6 +501,56 @@ class GoogleOAuthService {
 }
 
 export default new GoogleOAuthService();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

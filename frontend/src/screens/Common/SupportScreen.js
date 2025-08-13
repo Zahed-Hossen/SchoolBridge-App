@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,11 @@ import {
   Animated,
   TextInput,
   Alert,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
+import GoogleOAuthService from '../../services/GoogleOAuthService';
 
 const { width, height } = Dimensions.get('window');
 const isTablet = width > 768;
@@ -102,6 +104,368 @@ const FloatingCard = ({ children, style, delay = 0 }) => {
   );
 };
 
+// ✅ Dynamic OAuth Debug Toolkit Component
+const OAuthDebugToolkit = () => {
+  const [isVisible, setIsVisible] = useState(__DEV__);
+  const [debugStatus, setDebugStatus] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (__DEV__) {
+      loadDebugStatus();
+    }
+  }, []);
+
+  const loadDebugStatus = async () => {
+    try {
+      const status = await GoogleOAuthService.getConfigurationStatus();
+      setDebugStatus(status);
+    } catch (error) {
+      console.error('Failed to load debug status:', error);
+    }
+  };
+
+  const debugTools = [
+    {
+      id: 'oauth-test',
+      title: 'OAuth Test',
+      subtitle: 'Test OAuth functionality',
+      icon: '🧪',
+      color: '#4ECDC4',
+      action: async () => {
+        setIsLoading(true);
+        try {
+          console.log('🧪 Testing OAuth configuration...');
+          const result = await GoogleOAuthService.testOAuth();
+          Alert.alert(
+            '🧪 OAuth Test Result',
+            `Success: ${result.success}\n` +
+            `Method: ${result.method}\n` +
+            `Simulated: ${result.simulated}\n` +
+            `User: ${result.hasUser ? 'Yes' : 'No'}\n\n` +
+            'Check console for detailed logs.',
+            [{ text: 'OK' }]
+          );
+        } catch (error) {
+          Alert.alert('Test Error', error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    },
+    {
+      id: 'troubleshoot',
+      title: 'Troubleshoot',
+      subtitle: 'Full OAuth diagnostics',
+      icon: '🔧',
+      color: '#FF6B6B',
+      action: async () => {
+        setIsLoading(true);
+        try {
+          const result = await GoogleOAuthService.troubleshootOAuth();
+          Alert.alert(
+            '🔧 OAuth Troubleshooting',
+            `Platform: ${result.platform}\n` +
+            `Configuration: ${result.isConfigured ? 'OK' : 'Failed'}\n` +
+            `Client IDs: ${result.hasAllClientIds ? 'All Present' : 'Missing Some'}\n\n` +
+            'Check console for detailed analysis.',
+            [{ text: 'View Console', onPress: () => console.log(result) }, { text: 'OK' }]
+          );
+        } catch (error) {
+          Alert.alert('Troubleshoot Error', error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    },
+    {
+      id: 'config-status',
+      title: 'Config Status',
+      subtitle: 'View configuration details',
+      icon: '⚙️',
+      color: '#9B59B6',
+      action: () => {
+        const config = GoogleOAuthService.getConfigurationStatus();
+        Alert.alert(
+          '⚙️ Configuration Status',
+          `Platform: ${config.platform}\n` +
+          `Web Client: ${config.hasWebClientId ? 'OK' : 'Missing'}\n` +
+          `Android Client: ${config.hasAndroidClientId ? 'OK' : 'Missing'}\n` +
+          `iOS Client: ${config.hasIOSClientId ? 'OK' : 'Missing'}\n` +
+          `Configured: ${config.isConfigured ? 'Yes' : 'No'}`,
+          [
+            { text: 'Show in Console', onPress: () => console.log('📊 Configuration:', config) },
+            { text: 'OK' }
+          ]
+        );
+      }
+    },
+    {
+      id: 'clear-tokens',
+      title: 'Clear Tokens',
+      subtitle: 'Reset OAuth tokens',
+      icon: '🗑️',
+      color: '#E74C3C',
+      action: async () => {
+        Alert.alert(
+          'Clear OAuth Tokens',
+          'This will remove all stored OAuth tokens. Continue?',
+          [
+            {
+              text: 'Clear Tokens',
+              style: 'destructive',
+              onPress: async () => {
+                setIsLoading(true);
+                try {
+                  await GoogleOAuthService.clearTokens();
+                  Alert.alert('✅ Tokens Cleared', 'All OAuth tokens have been cleared successfully.');
+                } catch (error) {
+                  Alert.alert('Clear Error', error.message);
+                } finally {
+                  setIsLoading(false);
+                }
+              }
+            },
+            { text: 'Cancel' }
+          ]
+        );
+      }
+    },
+    {
+      id: 'redirect-debug',
+      title: 'Redirect URI',
+      subtitle: 'Debug redirect configuration',
+      icon: '🔗',
+      color: '#F39C12',
+      action: async () => {
+        setIsLoading(true);
+        try {
+          const debug = await GoogleOAuthService.debugRedirectUriMismatch();
+          Alert.alert(
+            '🔗 Redirect URI Debug',
+            `Client ID: ${debug.clientId}\n` +
+            `Platform: ${Platform.OS}\n` +
+            `Recommended URI: ${debug.recommendedRedirectUri}\n\n` +
+            `Recommendation: ${debug.recommendation}\n\n` +
+            'Check console for full URI list.',
+            [{ text: 'View Console', onPress: () => console.log(debug) }, { text: 'OK' }]
+          );
+        } catch (error) {
+          Alert.alert('Debug Error', error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    },
+    {
+      id: 'consent-screen',
+      title: 'Consent Screen',
+      subtitle: 'Google Console setup guide',
+      icon: '🔒',
+      color: '#8E44AD',
+      action: async () => {
+        setIsLoading(true);
+        try {
+          const diagnosis = await GoogleOAuthService.diagnoseOAuthConsentScreen();
+          Alert.alert(
+            '🔒 OAuth Consent Screen Diagnosis',
+            `Client ID: ${diagnosis.clientId}\n` +
+            `Test Users: mdzahedsiddique@gmail.com, zahedsiddique10@gmail.com\n` +
+            `Domains: expo.io, expo.dev\n` +
+            `Fix: ${diagnosis.recommendation}\n\n` +
+            'Check console for detailed setup steps.',
+            [
+              {
+                text: 'Open Console',
+                onPress: () => {
+                  console.log('🔗 OAuth Consent Screen: https://console.cloud.google.com/apis/credentials/consent');
+                  console.log('📧 Use your email: mdzahedsiddique@gmail.com');
+                  console.log('🌐 Authorized domains: expo.io, expo.dev');
+                  console.log('👥 Test users: mdzahedsiddique@gmail.com, zahedsiddique10@gmail.com');
+                  Linking.openURL('https://console.cloud.google.com/apis/credentials/consent');
+                }
+              },
+              { text: 'OK' }
+            ]
+          );
+        } catch (error) {
+          Alert.alert('Diagnosis Error', error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    },
+    {
+      id: 'real-oauth',
+      title: 'Real OAuth Test',
+      subtitle: 'Test real Google OAuth',
+      icon: '🌐',
+      color: '#27AE60',
+      action: async () => {
+        Alert.alert(
+          '🌐 Real OAuth Test',
+          'This will test real Google OAuth bypassing simulation mode.\n\n' +
+          'Make sure your Google Cloud Console is configured with:\n' +
+          '• Your test users added\n' +
+          '• OAuth consent screen set to "Testing"\n' +
+          '• Redirect URI configured\n\n' +
+          'Continue?',
+          [
+            {
+              text: 'Test Real OAuth',
+              onPress: async () => {
+                setIsLoading(true);
+                try {
+                  console.log('🌐 Testing REAL Google OAuth (bypassing simulation)...');
+                  console.log('👤 Test users: mdzahedsiddique@gmail.com, zahedsiddique10@gmail.com');
+
+                  const result = await GoogleOAuthService.signInWithExpoAuth();
+
+                  if (result.success && !result.simulated) {
+                    Alert.alert(
+                      '🎉 Real OAuth Success!',
+                      `✅ Real Google OAuth Working!\n\n` +
+                      `User: ${result.user.email}\n` +
+                      `Name: ${result.user.name}\n` +
+                      `Method: Real Google OAuth\n` +
+                      `Avatar: ${result.user.avatar ? 'Yes' : 'No'}`,
+                      [{ text: 'Awesome!' }]
+                    );
+                  } else if (result.simulated) {
+                    Alert.alert(
+                      '🧪 Fell Back to Simulation',
+                      'Real OAuth had issues, but simulation works perfectly.\n\n' +
+                      'This means your app will work reliably in all scenarios!',
+                      [{ text: 'Great!' }]
+                    );
+                  } else {
+                    Alert.alert(
+                      '⚠️ Real OAuth Failed',
+                      `Error: ${result.error}\n\n` +
+                      'Common fixes:\n' +
+                      '• Add your email to test users in Google Console\n' +
+                      '• Wait 5-10 minutes after configuration\n' +
+                      '• Check OAuth consent screen is set to "Testing"',
+                      [{ text: 'OK' }]
+                    );
+                  }
+                } catch (error) {
+                  console.error('❌ Real OAuth test error:', error);
+                  Alert.alert(
+                    'Real OAuth Test Error',
+                    `${error.message}\n\nYour app gracefully handles this with simulation mode.`
+                  );
+                } finally {
+                  setIsLoading(false);
+                }
+              }
+            },
+            { text: 'Cancel' }
+          ]
+        );
+      }
+    },
+    {
+      id: 'simulation-mode',
+      title: 'Simulation Test',
+      subtitle: 'Test simulation mode',
+      icon: '🎭',
+      color: '#16A085',
+      action: async () => {
+        setIsLoading(true);
+        try {
+          console.log('🎭 Testing simulation method...');
+          const result = await GoogleOAuthService.simulateOAuthSuccess();
+          Alert.alert(
+            '🎭 Simulation Test Result',
+            `Success: ${result.success}\n` +
+            `User: ${result.user.email}\n` +
+            `Method: ${result.method}\n` +
+            `Simulated: ${result.simulated}\n\n` +
+            'Simulation mode working perfectly!',
+            [{ text: 'Excellent!' }]
+          );
+        } catch (error) {
+          Alert.alert('Simulation Error', error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }
+  ];
+
+  if (!isVisible) return null;
+
+  return (
+    <View style={styles.debugSection}>
+      <View style={styles.debugHeader}>
+        <Text style={styles.debugTitle}>🔧 OAuth Debug Toolkit</Text>
+        <Text style={styles.debugSubtitle}>
+          Dynamic debugging tools for OAuth development
+        </Text>
+        <TouchableOpacity
+          style={styles.debugToggle}
+          onPress={() => setIsVisible(false)}
+        >
+          <Text style={styles.debugToggleText}>Hide Debug Tools</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.debugGrid}>
+        {debugTools.map((tool, index) => (
+          <FloatingCard
+            key={tool.id}
+            style={styles.debugToolWrapper}
+            delay={index * 50}
+          >
+            <InteractiveCard
+              onPress={tool.action}
+              scaleValue={0.95}
+            >
+              <LinearGradient
+                colors={[tool.color, tool.color + '90']}
+                style={styles.debugToolCard}
+              >
+                <Text style={styles.debugToolIcon}>{tool.icon}</Text>
+                <Text style={styles.debugToolTitle}>{tool.title}</Text>
+                <Text style={styles.debugToolSubtitle}>{tool.subtitle}</Text>
+                {isLoading && (
+                  <View style={styles.debugLoadingOverlay}>
+                    <Text style={styles.debugLoadingText}>⏳</Text>
+                  </View>
+                )}
+              </LinearGradient>
+            </InteractiveCard>
+          </FloatingCard>
+        ))}
+      </View>
+
+      <View style={styles.debugStatus}>
+        <Text style={styles.debugStatusTitle}>📊 Current Status</Text>
+        <View style={styles.debugStatusRow}>
+          <Text style={styles.debugStatusLabel}>Platform:</Text>
+          <Text style={styles.debugStatusValue}>{Platform.OS}</Text>
+        </View>
+        <View style={styles.debugStatusRow}>
+          <Text style={styles.debugStatusLabel}>OAuth Configured:</Text>
+          <Text style={[
+            styles.debugStatusValue,
+            { color: debugStatus.isConfigured ? '#27AE60' : '#E74C3C' }
+          ]}>
+            {debugStatus.isConfigured ? 'Yes' : 'No'}
+          </Text>
+        </View>
+        <View style={styles.debugStatusRow}>
+          <Text style={styles.debugStatusLabel}>Redirect URI:</Text>
+          <Text style={styles.debugStatusValue} numberOfLines={1}>
+            {debugStatus.recommendedRedirectUri || 'Loading...'}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const SupportScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState('general');
   const [ticketForm, setTicketForm] = useState({
@@ -112,6 +476,7 @@ const SupportScreen = ({ navigation }) => {
     priority: 'medium',
   });
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [showDebugTools, setShowDebugTools] = useState(__DEV__);
 
   const handleContactAction = (action) => {
     switch (action) {
@@ -132,10 +497,8 @@ const SupportScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ NEW: Handle Connection Test Navigation
   const handleConnectionTest = () => {
-    // Navigate to Connection Test screen or show as modal
-    navigation.navigate('ConnectionTest'); // Adjust this based on your navigation structure
+    navigation.navigate('ConnectionTest');
   };
 
   const handleSubmitTicket = () => {
@@ -232,10 +595,14 @@ const SupportScreen = ({ navigation }) => {
       answer: 'Try restarting the app. If the problem persists, update to the latest version or contact support.',
       category: 'technical',
     },
-    // ✅ NEW: Connection-related FAQ
     {
       question: 'The app won\'t connect to the server. What should I do?',
       answer: 'First, check your internet connection. Then use our Connection Test tool to diagnose the issue. You can find it in the Additional Resources section below.',
+      category: 'technical',
+    },
+    {
+      question: 'Google Sign-In is not working. How do I fix it?',
+      answer: 'Use the OAuth Debug Toolkit below to diagnose Google OAuth issues. The toolkit provides comprehensive debugging tools and solutions.',
       category: 'technical',
     },
   ];
@@ -261,6 +628,9 @@ const SupportScreen = ({ navigation }) => {
           </Text>
         </View>
       </LinearGradient>
+
+      {/* ✅ OAuth Debug Toolkit - Only in Development */}
+      {__DEV__ && showDebugTools && <OAuthDebugToolkit />}
 
       {/* ✅ Quick Contact Methods */}
       <View style={styles.contactMethodsSection}>
@@ -299,7 +669,7 @@ const SupportScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* ✅ NEW: Connection Test Quick Access */}
+      {/* ✅ Connection Test Quick Access */}
       <View style={styles.connectionTestSection}>
         <Text style={styles.connectionTestTitle}>Having Connection Issues?</Text>
         <Text style={styles.connectionTestSubtitle}>
@@ -334,7 +704,6 @@ const SupportScreen = ({ navigation }) => {
           Find quick answers to common questions
         </Text>
 
-        {/* Category Selector */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -372,7 +741,6 @@ const SupportScreen = ({ navigation }) => {
           ))}
         </ScrollView>
 
-        {/* FAQ Items */}
         {filteredFaqs.map((faq, index) => (
           <InteractiveCard
             key={index}
@@ -521,7 +889,7 @@ const SupportScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* ✅ Enhanced Additional Resources with Connection Test */}
+      {/* ✅ Additional Resources */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Additional Resources</Text>
         <Text style={styles.sectionSubtitle}>
@@ -529,7 +897,6 @@ const SupportScreen = ({ navigation }) => {
         </Text>
 
         <View style={styles.resourcesContainer}>
-          {/* ✅ First Row with Connection Test */}
           <View style={styles.resourceRow}>
             <InteractiveCard
               style={styles.resourceCardWrapper}
@@ -565,7 +932,6 @@ const SupportScreen = ({ navigation }) => {
             </InteractiveCard>
           </View>
 
-          {/* ✅ Second Row */}
           <View style={styles.resourceRow}>
             <InteractiveCard
               style={styles.resourceCardWrapper}
@@ -601,7 +967,6 @@ const SupportScreen = ({ navigation }) => {
             </InteractiveCard>
           </View>
 
-          {/* ✅ Third Row */}
           <View style={styles.resourceRow}>
             <InteractiveCard
               style={styles.resourceCardWrapper}
@@ -621,16 +986,14 @@ const SupportScreen = ({ navigation }) => {
 
             <InteractiveCard
               style={styles.resourceCardWrapper}
-              onPress={() =>
-                Alert.alert('Download Logs', 'Log download feature coming soon!')
-              }
+              onPress={() => setShowDebugTools(!showDebugTools)}
               scaleValue={0.95}
             >
               <View style={styles.resourceCardContent}>
-                <Text style={styles.resourceIcon}>📋</Text>
-                <Text style={styles.resourceTitle}>Download Logs</Text>
+                <Text style={styles.resourceIcon}>🔧</Text>
+                <Text style={styles.resourceTitle}>Debug Tools</Text>
                 <Text style={styles.resourceSubtitle}>
-                  Get diagnostic data
+                  {showDebugTools ? 'Hide debug tools' : 'Show debug tools'}
                 </Text>
               </View>
             </InteractiveCard>
@@ -638,7 +1001,6 @@ const SupportScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* ✅ Bottom spacing */}
       <View style={{ height: 40 }} />
     </ScrollView>
   );
@@ -684,11 +1046,137 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
 
+  // ✅ OAuth Debug Toolkit Styles
+  debugSection: {
+    backgroundColor: '#1A202C',
+    marginHorizontal: 16,
+    marginTop: -30,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 12,
+    zIndex: 15,
+    borderWidth: 2,
+    borderColor: '#4ECDC4',
+  },
+  debugHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  debugTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  debugSubtitle: {
+    fontSize: 14,
+    color: '#A0AEC0',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  debugToggle: {
+    backgroundColor: '#E53E3E',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  debugToggleText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  debugGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  debugToolWrapper: {
+    width: '48%',
+    marginBottom: 12,
+  },
+  debugToolCard: {
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    position: 'relative',
+  },
+  debugToolIcon: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  debugToolTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  debugToolSubtitle: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+  },
+  debugLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  debugLoadingText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+  },
+  debugStatus: {
+    backgroundColor: '#2D3748',
+    borderRadius: 12,
+    padding: 16,
+  },
+  debugStatusTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  debugStatusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  debugStatusLabel: {
+    fontSize: 13,
+    color: '#A0AEC0',
+    fontWeight: '600',
+  },
+  debugStatusValue: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '500',
+    flex: 1,
+    textAlign: 'right',
+  },
+
   // Contact Methods Section
   contactMethodsSection: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    marginTop: -30,
+    marginTop: 20,
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
@@ -741,7 +1229,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
-  // ✅ NEW: Connection Test Section
+  // Connection Test Section
   connectionTestSection: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
@@ -978,7 +1466,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // ✅ Enhanced Resources Grid
+  // Resources Grid
   resourcesContainer: {
     width: '100%',
   },
@@ -1012,7 +1500,6 @@ const styles = StyleSheet.create({
     elevation: 2,
     position: 'relative',
   },
-  // ✅ NEW: Connection Test Resource Special Styling
   connectionTestResource: {
     borderColor: '#4ECDC4',
     borderWidth: 2,

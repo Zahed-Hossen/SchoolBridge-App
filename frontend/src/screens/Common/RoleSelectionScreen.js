@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,41 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
+import { useRole } from '../../context/RoleContext';
 import { USER_ROLES } from '../../constants/config';
 
 const RoleSelectionScreen = ({ navigation, route }) => {
-  const { completeOAuthSetup, logout } = useAuth(); // ✅ Use logout instead of clearAuthData
+  const { user, completeOAuthSetup, logout } = useAuth();
+  const { setRole, currentRole } = useRole();
   const [selectedRole, setSelectedRole] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Get user data from route params (passed from OAuth)
-  const userData = route.params?.user || null;
+  // Get user data from route params or auth context
+  const userData = route?.params?.user || user;
+  const { error, showError } = route?.params || {};
+
+  console.log('🎯 RoleSelectionScreen - User Data:', {
+    userData: !!userData,
+    userRole: userData?.role,
+    currentRole,
+    selectedRole,
+    hasCompleteOAuthSetup: !!completeOAuthSetup,
+  });
+
+  // ✅ FIX: Auto-select role if user already has one
+  useEffect(() => {
+    if (userData?.role && !selectedRole) {
+      console.log('🔄 Auto-selecting role from user:', userData.role);
+      setSelectedRole(userData.role);
+    }
+  }, [userData?.role, selectedRole]);
+
+  // ✅ FIX: Show error if there was a role issue
+  useEffect(() => {
+    if (showError && error) {
+      Alert.alert('Role Selection Required', error);
+    }
+  }, [showError, error]);
 
   const roles = [
     {
@@ -62,13 +88,21 @@ const RoleSelectionScreen = ({ navigation, route }) => {
     try {
       console.log('🎯 Selected role:', selectedRole);
 
-      // ✅ Complete OAuth setup with selected role
-      await completeOAuthSetup(selectedRole);
+      // ✅ FIX: Check if this is OAuth flow or direct role selection
+      if (completeOAuthSetup && userData && !userData.role) {
+        // OAuth flow - complete setup with selected role
+        console.log('🔐 Completing OAuth setup with role:', selectedRole);
+        await completeOAuthSetup(selectedRole);
+      } else {
+        // Direct role selection - just set the role
+        console.log('🎭 Setting role directly:', selectedRole);
+        await setRole(selectedRole);
+      }
 
-      console.log('✅ Role selection completed, user should be authenticated now');
+      console.log('✅ Role selection completed, AppNavigator should redirect');
 
-      // ✅ Don't navigate manually - let App.js detect the auth state change
-      // and automatically navigate to the appropriate dashboard
+      // ✅ FIX: Don't navigate manually - let AppNavigator handle the redirect
+      // The role context update will trigger AppNavigator re-render
 
     } catch (error) {
       console.error('❌ Role selection error:', error);
@@ -90,9 +124,8 @@ const RoleSelectionScreen = ({ navigation, route }) => {
           onPress: async () => {
             try {
               console.log('🔄 Logging out and going back...');
-              // ✅ FIXED: Use logout method which clears all data
               await logout();
-              // App.js will automatically show AuthStack when user is logged out
+              // AppNavigator will automatically show AuthStack when user is logged out
             } catch (error) {
               console.error('❌ Error during logout:', error);
             }
@@ -104,7 +137,6 @@ const RoleSelectionScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* ✅ FIXED: Use flex layout instead of absolute positioning */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -117,14 +149,18 @@ const RoleSelectionScreen = ({ navigation, route }) => {
           ) : (
             <View style={styles.userImagePlaceholder}>
               <Text style={styles.userImageText}>
-                {userData?.name?.charAt(0)?.toUpperCase() || '👤'}
+                {userData?.name?.charAt(0)?.toUpperCase() || userData?.firstName?.charAt(0)?.toUpperCase() || '👤'}
               </Text>
             </View>
           )}
           <Text style={styles.title}>Choose Your Role</Text>
           <Text style={styles.subtitle}>
             Hi {userData?.firstName || userData?.name?.split(' ')[0] || 'there'}!
-            {'\n'}Please select how you'll be using SchoolBridge:
+            {'\n'}
+            {userData?.role ?
+              `Your account role is: ${userData.role}. Confirm or change below:` :
+              'Please select how you\'ll be using SchoolBridge:'
+            }
           </Text>
         </View>
 
@@ -150,6 +186,7 @@ const RoleSelectionScreen = ({ navigation, route }) => {
                     selectedRole === role.key && { color: role.color }
                   ]}>
                     {role.title}
+                    {userData?.role === role.key && ' (Current)'}
                   </Text>
                   <Text style={styles.roleDescription}>{role.description}</Text>
                 </View>
@@ -168,7 +205,7 @@ const RoleSelectionScreen = ({ navigation, route }) => {
         </View>
       </ScrollView>
 
-      {/* ✅ FIXED: Action Buttons - Use flex layout */}
+      {/* Action Buttons */}
       <View style={styles.actionContainer}>
         <TouchableOpacity
           style={[styles.continueButton, !selectedRole && styles.continueButtonDisabled]}
@@ -178,7 +215,9 @@ const RoleSelectionScreen = ({ navigation, route }) => {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.continueButtonText}>
+              {userData?.role === selectedRole ? 'Continue' : 'Confirm Role'}
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -194,22 +233,23 @@ const RoleSelectionScreen = ({ navigation, route }) => {
   );
 };
 
+// Keep your existing styles...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
   scrollView: {
-    flex: 1, // ✅ Takes available space
+    flex: 1,
   },
   scrollContent: {
     padding: 24,
-    paddingBottom: 20, // ✅ Reduced padding
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
     marginBottom: 32,
-    marginTop: 10, // ✅ Reduced margin
+    marginTop: 10,
   },
   userImage: {
     width: 80,
@@ -301,7 +341,6 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
   },
-  // ✅ FIXED: Use flex layout instead of absolute positioning
   actionContainer: {
     backgroundColor: '#F8F9FA',
     padding: 24,
@@ -309,7 +348,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
     gap: 12,
-    // Remove position: 'absolute' and related properties
   },
   continueButton: {
     backgroundColor: '#2E86AB',

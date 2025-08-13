@@ -21,6 +21,7 @@ import {
   API_ENDPOINTS
 } from '../constants/apiEndpoints';
 
+
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
 const ConnectionTest = () => {

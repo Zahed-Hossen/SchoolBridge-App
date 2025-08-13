@@ -3,13 +3,22 @@ import authRoutes from './auth.js';
 import userRoutes from './users.js';
 import { getNetworkIP } from '../utils/helpers.js';
 import { createResponse } from '../utils/helpers.js';
+import attendanceRoutes from './Student/attendance.js';
+import announcementsRoutes from './Student/announcements.js';
+import notificationsRoutes from './Student/notifications.js';
+import dashboardRoutes from './Student/dashboard.js';
+
 
 const router = express.Router();
 
 // ✅ Mount route modules
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
-router.use('/user', userRoutes); // Alternative path for compatibility
+router.use('/user', userRoutes);
+router.use('/attendance', attendanceRoutes);
+router.use('/announcements', announcementsRoutes);
+router.use('/notifications', notificationsRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 // ✅ Health check endpoint
 router.get('/health', (req, res) => {

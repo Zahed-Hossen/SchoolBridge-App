@@ -41,19 +41,14 @@ const SignUpScreen = () => {
 
   useEffect(() => {
     if (user && !role && !isAuthenticated && !googleLoading && !loading) {
-      console.log(
-        '🎯 Auto-navigating OAuth user to role selection from SignUpScreen',
-      );
+      console.log('Auto-navigating OAuth user to role selection from SignUpScreen');
       navigation.navigate('RoleSelection', { user });
     }
   }, [user, role, isAuthenticated, googleLoading, loading, navigation]);
 
-   const navigateToLogin = () => {
+  const navigateToLogin = () => {
     try {
-      console.log('🔄 Starting navigation to Login...');
-      console.log('🔍 Navigation state before:', navigation.getState());
-
-      // Reset form state
+      console.log('Starting navigation to Login...');
       setFormData({
         fullName: '',
         email: '',
@@ -66,21 +61,9 @@ const SignUpScreen = () => {
       setErrors({});
       setLoading(false);
       setGoogleLoading(false);
-
-      console.log('🚀 Executing navigation...');
-
-      // ✅ FIXED: Use replace to properly change screens
       navigation.replace('Login');
-
-      console.log('✅ navigation.replace executed');
-
-      // Check navigation state after a short delay
-      setTimeout(() => {
-        console.log('🔍 Navigation state after:', navigation.getState());
-      }, 100);
-
     } catch (error) {
-      console.error('❌ Navigation failed:', error);
+      console.error('Navigation failed:', error);
       Alert.alert('Error', 'Navigation failed. Please go to Login manually.');
     }
   };
@@ -116,19 +99,15 @@ const SignUpScreen = () => {
       newErrors.email = 'Please enter a valid email';
     }
 
-    // ✅ FIXED: Validate cleaned phone number
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else {
-      // Clean phone for validation
       const cleanPhone = formData.phone.replace(/\D/g, '');
-
       if (cleanPhone.length < 10 || cleanPhone.length > 15) {
         newErrors.phone = 'Please enter a valid phone number (10-15 digits)';
       }
     }
 
-    // ✅ Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
@@ -153,27 +132,18 @@ const SignUpScreen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ FIXED: Better phone formatting and validation
   const handleInputChange = (field, value) => {
     if (field === 'phone') {
-      // Remove all non-digits for processing
       let cleanPhone = value.replace(/\D/g, '');
-
-      // Limit length to prevent overly long numbers
       if (cleanPhone.length > 15) {
         cleanPhone = cleanPhone.substring(0, 15);
       }
 
-      // Format for display (but keep clean version for submission)
       let displayPhone = cleanPhone;
-
-      // Add formatting for better UX (only for display)
       if (cleanPhone.length >= 6) {
         if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
-          // Bangladesh format: 01888227599 -> 018-8822-7599
           displayPhone = cleanPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
         } else if (cleanPhone.length >= 10) {
-          // General format: 1234567890 -> 123-456-7890
           displayPhone = cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
         } else if (cleanPhone.length >= 7) {
           displayPhone = cleanPhone.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3');
@@ -208,40 +178,30 @@ const SignUpScreen = () => {
 
     setLoading(true);
     try {
-      console.log('📝 Submitting signup form...');
+      console.log('Submitting signup form...');
 
-      // ✅ FIXED: Clean phone number before sending
-      const cleanPhone = formData.phone.replace(/\D/g, ''); // Remove all non-digits
+      const cleanPhone = formData.phone.replace(/\D/g, '');
       let finalPhone = cleanPhone;
 
-      // ✅ Add country code if needed
       if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
-        // Bangladesh format: 01888227599 -> +8801888227599
         finalPhone = '+88' + cleanPhone;
       } else if (cleanPhone.length === 10 && !cleanPhone.startsWith('1')) {
-        // US format: add +1
         finalPhone = '+1' + cleanPhone;
       } else if (cleanPhone.length >= 10 && !cleanPhone.startsWith('+')) {
-        // Generic international: add +
         finalPhone = '+' + cleanPhone;
       }
-
-      console.log('📞 Original phone:', formData.phone);
-      console.log('📞 Clean phone:', cleanPhone);
-      console.log('📞 Final phone:', finalPhone);
 
       const result = await signup({
         fullName: formData.fullName,
         email: formData.email,
-        phone: finalPhone, // ✅ Use cleaned phone
+        phone: finalPhone,
         password: formData.password,
         role: formData.role,
       });
 
-      // ✅ FIXED: Enhanced success handling with better navigation
       if (result.success) {
         Alert.alert(
-          '🎉 Account Created!',
+          'Account Created!',
           'Your account has been created successfully! You can now log in with your email and password.',
           [
             {
@@ -255,9 +215,8 @@ const SignUpScreen = () => {
         throw new Error(result.error || 'Registration failed');
       }
     } catch (error) {
-      console.error('❌ Signup error:', error);
+      console.error('Signup error:', error);
 
-      // ✅ Enhanced error messaging
       let errorMessage = 'Failed to create account';
 
       if (error.message.includes('email already exists') || error.message.includes('already registered')) {
@@ -282,25 +241,25 @@ const SignUpScreen = () => {
     setGoogleLoading(true);
 
     try {
-      console.log('🔐 Starting Google OAuth sign-up...');
+      console.log('Starting Google OAuth sign-up...');
 
       const result = await GoogleOAuthService.signIn();
 
       if (result.success) {
-        console.log('✅ Google OAuth successful:', result.user.email);
+        console.log('Google OAuth successful:', result.user.email);
 
         const authResult = await signInWithGoogle(result);
 
         if (authResult.success && authResult.needsRoleSelection) {
-          console.log('🎯 New user signup, waiting for auto-navigation...');
+          console.log('New user signup, waiting for auto-navigation...');
         }
       } else if (result.cancelled) {
-        console.log('ℹ️ User cancelled Google sign-up');
+        console.log('User cancelled Google sign-up');
       } else {
         throw new Error(result.error || 'Google sign-up failed');
       }
     } catch (error) {
-      console.error('❌ Google OAuth error:', error);
+      console.error('Google OAuth error:', error);
 
       let errorMessage = 'Failed to sign up with Google';
 
@@ -340,61 +299,6 @@ const SignUpScreen = () => {
     </View>
   );
 
-
-// ✅ ADD: OAuth test function
-const testOAuth = async () => {
-  try {
-    console.log('🧪 Testing OAuth configuration...');
-
-    // Import GoogleOAuthService at the top if not already imported
-    // import GoogleOAuthService from '../../services/GoogleOAuthService';
-
-    // Debug redirect URIs
-    await GoogleOAuthService.debugRedirectUri();
-
-    // Get configuration status
-    const status = GoogleOAuthService.getConfigurationStatus();
-    console.log('📊 Configuration status:', status);
-
-    // Test sign-in
-    console.log('🚀 Testing OAuth sign-in...');
-    const result = await GoogleOAuthService.signIn();
-
-    console.log('📋 OAuth test result:', {
-      success: result.success,
-      hasUser: !!result.user,
-      method: result.method,
-      simulated: result.simulated,
-      error: result.error
-    });
-
-    if (result.success) {
-      Alert.alert(
-        'OAuth Test Success! ✅',
-        `Signed in as: ${result.user.email}\n` +
-        `Method: ${result.method || 'unknown'}\n` +
-        `Simulated: ${result.simulated ? 'Yes' : 'No'}`,
-        [{ text: 'OK' }]
-      );
-    } else {
-      Alert.alert(
-        'OAuth Test Failed ❌',
-        result.error || 'Unknown error',
-        [{ text: 'OK' }]
-      );
-    }
-
-  } catch (error) {
-    console.error('❌ OAuth test error:', error);
-    Alert.alert(
-      'Test Error ⚠️',
-      `Error: ${error.message}\n\nCheck console for details.`,
-      [{ text: 'OK' }]
-    );
-  }
-};
-
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -408,7 +312,6 @@ const testOAuth = async () => {
         </View>
 
         <View style={styles.form}>
-          {/* Full Name */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Full Name</Text>
             <TextInput
@@ -424,7 +327,6 @@ const testOAuth = async () => {
             )}
           </View>
 
-          {/* Email */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email</Text>
             <TextInput
@@ -442,7 +344,6 @@ const testOAuth = async () => {
             )}
           </View>
 
-          {/* Phone */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Phone</Text>
             <TextInput
@@ -454,18 +355,14 @@ const testOAuth = async () => {
               keyboardType="phone-pad"
               editable={!loading && !googleLoading}
             />
-
-            {/* ✅ Phone format helper */}
             <Text style={styles.phoneHint}>
               Format: +8801234567890 (with country code) or 01234567890
             </Text>
-
             {errors.phone && (
               <Text style={styles.errorText}>{errors.phone}</Text>
             )}
           </View>
 
-          {/* Password */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Password</Text>
             <TextInput
@@ -477,35 +374,24 @@ const testOAuth = async () => {
               secureTextEntry
               editable={!loading && !googleLoading}
             />
-
             <Text style={styles.passwordHint}>
               Must contain: uppercase letter, lowercase letter, and number
               (minimum 6 characters)
             </Text>
-
             {errors.password && (
               <Text style={styles.errorText}>{errors.password}</Text>
             )}
           </View>
 
-          {/* ✅ Dynamic Password Strength Indicator */}
           {formData.password.length > 0 && (
             <View style={styles.passwordStrengthContainer}>
               {(() => {
-                const { strength, checks } = getPasswordStrength(
-                  formData.password,
-                );
-                const strengthText =
-                  ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][strength] ||
-                  'Very Strong';
-                const strengthColor =
-                  ['#E74C3C', '#E67E22', '#F39C12', '#27AE60', '#16A085'][
-                    strength
-                  ] || '#E74C3C';
+                const { strength, checks } = getPasswordStrength(formData.password);
+                const strengthText = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][strength] || 'Very Strong';
+                const strengthColor = ['#E74C3C', '#E67E22', '#F39C12', '#27AE60', '#16A085'][strength] || '#E74C3C';
 
                 return (
                   <>
-                    {/* Strength Bar */}
                     <View style={styles.strengthBarContainer}>
                       <Text style={styles.strengthLabel}>Strength: </Text>
                       <View style={styles.strengthBar}>
@@ -519,69 +405,28 @@ const testOAuth = async () => {
                           ]}
                         />
                       </View>
-                      <Text
-                        style={[styles.strengthText, { color: strengthColor }]}
-                      >
+                      <Text style={[styles.strengthText, { color: strengthColor }]}>
                         {strengthText}
                       </Text>
                     </View>
 
-                    {/* Requirements Checklist */}
                     <View style={styles.requirementsContainer}>
-                      <Text style={styles.requirementsTitle}>
-                        Requirements:
-                      </Text>
+                      <Text style={styles.requirementsTitle}>Requirements:</Text>
                       <View style={styles.requirementsList}>
-                        <Text
-                          style={[
-                            styles.requirement,
-                            checks.length
-                              ? styles.requirementMet
-                              : styles.requirementUnmet,
-                          ]}
-                        >
+                        <Text style={[styles.requirement, checks.length ? styles.requirementMet : styles.requirementUnmet]}>
                           {checks.length ? '✅' : '❌'} At least 6 characters
                         </Text>
-                        <Text
-                          style={[
-                            styles.requirement,
-                            checks.lowercase
-                              ? styles.requirementMet
-                              : styles.requirementUnmet,
-                          ]}
-                        >
+                        <Text style={[styles.requirement, checks.lowercase ? styles.requirementMet : styles.requirementUnmet]}>
                           {checks.lowercase ? '✅' : '❌'} Lowercase letter
                         </Text>
-                        <Text
-                          style={[
-                            styles.requirement,
-                            checks.uppercase
-                              ? styles.requirementMet
-                              : styles.requirementUnmet,
-                          ]}
-                        >
+                        <Text style={[styles.requirement, checks.uppercase ? styles.requirementMet : styles.requirementUnmet]}>
                           {checks.uppercase ? '✅' : '❌'} Uppercase letter
                         </Text>
-                        <Text
-                          style={[
-                            styles.requirement,
-                            checks.number
-                              ? styles.requirementMet
-                              : styles.requirementUnmet,
-                          ]}
-                        >
+                        <Text style={[styles.requirement, checks.number ? styles.requirementMet : styles.requirementUnmet]}>
                           {checks.number ? '✅' : '❌'} Number
                         </Text>
-                        <Text
-                          style={[
-                            styles.requirement,
-                            checks.symbol
-                              ? styles.requirementMet
-                              : styles.requirementUnmet,
-                          ]}
-                        >
-                          {checks.symbol ? '🎯' : '⭕'} Special character
-                          (optional)
+                        <Text style={[styles.requirement, checks.symbol ? styles.requirementMet : styles.requirementUnmet]}>
+                          {checks.symbol ? '🎯' : '⭕'} Special character (optional)
                         </Text>
                       </View>
                     </View>
@@ -591,18 +436,12 @@ const testOAuth = async () => {
             </View>
           )}
 
-          {/* Confirm Password */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Confirm Password</Text>
             <TextInput
-              style={[
-                styles.input,
-                errors.confirmPassword && styles.inputError,
-              ]}
+              style={[styles.input, errors.confirmPassword && styles.inputError]}
               value={formData.confirmPassword}
-              onChangeText={(value) =>
-                handleInputChange('confirmPassword', value)
-              }
+              onChangeText={(value) => handleInputChange('confirmPassword', value)}
               placeholder="Confirm your password"
               placeholderTextColor="#999999"
               secureTextEntry
@@ -613,39 +452,26 @@ const testOAuth = async () => {
             )}
           </View>
 
-          {/* Role Picker */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Role</Text>
             <TouchableOpacity
-              style={[
-                styles.input,
-                styles.picker,
-                errors.role && styles.inputError,
-              ]}
+              style={[styles.input, styles.picker, errors.role && styles.inputError]}
               onPress={() => setShowRolePicker(true)}
               disabled={loading || googleLoading}
             >
-              <Text
-                style={[
-                  styles.pickerText,
-                  !formData.role && styles.placeholderText,
-                ]}
-              >
+              <Text style={[styles.pickerText, !formData.role && styles.placeholderText]}>
                 {formData.role || 'Select your role'}
               </Text>
             </TouchableOpacity>
             {errors.role && <Text style={styles.errorText}>{errors.role}</Text>}
           </View>
 
-          {/* Terms and Conditions */}
           <TouchableOpacity
             style={styles.checkboxContainer}
             onPress={() => setTermsAccepted(!termsAccepted)}
             disabled={loading || googleLoading}
           >
-            <View
-              style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}
-            >
+            <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
               {termsAccepted && <Text style={styles.checkmark}>✓</Text>}
             </View>
             <Text style={styles.checkboxLabel}>
@@ -654,12 +480,8 @@ const testOAuth = async () => {
           </TouchableOpacity>
           {errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
 
-          {/* Sign Up Button */}
           <TouchableOpacity
-            style={[
-              styles.submitButton,
-              (loading || googleLoading) && styles.submitButtonDisabled,
-            ]}
+            style={[styles.submitButton, (loading || googleLoading) && styles.submitButtonDisabled]}
             onPress={handleSubmit}
             disabled={loading || googleLoading}
           >
@@ -670,19 +492,14 @@ const testOAuth = async () => {
             )}
           </TouchableOpacity>
 
-          {/* Divider */}
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
             <Text style={styles.dividerText}>Or</Text>
             <View style={styles.divider} />
           </View>
 
-          {/* ✅ Google OAuth Button */}
           <TouchableOpacity
-            style={[
-              styles.googleButton,
-              googleLoading && styles.googleButtonDisabled,
-            ]}
+            style={[styles.googleButton, googleLoading && styles.googleButtonDisabled]}
             onPress={handleGoogleSignUp}
             disabled={loading || googleLoading}
           >
@@ -696,7 +513,6 @@ const testOAuth = async () => {
             )}
           </TouchableOpacity>
 
-          {/* Login Link */}
           <View style={styles.loginLinkContainer}>
             <Text style={styles.loginLinkText}>Already have an account? </Text>
             <TouchableOpacity
@@ -709,19 +525,6 @@ const testOAuth = async () => {
         </View>
       </ScrollView>
 
-
-      {/* ✅ NEW: Floating debug button (only in development) */}
-      {__DEV__ && (
-        <TouchableOpacity
-          style={styles.floatingDebugButton}
-          onPress={testOAuth}
-          disabled={loading || googleLoading}
-        >
-          <Text style={styles.floatingDebugText}>🧪</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Role Picker Modal */}
       {showRolePicker && (
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -783,7 +586,6 @@ const styles = StyleSheet.create({
     color: '#333333',
     backgroundColor: '#FFFFFF',
   },
-  // ✅ Password Strength Styles
   passwordStrengthContainer: {
     marginTop: 8,
     padding: 12,
@@ -960,28 +762,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-    // ✅ Floating debug button styles
-    floatingDebugButton: {
-      position: 'absolute',
-      bottom: 20,
-      right: 20,
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: '#9B59B6',
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 6,
-      elevation: 8,
-      zIndex: 1000,
-    },
-    floatingDebugText: {
-      fontSize: 20,
-      color: '#FFFFFF',
-    },
   loginLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

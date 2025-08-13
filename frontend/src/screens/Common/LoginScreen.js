@@ -19,8 +19,8 @@ const LoginScreen = ({ navigation }) => {
   const { login, signInWithGoogle, isLoading, user, role, isAuthenticated } =
     useAuth();
   const [formData, setFormData] = useState({
-    email: 'test@schoolbridge.com', // Pre-filled for easy testing
-    password: 'password123', // Pre-filled for easy testing
+    email: 'mdzahedsiddique@gmail.com', // Pre-filled for easy testing
+    password: 'Ananas@Guava#', // Pre-filled for easy testing
     role: USER_ROLES.STUDENT,
   });
   const [googleLoading, setGoogleLoading] = useState(false);

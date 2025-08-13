@@ -170,7 +170,6 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-
 // ✅ Pre-save middleware for password hashing
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password') || !this.password) {
@@ -184,6 +183,7 @@ userSchema.pre('save', async function(next) {
   } catch (error) {
     next(error);
   }
+
 });
 
 // ✅ Pre-save middleware to generate fullName from firstName/lastName
