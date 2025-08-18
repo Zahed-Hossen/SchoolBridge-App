@@ -1,0 +1,98 @@
+digraph SchoolBridgeApp {
+  node [shape=folder];
+
+  SchoolBridgeApp;
+  SchoolBridgeApp -> app;
+  SchoolBridgeApp -> backend;
+  SchoolBridgeApp -> package_json [label="package.json"];
+  SchoolBridgeApp -> README_md [label="README.md"];
+
+  // App structure
+  app -> assets;
+  app -> components;
+  app -> constants;
+  app -> context;
+  app -> hooks;
+  app -> navigation;
+  app -> screens;
+  app -> services;
+  app -> styles;
+  app -> App_js [label="App.js"];
+
+  // Navigation
+  navigation -> AuthStack_js [label="AuthStack.js"];
+  navigation -> StudentStack_js [label="StudentStack.js"];
+  navigation -> TeacherStack_js [label="TeacherStack.js"];
+  navigation -> AdminStack_js [label="AdminStack.js"];
+  navigation -> RootNavigator_js [label="RootNavigator.js"];
+  navigation -> index_js [label="index.js"];
+
+  // Screens
+  screens -> Auth;
+  screens -> Student;
+  screens -> Teacher;
+  screens -> SchoolAdmin;
+  screens -> SuperAdmin;
+  screens -> Shared;
+
+  // Auth Screens
+  Auth -> LoginScreen_jsx [label="LoginScreen.jsx"];
+  Auth -> RegisterScreen_jsx [label="RegisterScreen.jsx"];
+  Auth -> RoleSelectionScreen_jsx [label="RoleSelectionScreen.jsx"];
+  Auth -> ForgotPasswordScreen_jsx [label="ForgotPasswordScreen.jsx"];
+
+  // Student Screens
+  Student -> DashboardScreen_jsx [label="DashboardScreen.jsx"];
+  Student -> ClassesScreen_jsx [label="ClassesScreen.jsx"];
+  Student -> AttendanceScreen_jsx [label="AttendanceScreen.jsx"];
+  Student -> AnnouncementsScreen_jsx [label="AnnouncementsScreen.jsx"];
+  Student -> NewsScreen_jsx [label="NewsScreen.jsx"];
+  Student -> GradesScreen_jsx [label="GradesScreen.jsx"];
+  Student -> AssignmentsScreen_jsx [label="AssignmentsScreen.jsx"];
+  Student -> LibraryScreen_jsx [label="LibraryScreen.jsx"];
+  Student -> SettingsScreen_jsx [label="SettingsScreen.jsx"];
+
+  // Teacher Screens
+  Teacher -> DashboardScreen_jsx2 [label="DashboardScreen.jsx"];
+  Teacher -> ManageClassesScreen_jsx [label="ManageClassesScreen.jsx"];
+  Teacher -> AttendanceScreen_jsx2 [label="AttendanceScreen.jsx"];
+  Teacher -> AssignmentsScreen_jsx2 [label="AssignmentsScreen.jsx"];
+  Teacher -> GradesScreen_jsx2 [label="GradesScreen.jsx"];
+  Teacher -> AnnouncementsScreen_jsx2 [label="AnnouncementsScreen.jsx"];
+  Teacher -> SettingsScreen_jsx2 [label="SettingsScreen.jsx"];
+
+  // SchoolAdmin Screens
+  SchoolAdmin -> DashboardScreen_jsx3 [label="DashboardScreen.jsx"];
+  SchoolAdmin -> ManageAccountsScreen_jsx [label="ManageAccountsScreen.jsx"];
+  SchoolAdmin -> PermissionsScreen_jsx [label="PermissionsScreen.jsx"];
+  SchoolAdmin -> SchoolSettingsScreen_jsx [label="SchoolSettingsScreen.jsx"];
+  SchoolAdmin -> ReportsScreen_jsx [label="ReportsScreen.jsx"];
+
+  // SuperAdmin Screens
+  SuperAdmin -> DashboardScreen_jsx4 [label="DashboardScreen.jsx"];
+  SuperAdmin -> ManageSchoolsScreen_jsx [label="ManageSchoolsScreen.jsx"];
+  SuperAdmin -> ManageAdminsScreen_jsx [label="ManageAdminsScreen.jsx"];
+  SuperAdmin -> GlobalSettingsScreen_jsx [label="GlobalSettingsScreen.jsx"];
+  SuperAdmin -> AnalyticsScreen_jsx [label="AnalyticsScreen.jsx"];
+
+  // Shared Screens
+  Shared -> ProfileScreen_jsx [label="ProfileScreen.jsx"];
+  Shared -> NotificationsScreen_jsx [label="NotificationsScreen.jsx"];
+
+  // Services
+  services -> authService_js [label="authService.js"];
+  services -> studentService_js [label="studentService.js"];
+  services -> teacherService_js [label="teacherService.js"];
+  services -> adminService_js [label="adminService.js"];
+  services -> superAdminService_js [label="superAdminService.js"];
+
+  // Backend structure
+  backend -> config;
+  backend -> controllers;
+  backend -> middleware;
+  backend -> models;
+  backend -> routes;
+  backend -> utils;
+  backend -> server_js [label="server.js"];
+  backend -> package_json2 [label="package.json"];
+}

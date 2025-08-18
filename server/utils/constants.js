@@ -4,6 +4,10 @@ export const ROLES = {
   TEACHER: 'Teacher',
   PARENT: 'Parent',
   ADMIN: 'Admin',
+  SUPER_ADMIN: 'SuperAdmin',
+  VISITOR: 'Visitor',
+  PLATFORM_USER: 'PlatformUser',
+  GUEST: 'Guest',
 };
 
 export const PROVIDERS = {
@@ -31,7 +35,8 @@ export const MESSAGES = {
     INVALID_CREDENTIALS: 'Invalid email or password',
     USER_EXISTS: 'User with this email already exists',
     USER_NOT_FOUND: 'No account found with this email address',
-    ACCOUNT_DEACTIVATED: 'Account has been deactivated. Please contact support.',
+    ACCOUNT_DEACTIVATED:
+      'Account has been deactivated. Please contact support.',
     ROLE_MISMATCH: 'Account exists but not with the selected role',
     TOKEN_EXPIRED: 'Access token expired',
     INVALID_TOKEN: 'Invalid access token',
@@ -53,7 +58,9 @@ export const RATE_LIMITS = {
   AUTH: {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10, // 10 attempts per window
-    message: { error: 'Too many authentication attempts, please try again later.' },
+    message: {
+      error: 'Too many authentication attempts, please try again later.',
+    },
   },
   GENERAL: {
     windowMs: 15 * 60 * 1000, // 15 minutes

@@ -8,14 +8,16 @@ import {
   Modal,
   Linking,
   Alert,
-  ScrollView, 
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
+import { useAuth } from '../../context/AuthContext';
 
 const HeroSection = ({ onLoginPress, onSignUpPress }) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
+  const { user, logout } = useAuth();
 
   // Toggle menu visibility
   const toggleMenu = () => {
@@ -77,7 +79,9 @@ const HeroSection = ({ onLoginPress, onSignUpPress }) => {
         break;
 
       case 'email':
-        Linking.openURL('mailto:info@schoolbridge.com?subject=Inquiry from SchoolBridge App');
+        Linking.openURL(
+          'mailto:info@schoolbridge.com?subject=Inquiry from SchoolBridge App',
+        );
         break;
 
       case 'phone':
@@ -157,7 +161,11 @@ const HeroSection = ({ onLoginPress, onSignUpPress }) => {
                   onPress={() => handleMenuPress('pricing')}
                 >
                   <Text style={styles.menuItemIcon}>💰</Text>
-                  <Text style={[styles.menuItemText, styles.highlightedMenuText]}>Pricing & Plans</Text>
+                  <Text
+                    style={[styles.menuItemText, styles.highlightedMenuText]}
+                  >
+                    Pricing & Plans
+                  </Text>
                   <Text style={styles.menuItemArrow}>›</Text>
                 </TouchableOpacity>
 
@@ -271,19 +279,50 @@ const HeroSection = ({ onLoginPress, onSignUpPress }) => {
 
                 <TouchableOpacity
                   style={[styles.menuItem, styles.menuActionItem]}
-                  onPress={() => { closeMenu(); onLoginPress(); }}
+                  onPress={() => {
+                    closeMenu();
+                    onLoginPress();
+                  }}
                 >
                   <Text style={styles.menuItemIcon}>🚀</Text>
-                  <Text style={[styles.menuItemText, styles.menuActionText]}>Get Started</Text>
+                  <Text style={[styles.menuItemText, styles.menuActionText]}>
+                    Get Started
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.menuItem, styles.menuActionItem]}
-                  onPress={() => { closeMenu(); onSignUpPress(); }}
+                  onPress={() => {
+                    closeMenu();
+                    onSignUpPress();
+                  }}
                 >
                   <Text style={styles.menuItemIcon}>📝</Text>
-                  <Text style={[styles.menuItemText, styles.menuActionText]}>Sign Up</Text>
+                  <Text style={[styles.menuItemText, styles.menuActionText]}>
+                    Sign Up
+                  </Text>
                 </TouchableOpacity>
+
+                {/* Logout button for logged-in users (including Visitor) */}
+                {user && (
+                  <TouchableOpacity
+                    style={[styles.menuItem, styles.menuActionItem]}
+                    onPress={async () => {
+                      closeMenu();
+                      try {
+                        await logout();
+                        Alert.alert('Logged Out', 'You have been signed out.');
+                      } catch (e) {
+                        Alert.alert('Logout Failed', 'Please try again.');
+                      }
+                    }}
+                  >
+                    <Text style={styles.menuItemIcon}>🔓</Text>
+                    <Text style={[styles.menuItemText, styles.menuActionText]}>
+                      Logout
+                    </Text>
+                  </TouchableOpacity>
+                )}
 
                 {/* ✅ FOOTER SPACING */}
                 <View style={styles.menuFooter} />
@@ -381,7 +420,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
-    backgroundColor: '#FFFFFF', // ✅ Ensure white background
+    backgroundColor: '#FFFFFF',
   },
   menuTitle: {
     fontSize: 20,
@@ -455,10 +494,10 @@ const styles = StyleSheet.create({
   highlightedMenuItem: {
     backgroundColor: 'rgba(255, 193, 7, 0.1)',
     borderLeftWidth: 4,
-    borderLeftColor: '#FFD93D',
+    borderLeftColor: '#3b99a5e3',
   },
   highlightedMenuText: {
-    color: '#FF8C00',
+    color: '#124447ff',
     fontWeight: '600',
   },
 
@@ -511,7 +550,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  // ... rest of existing styles ...
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
@@ -583,15 +621,6 @@ const styles = StyleSheet.create({
 });
 
 export default HeroSection;
-
-
-
-
-
-
-
-
-
 
 // import React, { useState } from 'react';
 // import {
@@ -987,5 +1016,3 @@ export default HeroSection;
 // });
 
 // export default HeroSection;
-
-

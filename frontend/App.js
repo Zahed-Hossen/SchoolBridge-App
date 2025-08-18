@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  NavigationIndependentTree,
+} from '@react-navigation/native';
 import { ActivityIndicator, View, Text, TouchableOpacity } from 'react-native';
 
 // Context Providers
@@ -19,22 +23,27 @@ const LoadingScreen = ({ message }) => {
   const { tenantBranding } = useTenant();
 
   return (
-    <View style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: tenantBranding?.primaryColor || '#3498DB'
-    }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: tenantBranding?.primaryColor || '#3498DB',
+      }}
+    >
       <ActivityIndicator size="large" color="#FFFFFF" />
-      <Text style={{
-        marginTop: 16,
-        fontSize: 16,
-        color: '#FFFFFF',
-        fontWeight: '600',
-        textAlign: 'center',
-        paddingHorizontal: 20
-      }}>
-        {message || `Loading ${tenantBranding?.schoolName || 'SchoolBridge'}...`}
+      <Text
+        style={{
+          marginTop: 16,
+          fontSize: 16,
+          color: '#FFFFFF',
+          fontWeight: '600',
+          textAlign: 'center',
+          paddingHorizontal: 20,
+        }}
+      >
+        {message ||
+          `Loading ${tenantBranding?.schoolName || 'SchoolBridge'}...`}
       </Text>
     </View>
   );
@@ -45,23 +54,27 @@ const ErrorScreen = ({ error, onRetry }) => {
   const { tenantBranding } = useTenant();
 
   return (
-    <View style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#F8FAFB',
-      padding: 20
-    }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFB',
+        padding: 20,
+      }}
+    >
       <Text style={{ fontSize: 24, marginBottom: 16, textAlign: 'center' }}>
         ⚠️ Connection Error
       </Text>
-      <Text style={{
-        fontSize: 16,
-        color: '#718096',
-        textAlign: 'center',
-        marginBottom: 24,
-        lineHeight: 24
-      }}>
+      <Text
+        style={{
+          fontSize: 16,
+          color: '#718096',
+          textAlign: 'center',
+          marginBottom: 24,
+          lineHeight: 24,
+        }}
+      >
         {error || 'Unable to connect to the server.'}
       </Text>
       {onRetry && (
@@ -70,7 +83,7 @@ const ErrorScreen = ({ error, onRetry }) => {
             backgroundColor: tenantBranding?.primaryColor || '#3498DB',
             paddingHorizontal: 20,
             paddingVertical: 12,
-            borderRadius: 8
+            borderRadius: 8,
           }}
           onPress={onRetry}
         >
@@ -102,7 +115,7 @@ const useNetworkInitialization = () => {
     } catch (error) {
       console.error('❌ Network detection failed:', error);
       setNetworkError(error.message);
-      setIsNetworkReady(true); 
+      setIsNetworkReady(true);
     }
   };
 
@@ -114,19 +127,25 @@ const useNetworkInitialization = () => {
     isNetworkReady,
     networkError,
     detectedUrl,
-    retryNetwork: initializeNetwork
+    retryNetwork: initializeNetwork,
   };
 };
 
 // ✅ Main App Content
 const AppContent = () => {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
-  const { isLoading: tenantLoading, error: tenantError, initializeTenant } = useTenant();
+  const {
+    isLoading: tenantLoading,
+    error: tenantError,
+    initializeTenant,
+  } = useTenant();
   const { isLoading: roleLoading, currentRole } = useRole();
-  const { isNetworkReady, networkError, detectedUrl, retryNetwork } = useNetworkInitialization();
+  const { isNetworkReady, networkError, detectedUrl, retryNetwork } =
+    useNetworkInitialization();
 
   // Calculate loading state
-  const isLoading = authLoading || tenantLoading || roleLoading || !isNetworkReady;
+  const isLoading =
+    authLoading || tenantLoading || roleLoading || !isNetworkReady;
 
   // Debug logging
   console.log('🔍 App State:', {
@@ -135,7 +154,7 @@ const AppContent = () => {
     isLoading,
     hasUser: !!user,
     networkReady: isNetworkReady,
-    detectedUrl
+    detectedUrl,
   });
 
   // Handle network errors
@@ -163,10 +182,10 @@ const AppContent = () => {
     const loadingMessage = !isNetworkReady
       ? '🔍 Detecting server...'
       : tenantLoading
-        ? '🏫 Loading school data...'
-        : authLoading
-          ? '🔐 Checking authentication...'
-          : '👤 Loading user profile...';
+      ? '🏫 Loading school data...'
+      : authLoading
+      ? '🔐 Checking authentication...'
+      : '👤 Loading user profile...';
 
     return <LoadingScreen message={loadingMessage} />;
   }
@@ -184,9 +203,7 @@ const ContextProviders = ({ children }) => {
   return (
     <TenantProvider>
       <AuthProvider>
-        <RoleProvider>
-          {children}
-        </RoleProvider>
+        <RoleProvider>{children}</RoleProvider>
       </AuthProvider>
     </TenantProvider>
   );
@@ -197,17 +214,19 @@ export default function App() {
   console.log('🚀 SchoolBridge App Starting...');
 
   return (
-    <ContextProviders>
-      <NavigationIndependentTree>
-        <NavigationContainer
-          onReady={() => console.log('🧭 Navigation ready')}
-          fallback={<LoadingScreen message="Initializing navigation..." />}
-        >
-          <AppContent />
-          <StatusBar style="auto" backgroundColor="transparent" translucent />
-        </NavigationContainer>
-      </NavigationIndependentTree>
-    </ContextProviders>
+    <SafeAreaProvider>
+      <ContextProviders>
+        <NavigationIndependentTree>
+          <NavigationContainer
+            onReady={() => console.log('🧭 Navigation ready')}
+            fallback={<LoadingScreen message="Initializing navigation..." />}
+          >
+            <AppContent />
+            <StatusBar style="auto" backgroundColor="transparent" translucent />
+          </NavigationContainer>
+        </NavigationIndependentTree>
+      </ContextProviders>
+    </SafeAreaProvider>
   );
 }
 
@@ -217,18 +236,6 @@ if (__DEV__) {
   console.log('📱 App Version: 1.0.0');
   console.log('📅 Build:', new Date().toISOString());
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -556,6 +563,3 @@ if (__DEV__) {
 //   console.log('🚀 Ready for Phase 2: Role-Based Navigation Implementation');
 //   console.log('🌐 Network Detection: Enabled');
 // }
-
-
-

@@ -1,115 +1,141 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import { useRole } from '../../context/RoleContext';
 import { useTenant } from '../../context/TenantContext';
-import { getTabBarIcon } from '../helpers/tabBarIcons';
+import { getRoleColors } from '../../constants/theme';
 
-// Import Student Screens
+import ScrollableTabBar from '../../components/navigation/ScrollableTabBar';
 import StudentDashboard from '../../screens/Student/Dashboard';
-import StudentAssignments from '../../screens/Student/Assignments';
+import StudentAssignments from '../../screens/Student/StudentAssignments';
 import StudentGrades from '../../screens/Student/Grades';
 import StudentAnnouncements from '../../screens/Student/Announcements';
-import PlaceholderScreen from '../../components/PlaceholderScreen';
-
-// Import Guards
+import StudentAttendance from '../../screens/Student/Attendance';
 import PermissionGuard from '../guards/PermissionGuard';
-import FeatureGuard from '../guards/FeatureGuard';
 import RoleService from '../../services/RoleService';
+import StudentSettings from '../../screens/Student/Settings';
+import StudentClassDetails from '../../screens/Student/StudentClassDetails';
+import StudentMyClasses from '../../screens/Student/MyClasses';
+
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+// Assignment Tab: Use StudentAssignments directly for now
+const MyClassesStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="MyClassesHome" component={StudentMyClasses} />
+    <Stack.Screen name="StudentClassDetails" component={StudentClassDetails} />
+  </Stack.Navigator>
+);
+
+// Grades Stack (for future extensibility)
+const Grades = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="StudentGrades" component={StudentGrades} />
+    {/* Add more grades-related screens here if needed */}
+  </Stack.Navigator>
+);
+
+// Announcements Stack (for future extensibility)
+const Announcements = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen
+      name="StudentAnnouncements"
+      component={StudentAnnouncements}
+    />
+    {/* Add more announcement-related screens here if needed */}
+  </Stack.Navigator>
+);
+
+// Attendance Stack (for future extensibility)
+const Attendance = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="StudentAttendance" component={StudentAttendance} />
+  </Stack.Navigator>
+);
 
 const StudentTabNavigator = () => {
   const { roleTheme } = useRole();
   const { tenantBranding } = useTenant();
-
-  const primaryColor = roleTheme?.primary || tenantBranding?.primaryColor || '#3498DB';
+  const roleColors = getRoleColors('Student');
+  const primaryColor =
+    roleTheme?.primary ||
+    tenantBranding?.primaryColor ||
+    roleColors.primary ||
+    '#3498DB';
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) =>
-          getTabBarIcon(route.name, focused, color, size),
-        tabBarActiveTintColor: primaryColor,
-        tabBarInactiveTintColor: '#8E8E93',
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#E5E5E5',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-        headerStyle: {
-          backgroundColor: primaryColor
-        },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: { fontWeight: 'bold' },
-      })}
+      screenOptions={{
+        headerShown: false,
+      }}
+      initialRouteName="Dashboard"
+      tabBar={(props) => (
+        <ScrollableTabBar
+          {...props}
+          role="Student"
+          theme={{
+            primaryColor,
+            backgroundColor: '#FFFFFF',
+            surfaceColor: '#F8FAFC',
+            textColor: '#1A1A1A',
+            inactiveColor: '#8E8E93',
+            borderColor: '#E5E5E5',
+          }}
+          config={{
+            height: 60,
+            tabWidth: 100,
+            spacing: 2,
+            borderRadius: 8,
+            iconSize: { focused: 22, unfocused: 20 },
+            fontSize: { focused: 10, unfocused: 9 },
+          }}
+          badges={{
+            AssignmentStack: { count: 3, color: '#F39C12', pulse: true },
+            GradesStack: { count: 1, color: '#27AE60', pulse: false },
+          }}
+          enableAnimations={true}
+          enableHaptics={true}
+        />
+      )}
     >
-      {/* ✅ Dashboard - Always Available */}
       <Tab.Screen
         name="Dashboard"
         component={StudentDashboard}
-        options={{
-          title: '🎓 Home',
-          headerShown: false
-        }}
+        options={{ title: 'Home' }}
       />
-
-      {/* ✅ Assignments - With Permission Guard */}
       <Tab.Screen
-        name="Assignments"
-        options={{ title: '📝 Assignments' }}
-      >
-        {() => (
-          <PermissionGuard requiredPermission={RoleService.PERMISSIONS.VIEW_ASSIGNMENTS}>
-            <StudentAssignments />
-          </PermissionGuard>
-        )}
-      </Tab.Screen>
-
-      {/* ✅ Grades - With Permission Guard */}
+        name="MyClasses"
+        component={MyClassesStack}
+        options={{ title: 'My Classes' }}
+      />
+      <Tab.Screen
+        name="Assignment"
+        component={StudentAssignments}
+        options={{ title: 'Assignments' }}
+      />
       <Tab.Screen
         name="Grades"
-        options={{ title: '📊 Grades' }}
-      >
-        {() => (
-          <PermissionGuard requiredPermission={RoleService.PERMISSIONS.VIEW_GRADES}>
-            <StudentGrades />
-          </PermissionGuard>
-        )}
-      </Tab.Screen>
-
-      {/* ✅ NEW: Announcements Tab - Always Available */}
+        component={Grades}
+        options={{ title: 'Grades' }}
+      />
       <Tab.Screen
         name="Announcements"
-        component={StudentAnnouncements}
-        options={{
-          title: '📢 News'
-        }}
+        component={Announcements}
+        options={{ title: 'News' }}
       />
-
-      {/* ✅ Attendance - With Permission Guard */}
       <Tab.Screen
         name="Attendance"
-        options={{ title: '📅 Attendance' }}
-      >
-        {() => (
-          <PermissionGuard requiredPermission={RoleService.PERMISSIONS.VIEW_ATTENDANCE}>
-            <PlaceholderScreen
-              title="📅 Student Attendance"
-              subtitle="Track your attendance record"
-              features={[
-                'View attendance percentage',
-                'See subject-wise attendance',
-                'View attendance history',
-                'Get attendance alerts'
-              ]}
-            />
-          </PermissionGuard>
-        )}
-      </Tab.Screen>
+        component={Attendance}
+        options={{ title: 'Attendance' }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={StudentSettings}
+        options={{ title: 'Settings' }}
+      />
     </Tab.Navigator>
   );
 };

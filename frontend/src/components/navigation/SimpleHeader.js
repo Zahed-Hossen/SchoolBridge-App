@@ -28,12 +28,12 @@ const SimpleHeader = ({
   title,
   subtitle,
   navigation,
-  primaryColor = TEACHER_COLORS.primary, // ✅ Use theme default
+  primaryColor = TEACHER_COLORS.primary,
   onBackPress,
   rightAction,
   showShadow = true,
   style,
-  userRole = 'Teacher', // ✅ Add role support
+  userRole = 'Teacher', 
 }) => {
   const insets = useSafeAreaInsets();
   const headerHeight = 65 + insets.top;

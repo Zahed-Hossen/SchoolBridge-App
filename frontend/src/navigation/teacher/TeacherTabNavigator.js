@@ -1,77 +1,3 @@
-// import React from 'react';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-// // ✅ Import our simplified ScrollableTabBar
-// import ScrollableTabBar from '../../components/navigation/ScrollableTabBar';
-
-// // ✅ Import Teacher Screens
-// import TeacherDashboard from '../../screens/Teacher/Dashboard';
-// import MyClasses from '../../screens/Teacher/MyClasses';
-// import TeacherAssignments from '../../screens/Teacher/Assignment/TeacherAssignments';
-// import GradingDashboard from '../../screens/Teacher/GradingDashboard';
-
-// const Tab = createBottomTabNavigator();
-
-// const TeacherTabNavigator = () => {
-//   console.log('🔥 TeacherTabNavigator rendering...');
-
-//   return (
-//     <Tab.Navigator
-//       // ✅ Use our simplified ScrollableTabBar
-//       tabBar={(props) => {
-//         console.log('🔥 TabBar props:', props);
-//         return <ScrollableTabBar {...props} />;
-//       }}
-//       screenOptions={{
-//         headerShown: false,
-//       }}
-//       initialRouteName="TeacherDashboard"
-//     >
-//       <Tab.Screen
-//         name="TeacherDashboard"
-//         component={TeacherDashboard}
-//         options={{
-//           title: 'Home',
-//         }}
-//       />
-
-//       <Tab.Screen
-//         name="MyClasses"
-//         component={MyClasses}
-//         options={{
-//           title: 'Classes',
-//         }}
-//       />
-
-//       <Tab.Screen
-//         name="TeacherAssignments"
-//         component={TeacherAssignments}
-//         options={{
-//           title: 'Assignments',
-//         }}
-//       />
-
-//       <Tab.Screen
-//         name="GradingDashboard"
-//         component={GradingDashboard}
-//         options={{
-//           title: 'Grading',
-//         }}
-//       />
-//     </Tab.Navigator>
-//   );
-// };
-
-// export default TeacherTabNavigator;
-
-
-
-
-
-
-
-
-
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -148,7 +74,7 @@ const TeacherTabNavigator = () => {
         <ScrollableTabBar
           {...props}
           theme={{
-            primaryColor: '#2E7D8F', 
+            primaryColor: '#2E7D8F',
             backgroundColor: '#FFFFFF',
             surfaceColor: '#EBF4F6',
             textColor: '#1A1A1A',

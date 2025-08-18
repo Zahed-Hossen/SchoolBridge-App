@@ -1,0 +1,289 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1278pt" height="332pt" viewBox="0.00 0.00 1277.74 332">
+<g id="graph0" class="graph" transform="translate(131.41484724287238,293.69649584073045) scale(0.7937005371769565)" data-name="G">
+
+<polygon fill="white" stroke="none" points="-4,4 -4,-328 1273.74,-328 1273.74,4 -4,4"/>
+<!-- root -->
+<g id="node1" class="node" pointer-events="visible" data-name="root">
+
+<ellipse fill="none" stroke="black" cx="487.75" cy="-306" rx="72.98" ry="18"/>
+<text text-anchor="middle" x="487.75" y="-301.8" font-family="Times,serif" font-size="14.00">App Navigation</text>
+</g>
+<!-- auth -->
+<g id="node2" class="node" pointer-events="visible" data-name="auth">
+
+<ellipse fill="none" stroke="black" cx="384.75" cy="-234" rx="92.09" ry="18"/>
+<text text-anchor="middle" x="384.75" y="-229.8" font-family="Times,serif" font-size="14.00">Authentication Stack</text>
+</g>
+<!-- root&#45;&gt;auth -->
+<g id="edge1" class="edge" data-name="root-&gt;auth">
+
+<path fill="none" stroke="black" d="M463.6,-288.59C450.24,-279.51 433.41,-268.07 418.74,-258.1"/>
+<polygon fill="black" stroke="black" points="420.96,-255.37 410.72,-252.65 417.02,-261.16 420.96,-255.37"/>
+</g>
+<!-- main -->
+<g id="node3" class="node" pointer-events="visible" data-name="main">
+
+<ellipse fill="none" stroke="black" cx="782.75" cy="-234" rx="95.58" ry="18"/>
+<text text-anchor="middle" x="782.75" y="-229.8" font-family="Times,serif" font-size="14.00">Main App Navigation</text>
+</g>
+<!-- root&#45;&gt;main -->
+<g id="edge2" class="edge" data-name="root-&gt;main">
+
+<path fill="none" stroke="black" d="M539.14,-292.81C587.53,-281.32 660.37,-264.04 713.8,-251.36"/>
+<polygon fill="black" stroke="black" points="714.49,-254.79 723.41,-249.08 712.88,-247.98 714.49,-254.79"/>
+</g>
+<!-- auth_api -->
+<g id="node16" class="node" pointer-events="visible" data-name="auth_api">
+
+<ellipse fill="none" stroke="black" cx="54.75" cy="-90" rx="54.51" ry="18"/>
+<text text-anchor="middle" x="54.75" y="-85.8" font-family="Times,serif" font-size="14.00">/api/auth/...</text>
+</g>
+<!-- auth&#45;&gt;auth_api -->
+<g id="edge18" class="edge" data-name="auth-&gt;auth_api">
+
+<path fill="none" stroke="black" d="M306.56,-224.11C238.98,-215.25 147.47,-200.07 116.75,-180 93.9,-165.07 77.05,-138.51 66.73,-118.28"/>
+<polygon fill="black" stroke="black" points="69.97,-116.94 62.46,-109.46 63.67,-119.98 69.97,-116.94"/>
+</g>
+<!-- school_admin -->
+<g id="node4" class="node" pointer-events="visible" data-name="school_admin">
+
+<ellipse fill="none" stroke="black" cx="475.75" cy="-162" rx="99.6" ry="18"/>
+<text text-anchor="middle" x="475.75" y="-157.8" font-family="Times,serif" font-size="14.00">School Admin Screens</text>
+</g>
+<!-- main&#45;&gt;school_admin -->
+<g id="edge3" class="edge" data-name="main-&gt;school_admin">
+
+<path fill="none" stroke="black" d="M723.56,-219.5C673.21,-208.02 600.77,-191.51 547.2,-179.29"/>
+<polygon fill="black" stroke="black" points="548.08,-175.9 537.55,-177.09 546.52,-182.73 548.08,-175.9"/>
+</g>
+<!-- super_admin -->
+<g id="node5" class="node" pointer-events="visible" data-name="super_admin">
+
+<ellipse fill="none" stroke="black" cx="688.75" cy="-162" rx="95" ry="18"/>
+<text text-anchor="middle" x="688.75" y="-157.8" font-family="Times,serif" font-size="14.00">Super Admin Screens</text>
+</g>
+<!-- main&#45;&gt;super_admin -->
+<g id="edge4" class="edge" data-name="main-&gt;super_admin">
+
+<path fill="none" stroke="black" d="M760,-216.05C748.1,-207.2 733.36,-196.22 720.38,-186.55"/>
+<polygon fill="black" stroke="black" points="722.62,-183.86 712.51,-180.69 718.44,-189.47 722.62,-183.86"/>
+</g>
+<!-- student -->
+<g id="node6" class="node" pointer-events="visible" data-name="student">
+
+<ellipse fill="none" stroke="black" cx="1196.75" cy="-162" rx="72.98" ry="18"/>
+<text text-anchor="middle" x="1196.75" y="-157.8" font-family="Times,serif" font-size="14.00">Student Screens</text>
+</g>
+<!-- main&#45;&gt;student -->
+<g id="edge5" class="edge" data-name="main-&gt;student">
+
+<path fill="none" stroke="black" d="M856.43,-222.23C923.82,-212.15 1026.2,-196.24 1114.75,-180 1120.33,-178.98 1126.11,-177.87 1131.9,-176.73"/>
+<polygon fill="black" stroke="black" points="1132.41,-180.2 1141.52,-174.81 1131.03,-173.34 1132.41,-180.2"/>
+</g>
+<!-- teacher -->
+<g id="node7" class="node" pointer-events="visible" data-name="teacher">
+
+<ellipse fill="none" stroke="black" cx="876.75" cy="-162" rx="74.64" ry="18"/>
+<text text-anchor="middle" x="876.75" y="-157.8" font-family="Times,serif" font-size="14.00">Teacher Screens</text>
+</g>
+<!-- main&#45;&gt;teacher -->
+<g id="edge6" class="edge" data-name="main-&gt;teacher">
+
+<path fill="none" stroke="black" d="M805.51,-216.05C817.49,-207.13 832.36,-196.06 845.42,-186.34"/>
+<polygon fill="black" stroke="black" points="847.39,-189.23 853.32,-180.45 843.21,-183.62 847.39,-189.23"/>
+</g>
+<!-- parent -->
+<g id="node8" class="node" pointer-events="visible" data-name="parent">
+
+<ellipse fill="none" stroke="black" cx="1037.75" cy="-162" rx="68.31" ry="18"/>
+<text text-anchor="middle" x="1037.75" y="-157.8" font-family="Times,serif" font-size="14.00">Parent Screens</text>
+</g>
+<!-- main&#45;&gt;parent -->
+<g id="edge7" class="edge" data-name="main-&gt;parent">
+
+<path fill="none" stroke="black" d="M835.28,-218.58C877.66,-206.95 937.19,-190.61 980.72,-178.65"/>
+<polygon fill="black" stroke="black" points="981.53,-182.06 990.25,-176.04 979.68,-175.31 981.53,-182.06"/>
+</g>
+<!-- admin_api -->
+<g id="node19" class="node" pointer-events="visible" data-name="admin_api">
+
+<ellipse fill="none" stroke="black" cx="688.75" cy="-90" rx="62.03" ry="18"/>
+<text text-anchor="middle" x="688.75" y="-85.8" font-family="Times,serif" font-size="14.00">/api/admin/...</text>
+</g>
+<!-- school_admin&#45;&gt;admin_api -->
+<g id="edge19" class="edge" data-name="school_admin-&gt;admin_api">
+
+<path fill="none" stroke="black" d="M522.23,-145.72C556.51,-134.46 603.11,-119.15 638.29,-107.58"/>
+<polygon fill="black" stroke="black" points="638.97,-111.04 647.38,-104.6 636.79,-104.39 638.97,-111.04"/>
+</g>
+<!-- super_admin&#45;&gt;admin_api -->
+<g id="edge20" class="edge" data-name="super_admin-&gt;admin_api">
+
+<path fill="none" stroke="black" d="M688.75,-143.7C688.75,-136.41 688.75,-127.73 688.75,-119.54"/>
+<polygon fill="black" stroke="black" points="692.25,-119.62 688.75,-109.62 685.25,-119.62 692.25,-119.62"/>
+</g>
+<!-- grades_api -->
+<g id="node20" class="node" pointer-events="visible" data-name="grades_api">
+
+<ellipse fill="none" stroke="black" cx="912.75" cy="-90" rx="63.16" ry="18"/>
+<text text-anchor="middle" x="912.75" y="-85.8" font-family="Times,serif" font-size="14.00">/api/grades/...</text>
+</g>
+<!-- student&#45;&gt;grades_api -->
+<g id="edge21" class="edge" data-name="student-&gt;grades_api">
+
+<path fill="none" stroke="black" d="M1146.31,-148.57C1097,-136.41 1022.03,-117.94 970.4,-105.21"/>
+<polygon fill="black" stroke="black" points="971.45,-101.86 960.9,-102.87 969.77,-108.66 971.45,-101.86"/>
+</g>
+<!-- teacher&#45;&gt;grades_api -->
+<g id="edge22" class="edge" data-name="teacher-&gt;grades_api">
+
+<path fill="none" stroke="black" d="M885.65,-143.7C889.62,-135.98 894.39,-126.71 898.81,-118.11"/>
+<polygon fill="black" stroke="black" points="901.8,-119.94 903.26,-109.45 895.58,-116.74 901.8,-119.94"/>
+</g>
+<!-- parent&#45;&gt;grades_api -->
+<g id="edge23" class="edge" data-name="parent-&gt;grades_api">
+
+<path fill="none" stroke="black" d="M1009.7,-145.29C992.13,-135.45 969.27,-122.65 950.17,-111.95"/>
+<polygon fill="black" stroke="black" points="952.04,-108.99 941.6,-107.16 948.62,-115.1 952.04,-108.99"/>
+</g>
+<!-- db -->
+<g id="node9" class="node" pointer-events="visible" data-name="db">
+
+<ellipse fill="none" stroke="black" cx="511.75" cy="-90" rx="96.67" ry="18"/>
+<text text-anchor="middle" x="511.75" y="-85.8" font-family="Times,serif" font-size="14.00">Database (MongoDB)</text>
+</g>
+<!-- users -->
+<g id="node10" class="node" pointer-events="visible" data-name="users">
+
+<ellipse fill="none" stroke="black" cx="149.75" cy="-18" rx="75.85" ry="18"/>
+<text text-anchor="middle" x="149.75" y="-13.8" font-family="Times,serif" font-size="14.00">Users Collection</text>
+</g>
+<!-- db&#45;&gt;users -->
+<g id="edge8" class="edge" data-name="db-&gt;users">
+
+<path fill="none" stroke="black" d="M445.68,-76.52C389.54,-65.88 306.83,-50.1 234.75,-36 228.94,-34.86 222.9,-33.67 216.85,-32.47"/>
+<polygon fill="black" stroke="black" points="217.95,-29.12 207.46,-30.61 216.59,-35.99 217.95,-29.12"/>
+</g>
+<!-- schools -->
+<g id="node11" class="node" pointer-events="visible" data-name="schools">
+
+<ellipse fill="none" stroke="black" cx="327.75" cy="-18" rx="84.03" ry="18"/>
+<text text-anchor="middle" x="327.75" y="-13.8" font-family="Times,serif" font-size="14.00">Schools Collection</text>
+</g>
+<!-- db&#45;&gt;schools -->
+<g id="edge9" class="edge" data-name="db-&gt;schools">
+
+<path fill="none" stroke="black" d="M470.46,-73.29C443.21,-62.93 407.34,-49.28 378.37,-38.26"/>
+<polygon fill="black" stroke="black" points="379.65,-35 369.06,-34.71 377.16,-41.54 379.65,-35"/>
+</g>
+<!-- permissions -->
+<g id="node12" class="node" pointer-events="visible" data-name="permissions">
+
+<ellipse fill="none" stroke="black" cx="713.75" cy="-18" rx="100.23" ry="18"/>
+<text text-anchor="middle" x="713.75" y="-13.8" font-family="Times,serif" font-size="14.00">Permissions Collection</text>
+</g>
+<!-- db&#45;&gt;permissions -->
+<g id="edge10" class="edge" data-name="db-&gt;permissions">
+
+<path fill="none" stroke="black" d="M556.08,-73.64C586.24,-63.19 626.36,-49.29 658.58,-38.12"/>
+<polygon fill="black" stroke="black" points="659.44,-41.52 667.75,-34.94 657.15,-34.91 659.44,-41.52"/>
+</g>
+<!-- classes -->
+<g id="node13" class="node" pointer-events="visible" data-name="classes">
+
+<ellipse fill="none" stroke="black" cx="512.75" cy="-18" rx="82.81" ry="18"/>
+<text text-anchor="middle" x="512.75" y="-13.8" font-family="Times,serif" font-size="14.00">Classes Collection</text>
+</g>
+<!-- db&#45;&gt;classes -->
+<g id="edge11" class="edge" data-name="db-&gt;classes">
+
+<path fill="none" stroke="black" d="M512,-71.7C512.1,-64.41 512.23,-55.73 512.34,-47.54"/>
+<polygon fill="black" stroke="black" points="515.84,-47.67 512.49,-37.62 508.84,-47.57 515.84,-47.67"/>
+</g>
+<!-- grades -->
+<g id="node14" class="node" pointer-events="visible" data-name="grades">
+
+<ellipse fill="none" stroke="black" cx="912.75" cy="-18" rx="81.06" ry="18"/>
+<text text-anchor="middle" x="912.75" y="-13.8" font-family="Times,serif" font-size="14.00">Grades Collection</text>
+</g>
+<!-- db&#45;&gt;grades -->
+<g id="edge12" class="edge" data-name="db-&gt;grades">
+
+<path fill="none" stroke="black" d="M582.22,-77.36C645.29,-66.85 740.27,-50.82 822.75,-36 828.97,-34.88 835.42,-33.7 841.89,-32.51"/>
+<polygon fill="black" stroke="black" points="842.07,-36.03 851.26,-30.77 840.79,-29.15 842.07,-36.03"/>
+</g>
+<!-- api -->
+<g id="node15" class="node" pointer-events="visible" data-name="api">
+
+<ellipse fill="none" stroke="black" cx="241.75" cy="-162" rx="116.4" ry="18"/>
+<text text-anchor="middle" x="241.75" y="-157.8" font-family="Times,serif" font-size="14.00">API Endpoints (Express.js)</text>
+</g>
+<!-- api&#45;&gt;auth_api -->
+<g id="edge13" class="edge" data-name="api-&gt;auth_api">
+
+<path fill="none" stroke="black" d="M198.85,-144.94C169.46,-133.94 130.53,-119.37 100.55,-108.14"/>
+<polygon fill="black" stroke="black" points="101.95,-104.93 91.35,-104.7 99.49,-111.49 101.95,-104.93"/>
+</g>
+<!-- user_api -->
+<g id="node17" class="node" pointer-events="visible" data-name="user_api">
+
+<ellipse fill="none" stroke="black" cx="185.75" cy="-90" rx="57.95" ry="18"/>
+<text text-anchor="middle" x="185.75" y="-85.8" font-family="Times,serif" font-size="14.00">/api/users/...</text>
+</g>
+<!-- api&#45;&gt;user_api -->
+<g id="edge14" class="edge" data-name="api-&gt;user_api">
+
+<path fill="none" stroke="black" d="M227.91,-143.7C221.37,-135.52 213.43,-125.6 206.22,-116.58"/>
+<polygon fill="black" stroke="black" points="208.98,-114.43 200,-108.8 203.51,-118.8 208.98,-114.43"/>
+</g>
+<!-- school_api -->
+<g id="node18" class="node" pointer-events="visible" data-name="school_api">
+
+<ellipse fill="none" stroke="black" cx="328.75" cy="-90" rx="67.19" ry="18"/>
+<text text-anchor="middle" x="328.75" y="-85.8" font-family="Times,serif" font-size="14.00">/api/schools/...</text>
+</g>
+<!-- api&#45;&gt;school_api -->
+<g id="edge15" class="edge" data-name="api-&gt;school_api">
+
+<path fill="none" stroke="black" d="M262.81,-144.05C273.79,-135.22 287.4,-124.27 299.4,-114.62"/>
+<polygon fill="black" stroke="black" points="301.41,-117.49 307.01,-108.5 297.02,-112.04 301.41,-117.49"/>
+</g>
+<!-- api&#45;&gt;admin_api -->
+<g id="edge16" class="edge" data-name="api-&gt;admin_api">
+
+<path fill="none" stroke="black" d="M327.19,-149.39C429.28,-135.46 589.86,-113.29 617.75,-108 622.38,-107.12 627.15,-106.14 631.94,-105.11"/>
+<polygon fill="black" stroke="black" points="632.59,-108.55 641.58,-102.95 631.06,-101.72 632.59,-108.55"/>
+</g>
+<!-- api&#45;&gt;grades_api -->
+<g id="edge17" class="edge" data-name="api-&gt;grades_api">
+
+<path fill="none" stroke="black" d="M325.4,-149.11C339.2,-147.29 353.37,-145.52 366.75,-144 541.03,-124.18 585.25,-125.69 759.75,-108 787.2,-105.22 817.39,-101.92 843.64,-98.96"/>
+<polygon fill="black" stroke="black" points="843.97,-102.45 853.52,-97.85 843.19,-95.49 843.97,-102.45"/>
+</g>
+<!-- user_api&#45;&gt;users -->
+<g id="edge24" class="edge" data-name="user_api-&gt;users">
+
+<path fill="none" stroke="black" d="M177.04,-72.05C173.07,-64.35 168.28,-55.03 163.83,-46.36"/>
+<polygon fill="black" stroke="black" points="167.01,-44.91 159.33,-37.62 160.79,-48.11 167.01,-44.91"/>
+</g>
+<!-- school_api&#45;&gt;schools -->
+<g id="edge25" class="edge" data-name="school_api-&gt;schools">
+
+<path fill="none" stroke="black" d="M328.5,-71.7C328.4,-64.41 328.28,-55.73 328.16,-47.54"/>
+<polygon fill="black" stroke="black" points="331.66,-47.57 328.02,-37.62 324.66,-47.67 331.66,-47.57"/>
+</g>
+<!-- admin_api&#45;&gt;permissions -->
+<g id="edge26" class="edge" data-name="admin_api-&gt;permissions">
+
+<path fill="none" stroke="black" d="M694.93,-71.7C697.63,-64.15 700.85,-55.12 703.87,-46.68"/>
+<polygon fill="black" stroke="black" points="707.07,-48.12 707.13,-37.53 700.47,-45.77 707.07,-48.12"/>
+</g>
+<!-- grades_api&#45;&gt;grades -->
+<g id="edge27" class="edge" data-name="grades_api-&gt;grades">
+
+<path fill="none" stroke="black" d="M912.75,-71.7C912.75,-64.41 912.75,-55.73 912.75,-47.54"/>
+<polygon fill="black" stroke="black" points="916.25,-47.62 912.75,-37.62 909.25,-47.62 916.25,-47.62"/>
+</g>
+</g>
+</svg>

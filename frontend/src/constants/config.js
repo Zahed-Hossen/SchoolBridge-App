@@ -12,9 +12,9 @@ export const API_CONFIG = {
 
   // ✅ Fallback URLs (your existing ones, now used as backup)
   FALLBACK_URLS: [
-    'http://192.168.0.103:5000/api', // Your current working IP
-    'http://192.168.0.101:5000/api',
+    'http://192.168.0.100:5000/api', // Your current working IP
     'http://192.168.0.102:5000/api',
+    'http://192.168.0.103:5000/api',
     'http://localhost:5000/api',
     'http://10.0.2.2:5000/api', // Android emulator
   ],
@@ -155,6 +155,9 @@ export const USER_ROLES = {
   TEACHER: 'Teacher',
   PARENT: 'Parent',
   ADMIN: 'Admin',
+  SUPER_ADMIN: 'SuperAdmin',
+  VISITOR: 'Visitor',
+  // PLATFORM_USER: 'PlatformUser',
 };
 
 // ✅ ENHANCED: Role metadata for UI customization

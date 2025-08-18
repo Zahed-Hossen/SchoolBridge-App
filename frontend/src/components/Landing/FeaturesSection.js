@@ -1,10 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import FeaturesScreen from '../../screens/Common/FeaturesScreen';
+import { useAuth } from '../../context/AuthContext';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const features = [
@@ -43,12 +40,12 @@ const FeatureCard = ({ icon, title, description, onPress }) => (
   </TouchableOpacity>
 );
 
-const FeaturesSection = ({ onFeaturePress }) => {
+const FeaturesSection = ({ onFeaturePress, navigation }) => {
+  const { user } = useAuth();
+  const isVisitor = user?.role?.toLowerCase() === 'visitor';
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Our Key Features</Text>
-
-      {/* ✅ FIXED: Changed from horizontal ScrollView to 2x2 grid */}
       <View style={styles.featuresGrid}>
         {features.map((feature, index) => (
           <FeatureCard
@@ -56,7 +53,13 @@ const FeaturesSection = ({ onFeaturePress }) => {
             icon={feature.icon}
             title={feature.title}
             description={feature.description}
-            onPress={() => onFeaturePress && onFeaturePress(feature)}
+            onPress={() => {
+              if (isVisitor && navigation) {
+                navigation.navigate('Features');
+              } else if (onFeaturePress) {
+                onFeaturePress(feature);
+              }
+            }}
           />
         ))}
       </View>
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   featureButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#134d74b9',
     paddingVertical: SIZES.base,
     paddingHorizontal: SIZES.padding,
     borderRadius: SIZES.radius,
@@ -131,4 +134,3 @@ const styles = StyleSheet.create({
 });
 
 export default FeaturesSection;
-

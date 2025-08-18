@@ -3,7 +3,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import GoogleOAuthService from '../services/GoogleOAuthService';
 import { authService } from '../api/services/authService';
 
-const AuthContext = createContext();
+const AuthContext = createContext({
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  role: null,
+  login: () => {},
+  signup: () => {},
+  logout: () => {},
+  signInWithGoogle: () => {},
+  completeOAuthSetup: () => {},
+  clearAuthData: () => {},
+  checkAuthStatus: () => {},
+});
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -27,64 +39,99 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       console.log('🔍 Checking auth status...');
-      const accessToken = await AsyncStorage.getItem('accessToken');
-      const refreshToken = await AsyncStorage.getItem('refreshToken');
-      const userData = await AsyncStorage.getItem('userData');
-      const userRole = await AsyncStorage.getItem('userRole');
-      const loginMethod = await AsyncStorage.getItem('loginMethod');
+      const keys = await AsyncStorage.getAllKeys();
+      console.log('🗝️ All AsyncStorage keys:', keys);
+      const accessToken = await AsyncStorage.getItem(
+        '@schoolbridge_access__token',
+      );
+      const refreshToken = await AsyncStorage.getItem(
+        '@schoolbridge_refresh_token',
+      );
+      const userData = await AsyncStorage.getItem('@schoolbridge_user_data');
+      const userRole = await AsyncStorage.getItem('@schoolbridge_user_role');
+      const loginMethod = await AsyncStorage.getItem(
+        '@schoolbridge_login_method',
+      );
 
       console.log('📦 Stored tokens:', {
-        accessToken: !!accessToken,
-        refreshToken: !!refreshToken,
+        accessToken,
+        refreshToken,
         loginMethod,
+        userData,
+        userRole,
+        accessTokenBool: !!accessToken,
+        refreshTokenBool: !!refreshToken,
         hasUserData: !!userData,
         hasUserRole: !!userRole,
       });
 
       if (userData) {
-        const parsedUser = JSON.parse(userData);
+        let parsedUser = null;
+        try {
+          parsedUser = JSON.parse(userData);
+        } catch (err) {
+          console.error('❌ Error parsing userData:', err, userData);
+        }
+        console.log('👤 Parsed userData:', parsedUser);
 
-        // ✅ FIXED: Always set user data first
+        // ✅ Always set user data first
         setUser(parsedUser);
 
-        // ✅ FIXED: For Google OAuth users, check if they need role selection
+        // ✅ For Google OAuth users, check if they need role selection
         if (loginMethod === 'google') {
-          if (userRole && parsedUser.role) {
-            // User has completed role selection
+          if (userRole && parsedUser?.role) {
             setRole(parsedUser.role);
             setIsAuthenticated(true);
-            console.log('✅ Google OAuth user authenticated:', parsedUser.email, 'Role:', parsedUser.role);
+            console.log(
+              '✅ Google OAuth user authenticated:',
+              parsedUser.email,
+              'Role:',
+              parsedUser.role,
+            );
           } else {
-            // Google OAuth user needs role selection
-            console.log('⚠️ Google OAuth user needs role selection:', parsedUser.email);
+            console.log(
+              '⚠️ Google OAuth user needs role selection:',
+              parsedUser?.email,
+            );
             setRole(null);
             setIsAuthenticated(false);
           }
         } else if (loginMethod === 'email') {
-          // For email login, check normal authentication
-          if (userRole && (parsedUser.role || userRole)) {
-            setRole(parsedUser.role || userRole);
+          if (userRole && (parsedUser?.role || userRole)) {
+            setRole(parsedUser?.role || userRole);
             setIsAuthenticated(true);
-            console.log('✅ Email user authenticated:', parsedUser.email, 'Role:', parsedUser.role || userRole);
+            console.log(
+              '✅ Email user authenticated:',
+              parsedUser?.email,
+              'Role:',
+              parsedUser?.role || userRole,
+            );
           } else {
             console.log('⚠️ Email user missing role data');
             setRole(null);
             setIsAuthenticated(false);
           }
         } else {
-          // No login method or unknown method - clear partial data
           console.log('⚠️ Unknown login method, clearing data');
-          await AsyncStorage.multiRemove(['userData', 'userRole', 'loginMethod']);
+          await AsyncStorage.multiRemove([
+            '@schoolbridge_user_data',
+            '@schoolbridge_user_role',
+            '@schoolbridge_login_method',
+          ]);
           setUser(null);
           setRole(null);
           setIsAuthenticated(false);
         }
       } else {
         console.log('❌ No user data found');
-        // Clear any orphaned data
         if (userRole || loginMethod) {
           console.log('🧹 Clearing orphaned data...');
-          await AsyncStorage.multiRemove(['userRole', 'loginMethod', 'accessToken', 'refreshToken']);
+          await AsyncStorage.multiRemove([
+            '@schoolbridge_user_role',
+            '@schoolbridge_login_method',
+            '@schoolbridge_access__token',
+            '@schoolbridge_refresh_token',
+          ]);
         }
         setUser(null);
         setRole(null);
@@ -101,68 +148,69 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-const login = async (email, password, role) => {
-  setIsLoading(true);
-  console.log('📝 Starting login process...');
-  console.log('📝 Attempting login for:', email);
-  console.log('📋 Login data:', { email, role });
+  const login = async (email, password, role) => {
+    setIsLoading(true);
+    console.log('📝 Starting login process...');
+    console.log('📝 Attempting login for:', email);
+    console.log('📋 Login data:', { email, role });
 
-  try {
-    // ✅ FIXED: Use the auth.login method from your apiService
-    const response = await authService.login({
-      email,
-      password,
-      role,
-    });
-
-    console.log('📨 Login response:', response);
-
-    // ✅ Your API service already handles token storage, so check the response
-    if (response.success && response.data) {
-      const { user, accessToken, refreshToken } = response.data;
-
-      console.log('✅ Login successful for:', user.email);
-      console.log('🔑 Tokens received:', {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
+    try {
+      // ✅ FIXED: Use the auth.login method from your apiService
+      const response = await authService.login({
+        email,
+        password,
+        role,
       });
 
-      // ✅ Update state (tokens already stored by apiService)
-      setUser(user);
-      setRole(user.role);
-      setIsAuthenticated(true);
+      console.log('📨 Login response:', response);
 
-      console.log('✅ Login completed successfully');
-      console.log('👤 User set:', user.fullName);
-      console.log('🎭 Role set:', user.role);
+      // ✅ Your API service already handles token storage, so check the response
+      if (response.success && response.data) {
+        const { user, accessToken, refreshToken } = response.data;
 
-      return {
-        success: true,
-        user,
-        message: 'Login successful',
-      };
-    } else {
-      // ✅ Handle API error responses
-      const errorMessage = response.message || response.error || 'Login failed';
-      console.log('❌ Login failed:', errorMessage);
+        console.log('✅ Login successful for:', user.email);
+        console.log('🔑 Tokens received:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+        });
 
+        // ✅ Update state (tokens already stored by apiService)
+        setUser(user);
+        setRole(user.role);
+        setIsAuthenticated(true);
+
+        console.log('✅ Login completed successfully');
+        console.log('👤 User set:', user.fullName);
+        console.log('🎭 Role set:', user.role);
+
+        return {
+          success: true,
+          user,
+          message: 'Login successful',
+        };
+      } else {
+        // ✅ Handle API error responses
+        const errorMessage =
+          response.message || response.error || 'Login failed';
+        console.log('❌ Login failed:', errorMessage);
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+    } catch (error) {
+      console.error('❌ Login error:', error);
+
+      // ✅ Your apiService already provides user-friendly error messages
       return {
         success: false,
-        error: errorMessage,
+        error: error.message || 'Login failed',
       };
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error('❌ Login error:', error);
-
-    // ✅ Your apiService already provides user-friendly error messages
-    return {
-      success: false,
-      error: error.message || 'Login failed',
-    };
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const signup = async (userData) => {
     try {
@@ -182,7 +230,9 @@ const login = async (email, password, role) => {
           user: response.user || response.data?.user,
         };
       } else {
-        throw new Error(response.message || response.error || 'Registration failed');
+        throw new Error(
+          response.message || response.error || 'Registration failed',
+        );
       }
     } catch (error) {
       console.error('❌ Registration error:', error);
@@ -223,8 +273,11 @@ const login = async (email, password, role) => {
         console.log('✅ Google OAuth successful for:', result.user.email);
 
         // Store user data temporarily (before role selection)
-        await AsyncStorage.setItem('userData', JSON.stringify(result.user));
-        await AsyncStorage.setItem('loginMethod', 'google');
+        await AsyncStorage.setItem(
+          '@schoolbridge_user_data',
+          JSON.stringify(result.user),
+        );
+        await AsyncStorage.setItem('@schoolbridge_login_method', 'google');
 
         // Store Google tokens for backend authentication
         if (result.tokens?.idToken) {
@@ -269,8 +322,11 @@ const login = async (email, password, role) => {
       const updatedUser = { ...user, role: userRole };
 
       // ✅ FIXED: Store complete user data with role
-      await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
-      await AsyncStorage.setItem('userRole', userRole);
+      await AsyncStorage.setItem(
+        '@schoolbridge_user_data',
+        JSON.stringify(updatedUser),
+      );
+      await AsyncStorage.setItem('@schoolbridge_user_role', userRole);
 
       // ✅ FIXED: Now set authentication state
       setUser(updatedUser);
@@ -293,11 +349,11 @@ const login = async (email, password, role) => {
 
       // Clear all stored data
       await AsyncStorage.multiRemove([
-        'accessToken',
-        'refreshToken',
-        'userData',
-        'userRole',
-        'loginMethod',
+        '@schoolbridge_access__token',
+        '@schoolbridge_refresh_token',
+        '@schoolbridge_user_data',
+        '@schoolbridge_user_role',
+        '@schoolbridge_login_method',
       ]);
 
       // Clear state
@@ -319,7 +375,9 @@ const login = async (email, password, role) => {
       setIsLoading(true);
 
       // Check login method to clear appropriate tokens
-      const loginMethod = await AsyncStorage.getItem('loginMethod');
+      const loginMethod = await AsyncStorage.getItem(
+        '@schoolbridge_login_method',
+      );
       console.log('🔍 Login method detected:', loginMethod);
 
       // ✅ Enhanced logout for different login methods
@@ -351,11 +409,11 @@ const login = async (email, password, role) => {
       // ✅ Clear all stored authentication data
       console.log('🧹 Clearing all authentication data...');
       await AsyncStorage.multiRemove([
-        'accessToken',
-        'refreshToken',
-        'userData',
-        'userRole',
-        'loginMethod',
+        '@schoolbridge_access__token',
+        '@schoolbridge_refresh_token',
+        '@schoolbridge_user_data',
+        '@schoolbridge_user_role',
+        '@schoolbridge_login_method',
         'googleIdToken', // Clear Google ID token if exists
       ]);
 
@@ -366,18 +424,17 @@ const login = async (email, password, role) => {
 
       console.log('✅ Logout completed successfully');
       console.log('🔄 User will be redirected to login screen');
-
     } catch (error) {
       console.error('❌ Logout error:', error);
 
       // ✅ Even if there's an error, clear local state for security
       try {
         await AsyncStorage.multiRemove([
-          'accessToken',
-          'refreshToken',
-          'userData',
-          'userRole',
-          'loginMethod',
+          '@schoolbridge_access__token',
+          '@schoolbridge_refresh_token',
+          '@schoolbridge_user_data',
+          '@schoolbridge_user_role',
+          '@schoolbridge_login_method',
           'googleIdToken',
         ]);
 

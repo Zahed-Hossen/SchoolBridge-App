@@ -1,0 +1,62 @@
+digraph G {
+  // Navigation Menus
+  root [label="App Navigation"];
+  auth [label="Authentication Stack"];
+  main [label="Main App Navigation"];
+  school_admin [label="School Admin Screens"];
+  super_admin [label="Super Admin Screens"];
+  student [label="Student Screens"];
+  teacher [label="Teacher Screens"];
+  parent [label="Parent Screens"];
+
+  // Database Schema
+  db [label="Database (MongoDB)"];
+  users [label="Users Collection"];
+  schools [label="Schools Collection"];
+  permissions [label="Permissions Collection"];
+  classes [label="Classes Collection"];
+  grades [label="Grades Collection"];
+
+  // API Endpoints
+  api [label="API Endpoints (Express.js)"];
+  auth_api [label="/api/auth/..."];
+  user_api [label="/api/users/..."];
+  school_api [label="/api/schools/..."];
+  admin_api [label="/api/admin/..."];
+  grades_api [label="/api/grades/..."];
+
+  // Navigation structure
+  root -> auth;
+  root -> main;
+  main -> school_admin;
+  main -> super_admin;
+  main -> student;
+  main -> teacher;
+  main -> parent;
+
+  // Database relations
+  db -> users;
+  db -> schools;
+  db -> permissions;
+  db -> classes;
+  db -> grades;
+
+  // API connections
+  api -> auth_api;
+  api -> user_api;
+  api -> school_api;
+  api -> admin_api;
+  api -> grades_api;
+
+  // Link navigation to API & DB
+  auth -> auth_api;
+  school_admin -> admin_api;
+  super_admin -> admin_api;
+  student -> grades_api;
+  teacher -> grades_api;
+  parent -> grades_api;
+  user_api -> users;
+  school_api -> schools;
+  admin_api -> permissions;
+  grades_api -> grades;
+}

@@ -11,12 +11,13 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { useAuth } from '../../context/AuthContext';
 import { useRole } from '../../context/RoleContext';
 import { useTenant } from '../../context/TenantContext';
-import { announcementService } from '../../api/services/announcementService';
+import { COLORS, FONTS, SPACING } from '../../constants/theme';
 
 const Announcements = ({ navigation }) => {
   const { user } = useAuth();
@@ -27,144 +28,79 @@ const Announcements = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Fix: define itemsPerPage
   const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage] = useState(5);
+  const itemsPerPage = 5;
 
-  // ✅ Load announcements from API
+  // Mock async loadAnnouncements for frontend-only development
   const loadAnnouncements = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
     try {
-      if (isRefresh) {
-        setRefreshing(true);
-        setCurrentPage(0);
-      } else {
-        setLoading(true);
-      }
-
-      console.log('📢 Loading announcements...');
-
-      // Use your existing API service
-      const response = await announcementService.getAll({
-        page: currentPage + 1,
-        limit: itemsPerPage * 3, // Load more for offline use
-      });
-
-      if (response.success && response.data) {
-        setAnnouncements(response.data.announcements || []);
-        console.log('✅ Announcements loaded successfully');
-      } else {
-        throw new Error(response.message || 'Failed to load announcements');
-      }
-
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Mock data
+      const mockData = [
+        {
+          id: '1',
+          title: 'Welcome to the New School Year!',
+          description:
+            'We are excited to start the new academic year. Please check your schedule and be on time.',
+          category: 'Academic',
+          priority: 'high',
+          author: 'Principal',
+          date: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+          read: false,
+        },
+        {
+          id: '2',
+          title: 'Library Renovation',
+          description:
+            'The school library will be closed for renovation from next week.',
+          category: 'Facility',
+          priority: 'medium',
+          author: 'Admin',
+          date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+          read: true,
+        },
+        {
+          id: '3',
+          title: 'Science Fair Registration',
+          description:
+            'Register for the annual science fair by the end of this month.',
+          category: 'Event',
+          priority: 'low',
+          author: 'Science Dept.',
+          date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+          read: false,
+        },
+      ];
+      setAnnouncements(mockData);
     } catch (error) {
-      console.error('❌ Error loading announcements:', error);
-
-      // Use mock data as fallback
-      setAnnouncements(getMockAnnouncements());
-
-      Alert.alert(
-        'Connection Issue',
-        'Using offline data. Pull down to refresh.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to load announcements');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // ✅ Mock announcements data matching your web structure
-  const getMockAnnouncements = () => [
-    {
-      id: 1,
-      title: 'Exam Schedule Released',
-      description: 'The mid-term examination schedule has been released. Please check your student portal for specific dates and times.',
-      date: '2024-08-04T10:30:00Z',
-      read: false,
-      priority: 'high',
-      author: 'Academic Office',
-      category: 'Academic',
-    },
-    {
-      id: 2,
-      title: 'Library Hours Extended',
-      description: 'During exam week, the library will remain open until 10:00 PM Monday through Friday to accommodate student study needs.',
-      date: '2024-08-03T14:20:00Z',
-      read: false,
-      priority: 'medium',
-      author: 'Library Administration',
-      category: 'Facility',
-    },
-    {
-      id: 3,
-      title: 'Sports Day Event',
-      description: 'Annual sports day is scheduled for next Friday. All students are encouraged to participate in various athletic events.',
-      date: '2024-08-02T09:15:00Z',
-      read: true,
-      priority: 'medium',
-      author: 'Sports Department',
-      category: 'Event',
-    },
-    {
-      id: 4,
-      title: 'New Cafeteria Menu',
-      description: 'We\'ve updated our cafeteria menu with healthier options and student favorites. Check out the new offerings starting Monday.',
-      date: '2024-08-01T16:45:00Z',
-      read: true,
-      priority: 'low',
-      author: 'Food Services',
-      category: 'Facility',
-    },
-    {
-      id: 5,
-      title: 'Parent-Teacher Conference',
-      description: 'Parent-teacher conferences are scheduled for August 15-16. Please sign up for your preferred time slot through the parent portal.',
-      date: '2024-07-31T11:30:00Z',
-      read: false,
-      priority: 'high',
-      author: 'Administration',
-      category: 'Academic',
-    },
-    {
-      id: 6,
-      title: 'Technology Workshop',
-      description: 'Join us for a technology workshop focusing on digital literacy and online learning tools. Open to all students.',
-      date: '2024-07-30T13:00:00Z',
-      read: true,
-      priority: 'medium',
-      author: 'IT Department',
-      category: 'Workshop',
-    },
-    {
-      id: 7,
-      title: 'School Holiday Notice',
-      description: 'Please note that school will be closed next Friday for a staff development day. Regular classes will resume the following Monday.',
-      date: '2024-07-29T08:45:00Z',
-      read: true,
-      priority: 'high',
-      author: 'Principal\'s Office',
-      category: 'Holiday',
-    },
-    {
-      id: 8,
-      title: 'Art Exhibition Opening',
-      description: 'Student art exhibition opens in the main hall. Come view the creative works of your fellow students.',
-      date: '2024-07-28T15:20:00Z',
-      read: false,
-      priority: 'low',
-      author: 'Art Department',
-      category: 'Event',
-    },
-  ];
-
   // ✅ Filter announcements based on search
   const getFilteredAnnouncements = () => {
     let filtered = announcements;
 
     if (searchQuery) {
-      filtered = filtered.filter(announcement =>
-        announcement.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        announcement.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        announcement.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (announcement) =>
+          announcement.title
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          announcement.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          announcement.category
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -182,12 +118,12 @@ const Announcements = ({ navigation }) => {
   const handleMarkAsRead = async (announcementId) => {
     try {
       // Optimistically update UI
-      setAnnouncements(prev =>
-        prev.map(announcement =>
+      setAnnouncements((prev) =>
+        prev.map((announcement) =>
           announcement.id === announcementId
             ? { ...announcement, read: true }
-            : announcement
-        )
+            : announcement,
+        ),
       );
 
       // Call API to update read status
@@ -195,18 +131,17 @@ const Announcements = ({ navigation }) => {
 
       if (!response.success) {
         // Revert if API call failed
-        setAnnouncements(prev =>
-          prev.map(announcement =>
+        setAnnouncements((prev) =>
+          prev.map((announcement) =>
             announcement.id === announcementId
               ? { ...announcement, read: false }
-              : announcement
-          )
+              : announcement,
+          ),
         );
         throw new Error(response.message || 'Failed to mark as read');
       }
 
       console.log(`✅ Announcement ${announcementId} marked as read`);
-
     } catch (error) {
       console.error('❌ Error marking announcement as read:', error);
       Alert.alert('Error', 'Failed to mark announcement as read');
@@ -240,25 +175,35 @@ const Announcements = ({ navigation }) => {
     }
   };
 
-  // ✅ Get priority color
+  // Get priority color (theme)
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return '#E74C3C';
-      case 'medium': return '#F39C12';
-      case 'low': return '#27AE60';
-      default: return '#95A5A6';
+      case 'high':
+        return COLORS.error;
+      case 'medium':
+        return COLORS.warning;
+      case 'low':
+        return COLORS.success;
+      default:
+        return COLORS.grey.medium;
     }
   };
 
   // ✅ Get category icon
   const getCategoryIcon = (category) => {
     switch (category?.toLowerCase()) {
-      case 'academic': return 'school';
-      case 'facility': return 'business';
-      case 'event': return 'calendar';
-      case 'workshop': return 'construct';
-      case 'holiday': return 'sunny';
-      default: return 'information-circle';
+      case 'academic':
+        return 'school';
+      case 'facility':
+        return 'business';
+      case 'event':
+        return 'calendar';
+      case 'workshop':
+        return 'construct';
+      case 'holiday':
+        return 'sunny';
+      default:
+        return 'information-circle';
     }
   };
 
@@ -271,7 +216,7 @@ const Announcements = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       loadAnnouncements();
-    }, [])
+    }, []),
   );
 
   const onRefresh = () => {
@@ -279,9 +224,11 @@ const Announcements = ({ navigation }) => {
   };
 
   // Theme colors
-  const primaryColor = roleTheme?.primary || tenantBranding?.primaryColor || '#3498DB';
+  const primaryColor =
+    roleTheme?.primary || tenantBranding?.primaryColor || COLORS.student;
+  const headerGradient = [COLORS.student, COLORS.primary];
 
-  // ✅ Loading state
+  // Loading state
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -293,26 +240,33 @@ const Announcements = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* ✅ Header */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>📢 Announcements</Text>
-        <Text style={styles.headerSubtitle}>
-          Stay updated with the latest news
-        </Text>
-      </View>
+      {/* Solid Color Header */}
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#3498DB' }}>
+        <View style={[styles.headerSolid, { backgroundColor: '#3498DB' }]}>
+          <Text style={styles.headerTitle}>📢 Announcements</Text>
+          <Text style={styles.headerSubtitle}>
+            Stay updated with the latest news
+          </Text>
+        </View>
+      </SafeAreaView>
 
-      {/* ✅ Search Bar */}
+      {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+        <Ionicons
+          name="search"
+          size={20}
+          color={COLORS.grey.medium}
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search announcements..."
           value={searchQuery}
           onChangeText={(text) => {
             setSearchQuery(text);
-            setCurrentPage(0); // Reset to first page when searching
+            setCurrentPage(0);
           }}
-          placeholderTextColor="#999"
+          placeholderTextColor={COLORS.grey.medium}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity
@@ -321,32 +275,36 @@ const Announcements = ({ navigation }) => {
               setCurrentPage(0);
             }}
           >
-            <Ionicons name="close-circle" size={20} color="#999" />
+            <Ionicons
+              name="close-circle"
+              size={20}
+              color={COLORS.grey.medium}
+            />
           </TouchableOpacity>
         )}
       </View>
 
-      {/* ✅ Stats Bar */}
+      {/* Stats Bar */}
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{announcements.length}</Text>
           <Text style={styles.statLabel}>Total</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#E74C3C' }]}>
-            {announcements.filter(a => !a.read).length}
+          <Text style={[styles.statNumber, { color: COLORS.error }]}>
+            {announcements.filter((a) => !a.read).length}
           </Text>
           <Text style={styles.statLabel}>Unread</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#27AE60' }]}>
-            {announcements.filter(a => a.read).length}
+          <Text style={[styles.statNumber, { color: COLORS.success }]}>
+            {announcements.filter((a) => a.read).length}
           </Text>
           <Text style={styles.statLabel}>Read</Text>
         </View>
       </View>
 
-      {/* ✅ Announcements List */}
+      {/* Announcements List */}
       <ScrollView
         style={styles.announcementsList}
         refreshControl={
@@ -358,21 +316,23 @@ const Announcements = ({ navigation }) => {
         }
         showsVerticalScrollIndicator={false}
       >
-        {currentAnnouncements.length > 0 ? (
-          currentAnnouncements.map((announcement) => (
+        {getPaginatedAnnouncements().length > 0 ? (
+          getPaginatedAnnouncements().map((announcement) => (
             <TouchableOpacity
               key={announcement.id}
               style={[
                 styles.announcementCard,
-                !announcement.read && styles.unreadCard
+                !announcement.read && styles.unreadCard,
               ]}
-              onPress={() => navigation.navigate('AnnouncementDetails', {
-                announcementId: announcement.id,
-                announcement: announcement
-              })}
+              onPress={() =>
+                navigation.navigate('AnnouncementDetails', {
+                  announcementId: announcement.id,
+                  announcement: announcement,
+                })
+              }
               activeOpacity={0.7}
             >
-              {/* ✅ Announcement Header */}
+              {/* Announcement Header */}
               <View style={styles.announcementHeader}>
                 <View style={styles.announcementTitleContainer}>
                   <View style={styles.categoryContainer}>
@@ -381,7 +341,9 @@ const Announcements = ({ navigation }) => {
                       size={16}
                       color={primaryColor}
                     />
-                    <Text style={[styles.categoryText, { color: primaryColor }]}>
+                    <Text
+                      style={[styles.categoryText, { color: primaryColor }]}
+                    >
                       {announcement.category || 'General'}
                     </Text>
                   </View>
@@ -391,28 +353,30 @@ const Announcements = ({ navigation }) => {
                     </View>
                   )}
                 </View>
-
                 <View
                   style={[
                     styles.priorityIndicator,
-                    { backgroundColor: getPriorityColor(announcement.priority) }
+                    {
+                      backgroundColor: getPriorityColor(announcement.priority),
+                    },
                   ]}
                 />
               </View>
-
-              {/* ✅ Announcement Content */}
+              {/* Announcement Content */}
               <Text style={styles.announcementTitle} numberOfLines={2}>
                 {announcement.title}
               </Text>
-
               <Text style={styles.announcementDescription} numberOfLines={3}>
                 {announcement.description}
               </Text>
-
-              {/* ✅ Announcement Footer */}
+              {/* Announcement Footer */}
               <View style={styles.announcementFooter}>
                 <View style={styles.announcementMeta}>
-                  <Ionicons name="person" size={14} color="#666" />
+                  <Ionicons
+                    name="person"
+                    size={14}
+                    color={COLORS.text.secondary}
+                  />
                   <Text style={styles.announcementAuthor}>
                     {announcement.author || 'Administration'}
                   </Text>
@@ -421,16 +385,20 @@ const Announcements = ({ navigation }) => {
                     {formatDate(announcement.date)}
                   </Text>
                 </View>
-
                 {!announcement.read && (
                   <TouchableOpacity
-                    style={[styles.markAsReadButton, { backgroundColor: primaryColor }]}
+                    style={[
+                      styles.markAsReadButton,
+                      { backgroundColor: primaryColor },
+                    ]}
                     onPress={(e) => {
                       e.stopPropagation();
                       handleMarkAsRead(announcement.id);
                     }}
                   >
-                    <Text style={styles.markAsReadButtonText}>Mark as Read</Text>
+                    <Text style={styles.markAsReadButtonText}>
+                      Mark as Read
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -438,40 +406,52 @@ const Announcements = ({ navigation }) => {
           ))
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons name="megaphone-outline" size={64} color="#CCC" />
+            <Ionicons
+              name="megaphone-outline"
+              size={64}
+              color={COLORS.grey.medium}
+            />
             <Text style={styles.emptyStateTitle}>
-              {searchQuery ? 'No Matching Announcements' : 'No Announcements Yet'}
+              {searchQuery
+                ? 'No Matching Announcements'
+                : 'No Announcements Yet'}
             </Text>
             <Text style={styles.emptyStateText}>
               {searchQuery
                 ? 'Try adjusting your search terms'
-                : 'New announcements will appear here when available'
-              }
+                : 'New announcements will appear here when available'}
             </Text>
           </View>
         )}
       </ScrollView>
 
-      {/* ✅ Pagination */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <View style={styles.paginationContainer}>
           <TouchableOpacity
             style={[
               styles.paginationButton,
-              currentPage === 0 && styles.disabledButton
+              currentPage === 0 && styles.disabledButton,
             ]}
             onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
             disabled={currentPage === 0}
           >
-            <Ionicons name="chevron-back" size={20} color={currentPage === 0 ? '#CCC' : primaryColor} />
-            <Text style={[
-              styles.paginationButtonText,
-              { color: currentPage === 0 ? '#CCC' : primaryColor }
-            ]}>
+            <Ionicons
+              name="chevron-back"
+              size={20}
+              color={currentPage === 0 ? COLORS.grey.medium : primaryColor}
+            />
+            <Text
+              style={[
+                styles.paginationButtonText,
+                {
+                  color: currentPage === 0 ? COLORS.grey.medium : primaryColor,
+                },
+              ]}
+            >
               Previous
             </Text>
           </TouchableOpacity>
-
           <View style={styles.paginationInfo}>
             <Text style={styles.paginationText}>
               Page {currentPage + 1} of {totalPages}
@@ -480,22 +460,38 @@ const Announcements = ({ navigation }) => {
               {filteredAnnouncements.length} total announcements
             </Text>
           </View>
-
           <TouchableOpacity
             style={[
               styles.paginationButton,
-              currentPage >= totalPages - 1 && styles.disabledButton
+              currentPage >= totalPages - 1 && styles.disabledButton,
             ]}
-            onPress={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+            onPress={() =>
+              setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
+            }
             disabled={currentPage >= totalPages - 1}
           >
-            <Text style={[
-              styles.paginationButtonText,
-              { color: currentPage >= totalPages - 1 ? '#CCC' : primaryColor }
-            ]}>
+            <Text
+              style={[
+                styles.paginationButtonText,
+                {
+                  color:
+                    currentPage >= totalPages - 1
+                      ? COLORS.grey.medium
+                      : primaryColor,
+                },
+              ]}
+            >
               Next
             </Text>
-            <Ionicons name="chevron-forward" size={20} color={currentPage >= totalPages - 1 ? '#CCC' : primaryColor} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={
+                currentPage >= totalPages - 1
+                  ? COLORS.grey.medium
+                  : primaryColor
+              }
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -506,82 +502,83 @@ const Announcements = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: COLORS.background.secondary,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: COLORS.background.secondary,
   },
   loadingText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text.secondary,
     marginTop: 12,
   },
-  headerContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+  headerSolid: {
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 8,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: FONTS.sizes.h1,
+    fontWeight: FONTS.weights['700'],
+    color: COLORS.white,
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text.white,
+    opacity: 0.9,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     marginHorizontal: 16,
     marginVertical: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: COLORS.grey.light,
   },
   searchIcon: {
     marginRight: 12,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#333',
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text.primary,
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: COLORS.grey.dark,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.text.primary,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.text.secondary,
     marginTop: 4,
   },
   announcementsList: {
@@ -589,19 +586,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   announcementCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: COLORS.grey.dark,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
   unreadCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#3498DB',
+    borderLeftColor: COLORS.student,
   },
   announcementHeader: {
     flexDirection: 'row',
@@ -617,27 +614,27 @@ const styles = StyleSheet.create({
   categoryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: COLORS.background.secondary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     marginRight: 8,
   },
   categoryText: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights['500'],
     marginLeft: 4,
   },
   unreadBadge: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: COLORS.error,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
   },
   unreadBadgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontSize: FONTS.sizes.xs,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.white,
   },
   priorityIndicator: {
     width: 8,
@@ -645,15 +642,15 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   announcementTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: FONTS.sizes.lg,
+    fontWeight: FONTS.weights['600'],
+    color: COLORS.text.primary,
     marginBottom: 8,
     lineHeight: 24,
   },
   announcementDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: FONTS.sizes.body3,
+    color: COLORS.text.secondary,
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -668,18 +665,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   announcementAuthor: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.text.secondary,
     marginLeft: 4,
   },
   announcementDot: {
-    fontSize: 12,
-    color: '#CCC',
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.grey.medium,
     marginHorizontal: 6,
   },
   announcementDate: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.text.light,
   },
   markAsReadButton: {
     paddingHorizontal: 12,
@@ -687,9 +684,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   markAsReadButtonText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#FFFFFF',
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights['500'],
+    color: COLORS.white,
   },
   emptyState: {
     flex: 1,
@@ -698,15 +695,15 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: FONTS.sizes.xl,
+    fontWeight: FONTS.weights['600'],
+    color: COLORS.text.primary,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateText: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: FONTS.sizes.body3,
+    color: COLORS.text.light,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -714,11 +711,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderTopColor: COLORS.grey.light,
   },
   paginationButton: {
     flexDirection: 'row',
@@ -731,21 +728,21 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   paginationButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: FONTS.sizes.body3,
+    fontWeight: FONTS.weights['500'],
     marginHorizontal: 4,
   },
   paginationInfo: {
     alignItems: 'center',
   },
   paginationText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    fontSize: FONTS.sizes.body3,
+    fontWeight: FONTS.weights['500'],
+    color: COLORS.text.primary,
   },
   paginationSubtext: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.text.secondary,
     marginTop: 2,
   },
 });

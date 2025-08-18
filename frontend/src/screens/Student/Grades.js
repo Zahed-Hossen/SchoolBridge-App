@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -21,6 +22,7 @@ import * as Sharing from 'expo-sharing';
 import { useAuth } from '../../context/AuthContext';
 import { useRole } from '../../context/RoleContext';
 import { useTenant } from '../../context/TenantContext';
+import { COLORS, FONTS, SPACING } from '../../constants/theme';
 
 // ✅ FIX: Update import to use new modular API structure
 import { studentService } from '../../api/services/studentService';
@@ -67,7 +69,6 @@ const StudentGrades = ({ navigation }) => {
       } else {
         throw new Error(response.message || 'Failed to load performance data');
       }
-
     } catch (error) {
       console.error('❌ Error loading performance data:', error);
 
@@ -77,7 +78,7 @@ const StudentGrades = ({ navigation }) => {
       Alert.alert(
         'Connection Issue',
         'Using offline data. Pull down to refresh.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     } finally {
       setLoading(false);
@@ -86,64 +87,60 @@ const StudentGrades = ({ navigation }) => {
   };
 
   // ✅ Enhanced mock performance data matching your web structure
+  // Minimal mock data for safe chart rendering (1 subject, 1 assignment, 1 progress point, 1 class average)
   const getMockPerformanceData = () => ({
-    overallGPA: 3.57,
-    rank: 12,
-    totalStudents: 150,
+    overallGPA: 3.5,
+    rank: 1,
+    totalStudents: 1,
     semester: 'Fall 2024',
     lastUpdated: '2024-08-04',
     attendance: {
-      present: 42,
-      total: 50,
-      percentage: 84.0,
+      present: 1,
+      total: 1,
+      percentage: 100.0,
       trend: 'stable',
-      totalDays: 120,
-      presentDays: 110
+      totalDays: 1,
+      presentDays: 1,
     },
     grades: [
-      { subject: 'Mathematics', score: 92, grade: 'A', credits: 4, gpa: 4.0, trend: 'up', lastUpdated: '2024-08-01' },
-      { subject: 'Physics', score: 88, grade: 'B+', credits: 4, gpa: 3.7, trend: 'stable', lastUpdated: '2024-08-02' },
-      { subject: 'Chemistry', score: 85, grade: 'B', credits: 3, gpa: 3.3, trend: 'down', lastUpdated: '2024-08-03' },
-      { subject: 'English', score: 95, grade: 'A', credits: 3, gpa: 4.0, trend: 'up', lastUpdated: '2024-08-04' },
-      { subject: 'History', score: 79, grade: 'B-', credits: 2, gpa: 2.7, trend: 'stable', lastUpdated: '2024-08-01' },
-      { subject: 'Biology', score: 90, grade: 'A-', credits: 4, gpa: 3.7, trend: 'up', lastUpdated: '2024-08-02' }
+      {
+        subject: 'Math',
+        score: 90,
+        grade: 'A',
+        credits: 1,
+        gpa: 4.0,
+        trend: 'up',
+        lastUpdated: '2024-08-01',
+      },
     ],
     analytics: {
-      overallGPA: 3.57,
-      rank: 12,
-      totalStudents: 150,
-      totalCredits: 20,
-      improvement: '+5.2%',
-      strengths: ['Mathematics', 'English'],
-      improvements: ['History'],
-      classAverage: 81.3,
-      gradeAverage: 82.8,
-      percentile: 87.5,
-      academicStanding: 'Good Standing'
+      overallGPA: 3.5,
+      rank: 1,
+      totalStudents: 1,
+      totalCredits: 1,
+      improvement: '+0.0%',
+      strengths: ['Math'],
+      improvements: ['Math'],
+      classAverage: 90,
+      gradeAverage: 90,
+      percentile: 100,
+      academicStanding: 'Good Standing',
     },
     benchmark: {
       classAverages: {
-        Mathematics: 78.5,
-        Physics: 82.3,
-        Chemistry: 80.1,
-        English: 85.7,
-        History: 77.9,
-        Biology: 83.2,
+        Math: 90,
       },
-      schoolAverage: 81.3,
-      gradeAverage: 82.8,
+      schoolAverage: 90,
+      gradeAverage: 90,
     },
-    progressHistory: [
-      { month: 'Jan', gpa: 3.2 },
-      { month: 'Feb', gpa: 3.3 },
-      { month: 'Mar', gpa: 3.4 },
-      { month: 'Apr', gpa: 3.5 },
-      { month: 'May', gpa: 3.57 },
-    ],
+    progressHistory: [{ month: 'Jan', gpa: 3.5 }],
     recentAssignments: [
-      { subject: 'Mathematics', title: 'Calculus Quiz', score: 95, date: '2024-08-01' },
-      { subject: 'Physics', title: 'Lab Report', score: 88, date: '2024-07-30' },
-      { subject: 'Chemistry', title: 'Midterm Exam', score: 85, date: '2024-07-28' },
+      {
+        subject: 'Math',
+        title: 'Quiz 1',
+        score: 90,
+        date: '2024-08-01',
+      },
     ],
   });
 
@@ -165,10 +162,12 @@ const StudentGrades = ({ navigation }) => {
       }
 
       console.log(`✅ Report exported successfully as ${type}`);
-
     } catch (error) {
       console.error('❌ Error exporting report:', error);
-      Alert.alert('Export Failed', 'Unable to export report. Please try again.');
+      Alert.alert(
+        'Export Failed',
+        'Unable to export report. Please try again.',
+      );
     } finally {
       setExporting(false);
     }
@@ -182,7 +181,7 @@ const StudentGrades = ({ navigation }) => {
 
     if (type === 'csv') {
       let csv = 'Subject,Score,Grade,Credits,GPA\n';
-      grades.forEach(grade => {
+      grades.forEach((grade) => {
         csv += `${grade.subject},${grade.score},${grade.grade},${grade.credits},${grade.gpa}\n`;
       });
       csv += `\nOverall GPA,${analytics.overallGPA}\n`;
@@ -199,13 +198,15 @@ const StudentGrades = ({ navigation }) => {
       report += `Class Rank: ${analytics.rank}/${analytics.totalStudents}\n`;
       report += `Total Credits: ${analytics.totalCredits}\n\n`;
       report += `📚 SUBJECT GRADES:\n`;
-      grades.forEach(grade => {
+      grades.forEach((grade) => {
         report += `${grade.subject}: ${grade.score}% (${grade.grade})\n`;
       });
       report += `\n📅 ATTENDANCE:\n`;
       report += `${attendance.present}/${attendance.total} days (${attendance.percentage}%)\n\n`;
       report += `💪 STRENGTHS: ${analytics.strengths.join(', ')}\n`;
-      report += `📈 AREAS FOR IMPROVEMENT: ${analytics.improvements.join(', ')}\n`;
+      report += `📈 AREAS FOR IMPROVEMENT: ${analytics.improvements.join(
+        ', ',
+      )}\n`;
       return report;
     }
   };
@@ -224,7 +225,7 @@ const StudentGrades = ({ navigation }) => {
     Alert.alert(
       'PDF Export',
       'PDF export functionality would be implemented with a library like react-native-html-to-pdf',
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
@@ -245,28 +246,67 @@ const StudentGrades = ({ navigation }) => {
     color: (opacity = 1) => `rgba(52, 152, 219, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(51, 51, 51, ${opacity})`,
     style: {
-      borderRadius: 16
+      borderRadius: 16,
     },
     propsForDots: {
       r: '6',
       strokeWidth: '2',
-      stroke: '#3498DB'
+      stroke: '#3498DB',
+    },
+  };
+
+  // --- Modular MetricCard ---
+  const getGradeColor = (grade) => {
+    switch (grade) {
+      case 'A':
+        return '#27AE60';
+      case 'A-':
+        return '#2ECC71';
+      case 'B+':
+        return '#3498DB';
+      case 'B':
+        return '#5DADE2';
+      case 'B-':
+        return '#F39C12';
+      case 'C+':
+        return '#F7DC6F';
+      case 'C':
+        return '#E67E22';
+      default:
+        return '#E74C3C';
     }
   };
 
-  // ✅ Get grade color (keep existing implementation)
-  const getGradeColor = (grade) => {
-    switch (grade) {
-      case 'A': return '#27AE60';
-      case 'A-': return '#2ECC71';
-      case 'B+': return '#3498DB';
-      case 'B': return '#5DADE2';
-      case 'B-': return '#F39C12';
-      case 'C+': return '#F7DC6F';
-      case 'C': return '#E67E22';
-      default: return '#E74C3C';
-    }
-  };
+  const MetricCard = ({ label, value, color, improvement, icon, subtext }) => (
+    <View style={[styles.metricCard, { borderLeftColor: color }]}>
+      <Text style={styles.metricValue}>{value}</Text>
+      <Text style={styles.metricLabel}>{label}</Text>
+      {improvement && icon && (
+        <View style={styles.improvementIndicator}>
+          <Ionicons name={icon} size={16} color="#27AE60" />
+          <Text style={styles.improvementText}>{improvement}</Text>
+        </View>
+      )}
+      {subtext && <Text style={styles.metricSubtext}>{subtext}</Text>}
+    </View>
+  );
+
+  const GradeCard = ({ grade }) => (
+    <View style={styles.gradeRow}>
+      <View style={styles.gradeInfo}>
+        <Text style={styles.gradeSubject}>{grade.subject}</Text>
+        <Text style={styles.gradeScore}>{grade.score}%</Text>
+      </View>
+      <View
+        style={[
+          styles.gradeTag,
+          { backgroundColor: getGradeColor(grade.grade) },
+        ]}
+      >
+        <Text style={styles.gradeTagText}>{grade.grade}</Text>
+      </View>
+    </View>
+  );
 
   // ✅ Get improvement icon (keep existing implementation)
   const getImprovementIcon = (improvement) => {
@@ -275,11 +315,39 @@ const StudentGrades = ({ navigation }) => {
     return 'remove';
   };
 
+  // --- Chart Data Sanitization Helpers ---
+  const safeLabel = (label) => (typeof label === 'string' ? label : '');
+  const safeNumber = (num) =>
+    typeof num === 'number' && isFinite(num) ? num : 0;
+  // Strict division safe helper
+  const safeDivide = (num, denom) =>
+    typeof num === 'number' &&
+    typeof denom === 'number' &&
+    denom !== 0 &&
+    isFinite(num / denom)
+      ? num / denom
+      : 0;
+
+  // Ensures chart arrays are never empty and never contain Infinity/NaN
+  function ensureValidChartArray(arr, fallback = 0) {
+    if (!Array.isArray(arr) || arr.length === 0) return [fallback];
+    const sanitized = arr.map((n) => (isFinite(n) ? n : fallback));
+    // If all values are invalid, fallback to [0]
+    if (sanitized.every((n) => !isFinite(n))) return [fallback];
+    return sanitized;
+  }
+  function ensureValidLabelArray(arr, fallback = '') {
+    if (!Array.isArray(arr) || arr.length === 0) return [fallback];
+    const sanitized = arr.map((l) => (typeof l === 'string' ? l : fallback));
+    if (sanitized.every((l) => l === fallback)) return [fallback];
+    return sanitized;
+  }
+
   // ✅ Initial load
   useFocusEffect(
     useCallback(() => {
       loadPerformanceData();
-    }, [])
+    }, []),
   );
 
   const onRefresh = () => {
@@ -287,7 +355,9 @@ const StudentGrades = ({ navigation }) => {
   };
 
   // Theme colors
-  const primaryColor = roleTheme?.primary || tenantBranding?.primaryColor || '#3498DB';
+  const primaryColor =
+    roleTheme?.primary || tenantBranding?.primaryColor || COLORS.student;
+  const headerGradient = [COLORS.student, COLORS.primary];
 
   // ✅ Loading state
   if (loading) {
@@ -304,48 +374,77 @@ const StudentGrades = ({ navigation }) => {
       <View style={styles.errorContainer}>
         <Ionicons name="analytics-outline" size={64} color="#E74C3C" />
         <Text style={styles.errorTitle}>No Performance Data</Text>
-        <Text style={styles.errorText}>Performance data is not available at this time.</Text>
+        <Text style={styles.errorText}>
+          Performance data is not available at this time.
+        </Text>
       </View>
     );
   }
 
+  // Defensive: fallback for benchmark and classAverages
+  const benchmark = performanceData.benchmark || { classAverages: {} };
+  const classAverages = benchmark.classAverages || {};
+
+  // Optionally, check if Profile screen exists in navigation (if not, disable button)
+  // For now, just disable the button if navigation.navigate('Profile') would fail
+  let canNavigateProfile = true;
+  try {
+    if (!navigation || typeof navigation.navigate !== 'function')
+      canNavigateProfile = false;
+    // Optionally, check navigation.getState() for available routes
+  } catch (e) {
+    canNavigateProfile = false;
+  }
+
   return (
     <View style={styles.container}>
-      {/* ✅ Header with Export Options */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>📊 Performance Overview</Text>
-        <Text style={styles.headerSubtitle}>Track your academic progress</Text>
-
-        {/* Export Buttons */}
-        <View style={styles.exportContainer}>
-          <TouchableOpacity
-            style={[styles.exportButton, { backgroundColor: primaryColor }]}
-            onPress={() => exportReport('csv')}
-            disabled={exporting}
-          >
-            <Ionicons name="download" size={16} color="#FFFFFF" />
-            <Text style={styles.exportButtonText}>CSV</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.exportButton, { backgroundColor: '#E74C3C' }]}
-            onPress={() => exportReport('pdf')}
-            disabled={exporting}
-          >
-            <Ionicons name="document" size={16} color="#FFFFFF" />
-            <Text style={styles.exportButtonText}>PDF</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.exportButton, { backgroundColor: '#27AE60' }]}
-            onPress={() => exportReport('share')}
-            disabled={exporting}
-          >
-            <Ionicons name="share" size={16} color="#FFFFFF" />
-            <Text style={styles.exportButtonText}>Share</Text>
-          </TouchableOpacity>
+      {/* Solid Color Header with SafeAreaView */}
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#3498DB' }}>
+        <View style={[styles.headerSolid, { backgroundColor: '#3498DB' }]}>
+          <View style={styles.headerRow}>
+            <Text style={styles.headerTitle}>📊 Performance Overview</Text>
+            <TouchableOpacity
+              style={styles.profileIcon}
+              onPress={() =>
+                canNavigateProfile && navigation.navigate('Profile')
+              }
+              disabled={!canNavigateProfile}
+            >
+              <Ionicons name="person-circle" size={32} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.headerSubtitle}>
+            Track your academic progress
+          </Text>
+          {/* Export Buttons */}
+          <View style={styles.exportContainer}>
+            <TouchableOpacity
+              style={[styles.exportButton, { backgroundColor: '#217dbb' }]}
+              onPress={() => exportReport('csv')}
+              disabled={exporting}
+            >
+              <Ionicons name="download" size={16} color={COLORS.white} />
+              <Text style={styles.exportButtonText}>CSV</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.exportButton, { backgroundColor: COLORS.error }]}
+              onPress={() => exportReport('pdf')}
+              disabled={exporting}
+            >
+              <Ionicons name="document" size={16} color={COLORS.white} />
+              <Text style={styles.exportButtonText}>PDF</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.exportButton, { backgroundColor: COLORS.success }]}
+              onPress={() => exportReport('share')}
+              disabled={exporting}
+            >
+              <Ionicons name="share" size={16} color={COLORS.white} />
+              <Text style={styles.exportButtonText}>Share</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
 
       {/* ✅ View Selector */}
       <View style={styles.viewSelector}>
@@ -358,19 +457,28 @@ const StudentGrades = ({ navigation }) => {
             key={view.key}
             style={[
               styles.viewTab,
-              selectedView === view.key && { backgroundColor: primaryColor }
+              selectedView === view.key && {
+                backgroundColor: primaryColor,
+                elevation: 2,
+              },
             ]}
             onPress={() => setSelectedView(view.key)}
+            activeOpacity={0.85}
           >
             <Ionicons
               name={view.icon}
               size={20}
               color={selectedView === view.key ? '#FFFFFF' : '#666'}
             />
-            <Text style={[
-              styles.viewTabText,
-              selectedView === view.key && { color: '#FFFFFF' }
-            ]}>
+            <Text
+              style={[
+                styles.viewTabText,
+                selectedView === view.key && {
+                  color: '#FFFFFF',
+                  fontWeight: '700',
+                },
+              ]}
+            >
               {view.label}
             </Text>
           </TouchableOpacity>
@@ -393,75 +501,89 @@ const StudentGrades = ({ navigation }) => {
           <>
             {/* Key Metrics */}
             <View style={styles.metricsContainer}>
-              <View style={[styles.metricCard, { borderLeftColor: primaryColor }]}>
-                <Text style={styles.metricValue}>{performanceData.analytics.overallGPA}</Text>
-                <Text style={styles.metricLabel}>Overall GPA</Text>
-                <View style={styles.improvementIndicator}>
-                  <Ionicons
-                    name={getImprovementIcon(performanceData.analytics.improvement)}
-                    size={16}
-                    color="#27AE60"
-                  />
-                  <Text style={styles.improvementText}>{performanceData.analytics.improvement}</Text>
-                </View>
-              </View>
-
-              <View style={[styles.metricCard, { borderLeftColor: '#27AE60' }]}>
-                <Text style={styles.metricValue}>{performanceData.attendance.percentage}%</Text>
-                <Text style={styles.metricLabel}>Attendance</Text>
-                <Text style={styles.metricSubtext}>
-                  {performanceData.attendance.present}/{performanceData.attendance.total} days
-                </Text>
-              </View>
-
-              <View style={[styles.metricCard, { borderLeftColor: '#F39C12' }]}>
-                <Text style={styles.metricValue}>#{performanceData.analytics.rank}</Text>
-                <Text style={styles.metricLabel}>Class Rank</Text>
-                <Text style={styles.metricSubtext}>
-                  of {performanceData.analytics.totalStudents} students
-                </Text>
-              </View>
+              <MetricCard
+                label="Overall GPA"
+                value={performanceData.analytics.overallGPA}
+                color={primaryColor}
+                improvement={performanceData.analytics.improvement}
+                icon={getImprovementIcon(performanceData.analytics.improvement)}
+              />
+              <MetricCard
+                label="Attendance"
+                value={
+                  isFinite(performanceData.attendance?.percentage)
+                    ? `${performanceData.attendance.percentage}%`
+                    : '0%'
+                }
+                color="#27AE60"
+                subtext={
+                  isFinite(performanceData.attendance?.present) &&
+                  isFinite(performanceData.attendance?.total)
+                    ? `${performanceData.attendance.present}/${performanceData.attendance.total} days`
+                    : '0/0 days'
+                }
+              />
+              <MetricCard
+                label="Class Rank"
+                value={`#${performanceData.analytics.rank}`}
+                color="#F39C12"
+                subtext={`of ${performanceData.analytics.totalStudents} students`}
+              />
             </View>
 
             {/* ✅ Rest of your existing JSX stays exactly the same */}
             {/* GPA Progress Chart */}
             <View style={styles.chartSection}>
               <Text style={styles.sectionTitle}>📈 GPA Progress</Text>
-              <LineChart
-                data={{
-                  labels: performanceData.progressHistory.map(p => p.month),
-                  datasets: [{
-                    data: performanceData.progressHistory.map(p => p.gpa),
-                    strokeWidth: 3,
-                  }],
-                }}
-                width={screenWidth - 32}
-                height={220}
-                chartConfig={chartConfig}
-                bezier
-                style={styles.chart}
-              />
+              {(() => {
+                try {
+                  const labels = ensureValidLabelArray(
+                    (performanceData.progressHistory || []).map((p) =>
+                      safeLabel(p.month),
+                    ),
+                  );
+                  const data = ensureValidChartArray(
+                    (performanceData.progressHistory || []).map((p) =>
+                      safeNumber(p.gpa),
+                    ),
+                  );
+                  return (
+                    <LineChart
+                      data={{
+                        labels,
+                        datasets: [
+                          {
+                            data,
+                            strokeWidth: 3,
+                          },
+                        ],
+                      }}
+                      width={screenWidth - 32}
+                      height={220}
+                      chartConfig={chartConfig}
+                      bezier
+                      style={styles.chart}
+                    />
+                  );
+                } catch (e) {
+                  console.error('Chart error:', e);
+                  return (
+                    <Text style={{ color: '#E74C3C' }}>
+                      Chart error: {String(e)}
+                    </Text>
+                  );
+                }
+              })()}
             </View>
 
             {/* Quick Grade Overview */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>📚 Recent Grades</Text>
-              {performanceData.grades.slice(0, 3).map((grade, index) => (
-                <View key={index} style={styles.gradeRow}>
-                  <View style={styles.gradeInfo}>
-                    <Text style={styles.gradeSubject}>{grade.subject}</Text>
-                    <Text style={styles.gradeScore}>{grade.score}%</Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.gradeTag,
-                      { backgroundColor: getGradeColor(grade.grade) }
-                    ]}
-                  >
-                    <Text style={styles.gradeTagText}>{grade.grade}</Text>
-                  </View>
-                </View>
-              ))}
+              {(performanceData.grades || [])
+                .slice(0, 3)
+                .map((grade, index) => (
+                  <GradeCard key={index} grade={grade} />
+                ))}
               <TouchableOpacity
                 style={[styles.viewAllButton, { borderColor: primaryColor }]}
                 onPress={() => setSelectedView('detailed')}
@@ -481,14 +603,16 @@ const StudentGrades = ({ navigation }) => {
             {/* All Grades */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>📊 Subject Performance</Text>
-              {performanceData.grades.map((grade, index) => (
+              {(performanceData.grades || []).map((grade, index) => (
                 <View key={index} style={styles.detailedGradeCard}>
                   <View style={styles.detailedGradeHeader}>
-                    <Text style={styles.detailedGradeSubject}>{grade.subject}</Text>
+                    <Text style={styles.detailedGradeSubject}>
+                      {grade.subject}
+                    </Text>
                     <View
                       style={[
                         styles.gradeTag,
-                        { backgroundColor: getGradeColor(grade.grade) }
+                        { backgroundColor: getGradeColor(grade.grade) },
                       ]}
                     >
                       <Text style={styles.gradeTagText}>{grade.grade}</Text>
@@ -511,7 +635,10 @@ const StudentGrades = ({ navigation }) => {
                     <View style={styles.statItem}>
                       <Text style={styles.statLabel}>Class Avg</Text>
                       <Text style={styles.statValue}>
-                        {performanceData.benchmark.classAverages[grade.subject]?.toFixed(1) || 'N/A'}%
+                        {isFinite(classAverages[grade.subject])
+                          ? classAverages[grade.subject].toFixed(1)
+                          : 'N/A'}
+                        % %
                       </Text>
                     </View>
                   </View>
@@ -524,27 +651,40 @@ const StudentGrades = ({ navigation }) => {
                         style={[
                           styles.performanceBar,
                           {
-                            width: `${(grade.score / 100) * 100}%`,
-                            backgroundColor: primaryColor
-                          }
+                            width: `${safeDivide(grade.score, 100) * 100}%`,
+                            backgroundColor: primaryColor,
+                          },
                         ]}
                       />
                       <View
                         style={[
                           styles.averageIndicator,
                           {
-                            left: `${(performanceData.benchmark.classAverages[grade.subject] / 100) * 100}%`,
-                          }
+                            left: `$${
+                              safeDivide(classAverages[grade.subject], 100) *
+                              100
+                            }%`,
+                          },
                         ]}
                       />
                     </View>
                     <View style={styles.comparisonLegend}>
                       <View style={styles.legendItem}>
-                        <View style={[styles.legendDot, { backgroundColor: primaryColor }]} />
+                        <View
+                          style={[
+                            styles.legendDot,
+                            { backgroundColor: primaryColor },
+                          ]}
+                        />
                         <Text style={styles.legendText}>Your Score</Text>
                       </View>
                       <View style={styles.legendItem}>
-                        <View style={[styles.legendDot, { backgroundColor: '#E74C3C' }]} />
+                        <View
+                          style={[
+                            styles.legendDot,
+                            { backgroundColor: '#E74C3C' },
+                          ]}
+                        />
                         <Text style={styles.legendText}>Class Average</Text>
                       </View>
                     </View>
@@ -557,10 +697,12 @@ const StudentGrades = ({ navigation }) => {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>🎯 Class Averages</Text>
               <View style={styles.benchmarkContainer}>
-                {Object.entries(performanceData.benchmark.classAverages).map(([subject, average]) => (
+                {Object.entries(classAverages).map(([subject, average]) => (
                   <View key={subject} style={styles.benchmarkItem}>
                     <Text style={styles.benchmarkSubject}>{subject}</Text>
-                    <Text style={styles.benchmarkAverage}>{average.toFixed(1)}%</Text>
+                    <Text style={styles.benchmarkAverage}>
+                      {isFinite(average) ? average.toFixed(1) : 'N/A'}%
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -581,14 +723,16 @@ const StudentGrades = ({ navigation }) => {
                       key={type}
                       style={[
                         styles.chartTypeButton,
-                        chartType === type && { backgroundColor: primaryColor }
+                        chartType === type && { backgroundColor: primaryColor },
                       ]}
                       onPress={() => setChartType(type)}
                     >
-                      <Text style={[
-                        styles.chartTypeButtonText,
-                        chartType === type && { color: '#FFFFFF' }
-                      ]}>
+                      <Text
+                        style={[
+                          styles.chartTypeButtonText,
+                          chartType === type && { color: '#FFFFFF' },
+                        ]}
+                      >
                         {type.toUpperCase()}
                       </Text>
                     </TouchableOpacity>
@@ -596,36 +740,65 @@ const StudentGrades = ({ navigation }) => {
                 </View>
               </View>
 
-              {chartType === 'bar' ? (
-                <BarChart
-                  data={{
-                    labels: performanceData.grades.map(g => g.subject.substring(0, 4)),
-                    datasets: [{
-                      data: performanceData.grades.map(g => g.score),
-                    }],
-                  }}
-                  width={screenWidth - 32}
-                  height={220}
-                  chartConfig={chartConfig}
-                  style={styles.chart}
-                  showValuesOnTopOfBars
-                />
-              ) : (
-                <LineChart
-                  data={{
-                    labels: performanceData.grades.map(g => g.subject.substring(0, 4)),
-                    datasets: [{
-                      data: performanceData.grades.map(g => g.score),
-                      strokeWidth: 3,
-                    }],
-                  }}
-                  width={screenWidth - 32}
-                  height={220}
-                  chartConfig={chartConfig}
-                  bezier
-                  style={styles.chart}
-                />
-              )}
+              {(() => {
+                try {
+                  const labels = ensureValidLabelArray(
+                    (performanceData.grades || []).map((g) =>
+                      safeLabel(g.subject).substring(0, 4),
+                    ),
+                  );
+                  const data = ensureValidChartArray(
+                    (performanceData.grades || []).map((g) =>
+                      safeNumber(g.score),
+                    ),
+                  );
+                  if (chartType === 'bar') {
+                    return (
+                      <BarChart
+                        data={{
+                          labels,
+                          datasets: [
+                            {
+                              data,
+                            },
+                          ],
+                        }}
+                        width={screenWidth - 32}
+                        height={220}
+                        chartConfig={chartConfig}
+                        style={styles.chart}
+                        showValuesOnTopOfBars
+                      />
+                    );
+                  } else {
+                    return (
+                      <LineChart
+                        data={{
+                          labels,
+                          datasets: [
+                            {
+                              data,
+                              strokeWidth: 3,
+                            },
+                          ],
+                        }}
+                        width={screenWidth - 32}
+                        height={220}
+                        chartConfig={chartConfig}
+                        bezier
+                        style={styles.chart}
+                      />
+                    );
+                  }
+                } catch (e) {
+                  console.error('Chart error:', e);
+                  return (
+                    <Text style={{ color: '#E74C3C' }}>
+                      Chart error: {String(e)}
+                    </Text>
+                  );
+                }
+              })()}
             </View>
 
             {/* Performance Insights */}
@@ -638,7 +811,8 @@ const StudentGrades = ({ navigation }) => {
                   <Text style={styles.insightTitle}>Strengths</Text>
                 </View>
                 <Text style={styles.insightText}>
-                  You excel in: {performanceData.analytics.strengths.join(', ')}
+                  You excel in:{' '}
+                  {(performanceData.analytics.strengths || []).join(', ')}
                 </Text>
               </View>
 
@@ -648,7 +822,8 @@ const StudentGrades = ({ navigation }) => {
                   <Text style={styles.insightTitle}>Areas for Improvement</Text>
                 </View>
                 <Text style={styles.insightText}>
-                  Focus on: {performanceData.analytics.improvements.join(', ')}
+                  Focus on:{' '}
+                  {(performanceData.analytics.improvements || []).join(', ')}
                 </Text>
               </View>
 
@@ -658,8 +833,9 @@ const StudentGrades = ({ navigation }) => {
                   <Text style={styles.insightTitle}>Overall Progress</Text>
                 </View>
                 <Text style={styles.insightText}>
-                  Your performance has improved by {performanceData.analytics.improvement} this semester.
-                  Keep up the excellent work!
+                  Your performance has improved by{' '}
+                  {performanceData.analytics.improvement} this semester. Keep up
+                  the excellent work!
                 </Text>
               </View>
             </View>
@@ -667,20 +843,30 @@ const StudentGrades = ({ navigation }) => {
             {/* Recent Assignments */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>📝 Recent Assignments</Text>
-              {performanceData.recentAssignments.map((assignment, index) => (
-                <View key={index} style={styles.assignmentRow}>
-                  <View style={styles.assignmentInfo}>
-                    <Text style={styles.assignmentTitle}>{assignment.title}</Text>
-                    <Text style={styles.assignmentSubject}>{assignment.subject}</Text>
-                    <Text style={styles.assignmentDate}>
-                      {new Date(assignment.date).toLocaleDateString()}
-                    </Text>
+              {(performanceData.recentAssignments || []).map(
+                (assignment, index) => (
+                  <View key={index} style={styles.assignmentRow}>
+                    <View style={styles.assignmentInfo}>
+                      <Text style={styles.assignmentTitle}>
+                        {assignment.title}
+                      </Text>
+                      <Text style={styles.assignmentSubject}>
+                        {assignment.subject}
+                      </Text>
+                      <Text style={styles.assignmentDate}>
+                        {assignment.date
+                          ? new Date(assignment.date).toLocaleDateString()
+                          : ''}
+                      </Text>
+                    </View>
+                    <View style={styles.assignmentScore}>
+                      <Text style={styles.assignmentScoreText}>
+                        {isFinite(assignment.score) ? assignment.score : 0}%
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.assignmentScore}>
-                    <Text style={styles.assignmentScoreText}>{assignment.score}%</Text>
-                  </View>
-                </View>
-              ))}
+                ),
+              )}
             </View>
           </>
         )}
@@ -734,24 +920,34 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  headerContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+  headerSolid: {
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 8,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  profileIcon: {
+    marginLeft: 8,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: FONTS.sizes.h1,
+    fontWeight: FONTS.weights['700'],
+    color: COLORS.white,
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text.white,
     marginBottom: 16,
+    opacity: 0.9,
   },
   exportContainer: {
     flexDirection: 'row',

@@ -7,7 +7,7 @@ export const validate = (req, res, next) => {
     return res.status(400).json({
       success: false,
       error: 'Validation failed',
-      details: errors.array().map(error => ({
+      details: errors.array().map((error) => ({
         field: error.path,
         message: error.msg,
         value: error.value,
@@ -19,6 +19,9 @@ export const validate = (req, res, next) => {
 
 export const userValidation = {
   signup: [
+    body('signupType')
+      .isIn(['platform', 'visitor'])
+      .withMessage('Signup type must be either "platform" or "visitor"'),
     body('email')
       .isEmail()
       .normalizeEmail()
@@ -27,16 +30,21 @@ export const userValidation = {
       .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters long')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-      .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+      .withMessage(
+        'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+      ),
     body('fullName')
       .trim()
       .isLength({ min: 2, max: 100 })
       .withMessage('Full name must be between 2 and 100 characters'),
     body('role')
-      .isIn(['Student', 'Teacher', 'Parent', 'Admin'])
+      .if(body('signupType').equals('platform'))
+      .notEmpty()
+      .withMessage('Role is required for platform users')
+      .isIn(['Student', 'Teacher', 'Parent', 'Admin', 'PlatformUser', 'SuperAdmin'])
       .withMessage('Please select a valid role'),
 
-    // ✅ ENHANCED: More flexible phone validation
+    // 705 ENHANCED: More flexible phone validation
     body('phone')
       .optional()
       .custom((value) => {
@@ -58,10 +66,14 @@ export const userValidation = {
           /^\+1[0-9]{10}$/, // US format
         ];
 
-        const isValid = validFormats.some(format => format.test(value.replace(/[\s\-\(\)]/g, '')));
+        const isValid = validFormats.some((format) =>
+          format.test(value.replace(/[\s\-\(\)]/g, '')),
+        );
 
         if (!isValid) {
-          throw new Error('Please enter a valid phone number (e.g., +8801234567890 or 01234567890)');
+          throw new Error(
+            'Please enter a valid phone number (e.g., +8801234567890 or 01234567890)',
+          );
         }
 
         return true;
@@ -73,11 +85,17 @@ export const userValidation = {
       .isEmail()
       .normalizeEmail()
       .withMessage('Please provide a valid email address'),
-    body('password')
-      .notEmpty()
-      .withMessage('Password is required'),
+    body('password').notEmpty().withMessage('Password is required'),
     body('role')
-      .isIn(['Student', 'Teacher', 'Parent', 'Admin'])
+      .isIn([
+        'Student',
+        'Teacher',
+        'Parent',
+        'Admin',
+        'SuperAdmin',
+        'Visitor',
+        'PlatformUser',
+      ])
       .withMessage('Please select a valid role'),
   ],
 
@@ -86,16 +104,22 @@ export const userValidation = {
       .isEmail()
       .normalizeEmail()
       .withMessage('Valid email is required'),
-    body('user.googleId')
-      .notEmpty()
-      .withMessage('Google ID is required'),
+    body('user.googleId').notEmpty().withMessage('Google ID is required'),
     body('user.fullName')
       .optional()
       .trim()
       .isLength({ min: 2 })
       .withMessage('Full name must be at least 2 characters'),
     body('role')
-      .isIn(['Student', 'Teacher', 'Parent', 'Admin'])
+      .isIn([
+        'Student',
+        'Teacher',
+        'Parent',
+        'Admin',
+        'SuperAdmin',
+        'Visitor',
+        'PlatformUser',
+      ])
       .withMessage('Please select a valid role'),
   ],
 

@@ -1,0 +1,913 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="5143pt" height="399pt" viewBox="0.00 0.00 5143.46 399.20">
+<g id="graph0" class="graph" transform="translate(-1858.1683337087493,327.6536442950374) scale(1.9999999153873087)" data-name="SchoolBridgeApp">
+
+<polygon fill="white" stroke="none" points="-4,4 -4,-395.2 5139.46,-395.2 5139.46,4 -4,4"/>
+<!-- SchoolBridgeApp -->
+<g id="node1" class="node" pointer-events="visible" data-name="SchoolBridgeApp">
+
+<polygon fill="none" stroke="black" points="4834.04,-391.2 4831.04,-395.2 4810.04,-395.2 4807.04,-391.2 4716.83,-391.2 4716.83,-355.2 4834.04,-355.2 4834.04,-391.2"/>
+<text text-anchor="middle" x="4775.43" y="-369" font-family="Times,serif" font-size="14.00">SchoolBridgeApp</text>
+</g>
+<!-- app -->
+<g id="node2" class="node" pointer-events="visible" data-name="app">
+
+<polygon fill="none" stroke="black" points="1419.43,-302.4 1416.43,-306.4 1395.43,-306.4 1392.43,-302.4 1365.43,-302.4 1365.43,-266.4 1419.43,-266.4 1419.43,-302.4"/>
+<text text-anchor="middle" x="1392.43" y="-280.2" font-family="Times,serif" font-size="14.00">app</text>
+</g>
+<!-- SchoolBridgeApp&#45;&gt;app -->
+<g id="edge1" class="edge" data-name="SchoolBridgeApp-&gt;app">
+
+<path fill="none" stroke="black" d="M4716.36,-370.68C4296.78,-359.92 1774.24,-295.2 1431.08,-286.39"/>
+<polygon fill="black" stroke="black" points="1431.18,-282.89 1421.1,-286.14 1431,-289.89 1431.18,-282.89"/>
+</g>
+<!-- backend -->
+<g id="node3" class="node" pointer-events="visible" data-name="backend">
+
+<polygon fill="none" stroke="black" points="4759.58,-302.4 4756.58,-306.4 4735.58,-306.4 4732.58,-302.4 4697.29,-302.4 4697.29,-266.4 4759.58,-266.4 4759.58,-302.4"/>
+<text text-anchor="middle" x="4728.43" y="-280.2" font-family="Times,serif" font-size="14.00">backend</text>
+</g>
+<!-- SchoolBridgeApp&#45;&gt;backend -->
+<g id="edge2" class="edge" data-name="SchoolBridgeApp-&gt;backend">
+
+<path fill="none" stroke="black" d="M4766.15,-355.05C4759.63,-343 4750.76,-326.63 4743.27,-312.79"/>
+<polygon fill="black" stroke="black" points="4746.42,-311.27 4738.58,-304.14 4740.27,-314.6 4746.42,-311.27"/>
+</g>
+<!-- package_json -->
+<g id="node4" class="node" pointer-events="visible" data-name="package_json">
+
+<polygon fill="none" stroke="black" points="4869.63,-302.4 4866.63,-306.4 4845.63,-306.4 4842.63,-302.4 4777.24,-302.4 4777.24,-266.4 4869.63,-266.4 4869.63,-302.4"/>
+<text text-anchor="middle" x="4823.43" y="-280.2" font-family="Times,serif" font-size="14.00">package_json</text>
+</g>
+<!-- SchoolBridgeApp&#45;&gt;package_json -->
+<g id="edge3" class="edge" data-name="SchoolBridgeApp-&gt;package_json">
+
+<path fill="none" stroke="black" d="M4784.92,-355.05C4791.58,-343 4800.63,-326.63 4808.29,-312.79"/>
+<polygon fill="black" stroke="black" points="4811.3,-314.58 4813.07,-304.13 4805.17,-311.19 4811.3,-314.58"/>
+<text text-anchor="middle" x="4840.78" y="-324.6" font-family="Times,serif" font-size="14.00">package.json</text>
+</g>
+<!-- README_md -->
+<g id="node5" class="node" pointer-events="visible" data-name="README_md">
+
+<polygon fill="none" stroke="black" points="4987.43,-302.4 4984.43,-306.4 4963.43,-306.4 4960.43,-302.4 4887.43,-302.4 4887.43,-266.4 4987.43,-266.4 4987.43,-302.4"/>
+<text text-anchor="middle" x="4937.43" y="-280.2" font-family="Times,serif" font-size="14.00">README_md</text>
+</g>
+<!-- SchoolBridgeApp&#45;&gt;README_md -->
+<g id="edge4" class="edge" data-name="SchoolBridgeApp-&gt;README_md">
+
+<path fill="none" stroke="black" d="M4834.31,-357.68C4850.21,-352.47 4866.99,-345.71 4881.43,-337.2 4893.31,-330.2 4904.79,-320.32 4914.23,-311.07"/>
+<polygon fill="black" stroke="black" points="4916.73,-313.52 4921.23,-303.93 4911.73,-308.62 4916.73,-313.52"/>
+<text text-anchor="middle" x="4942.68" y="-324.6" font-family="Times,serif" font-size="14.00">README.md</text>
+</g>
+<!-- assets -->
+<g id="node6" class="node" pointer-events="visible" data-name="assets">
+
+<polygon fill="none" stroke="black" points="1000.43,-213.6 997.43,-217.6 976.43,-217.6 973.43,-213.6 946.43,-213.6 946.43,-177.6 1000.43,-177.6 1000.43,-213.6"/>
+<text text-anchor="middle" x="973.43" y="-191.4" font-family="Times,serif" font-size="14.00">assets</text>
+</g>
+<!-- app&#45;&gt;assets -->
+<g id="edge5" class="edge" data-name="app-&gt;assets">
+
+<path fill="none" stroke="black" d="M1365.31,-281.14C1303.32,-275.42 1146.79,-257.79 1011.23,-213.77"/>
+<polygon fill="black" stroke="black" points="1012.71,-210.58 1002.11,-210.75 1010.51,-217.22 1012.71,-210.58"/>
+</g>
+<!-- components -->
+<g id="node7" class="node" pointer-events="visible" data-name="components">
+
+<polygon fill="none" stroke="black" points="1102.09,-213.6 1099.09,-217.6 1078.09,-217.6 1075.09,-213.6 1018.78,-213.6 1018.78,-177.6 1102.09,-177.6 1102.09,-213.6"/>
+<text text-anchor="middle" x="1060.43" y="-191.4" font-family="Times,serif" font-size="14.00">components</text>
+</g>
+<!-- app&#45;&gt;components -->
+<g id="edge6" class="edge" data-name="app-&gt;components">
+
+<path fill="none" stroke="black" d="M1365.1,-277.43C1316.45,-266.62 1211.49,-242.52 1113.39,-214.06"/>
+<polygon fill="black" stroke="black" points="1114.42,-210.72 1103.84,-211.27 1112.45,-217.44 1114.42,-210.72"/>
+</g>
+<!-- constants -->
+<g id="node8" class="node" pointer-events="visible" data-name="constants">
+
+<polygon fill="none" stroke="black" points="1188.54,-213.6 1185.54,-217.6 1164.54,-217.6 1161.54,-213.6 1120.33,-213.6 1120.33,-177.6 1188.54,-177.6 1188.54,-213.6"/>
+<text text-anchor="middle" x="1154.43" y="-191.4" font-family="Times,serif" font-size="14.00">constants</text>
+</g>
+<!-- app&#45;&gt;constants -->
+<g id="edge7" class="edge" data-name="app-&gt;constants">
+
+<path fill="none" stroke="black" d="M1365.2,-273.97C1329.33,-261.48 1264.06,-238.51 1199.08,-214.17"/>
+<polygon fill="black" stroke="black" points="1200.67,-211.02 1190.08,-210.78 1198.21,-217.58 1200.67,-211.02"/>
+</g>
+<!-- context -->
+<g id="node9" class="node" pointer-events="visible" data-name="context">
+
+<polygon fill="none" stroke="black" points="1264.14,-213.6 1261.14,-217.6 1240.14,-217.6 1237.14,-213.6 1206.73,-213.6 1206.73,-177.6 1264.14,-177.6 1264.14,-213.6"/>
+<text text-anchor="middle" x="1235.43" y="-191.4" font-family="Times,serif" font-size="14.00">context</text>
+</g>
+<!-- app&#45;&gt;context -->
+<g id="edge8" class="edge" data-name="app-&gt;context">
+
+<path fill="none" stroke="black" d="M1365.09,-268.28C1340.05,-254.44 1302.71,-233.8 1274.53,-218.21"/>
+<polygon fill="black" stroke="black" points="1276.37,-215.23 1265.92,-213.46 1272.98,-221.36 1276.37,-215.23"/>
+</g>
+<!-- hooks -->
+<g id="node10" class="node" pointer-events="visible" data-name="hooks">
+
+<polygon fill="none" stroke="black" points="1336.43,-213.6 1333.43,-217.6 1312.43,-217.6 1309.43,-213.6 1282.43,-213.6 1282.43,-177.6 1336.43,-177.6 1336.43,-213.6"/>
+<text text-anchor="middle" x="1309.43" y="-191.4" font-family="Times,serif" font-size="14.00">hooks</text>
+</g>
+<!-- app&#45;&gt;hooks -->
+<g id="edge9" class="edge" data-name="app-&gt;hooks">
+
+<path fill="none" stroke="black" d="M1376.04,-266.25C1363.95,-253.61 1347.32,-236.22 1333.7,-221.97"/>
+<polygon fill="black" stroke="black" points="1336.57,-219.91 1327.13,-215.1 1331.51,-224.75 1336.57,-219.91"/>
+</g>
+<!-- navigation -->
+<g id="node11" class="node" pointer-events="visible" data-name="navigation">
+
+<polygon fill="none" stroke="black" points="1430.03,-213.6 1427.03,-217.6 1406.03,-217.6 1403.03,-213.6 1354.84,-213.6 1354.84,-177.6 1430.03,-177.6 1430.03,-213.6"/>
+<text text-anchor="middle" x="1392.43" y="-191.4" font-family="Times,serif" font-size="14.00">navigation</text>
+</g>
+<!-- app&#45;&gt;navigation -->
+<g id="edge10" class="edge" data-name="app-&gt;navigation">
+
+<path fill="none" stroke="black" d="M1392.43,-266.25C1392.43,-254.56 1392.43,-238.79 1392.43,-225.22"/>
+<polygon fill="black" stroke="black" points="1395.93,-225.52 1392.43,-215.52 1388.93,-225.52 1395.93,-225.52"/>
+</g>
+<!-- screens -->
+<g id="node12" class="node" pointer-events="visible" data-name="screens">
+
+<polygon fill="none" stroke="black" points="2596.14,-213.6 2593.14,-217.6 2572.14,-217.6 2569.14,-213.6 2538.73,-213.6 2538.73,-177.6 2596.14,-177.6 2596.14,-213.6"/>
+<text text-anchor="middle" x="2567.43" y="-191.4" font-family="Times,serif" font-size="14.00">screens</text>
+</g>
+<!-- app&#45;&gt;screens -->
+<g id="edge11" class="edge" data-name="app-&gt;screens">
+
+<path fill="none" stroke="black" d="M1419.75,-281.38C1574.59,-269.94 2341.76,-213.27 2527.08,-199.58"/>
+<polygon fill="black" stroke="black" points="2527.21,-203.08 2536.93,-198.85 2526.7,-196.1 2527.21,-203.08"/>
+</g>
+<!-- services -->
+<g id="node13" class="node" pointer-events="visible" data-name="services">
+
+<polygon fill="none" stroke="black" points="4270.02,-213.6 4267.02,-217.6 4246.02,-217.6 4243.02,-213.6 4208.84,-213.6 4208.84,-177.6 4270.02,-177.6 4270.02,-213.6"/>
+<text text-anchor="middle" x="4239.43" y="-191.4" font-family="Times,serif" font-size="14.00">services</text>
+</g>
+<!-- app&#45;&gt;services -->
+<g id="edge12" class="edge" data-name="app-&gt;services">
+
+<path fill="none" stroke="black" d="M1419.7,-282.57C1688.81,-274.36 3866.36,-207.97 4197.33,-197.88"/>
+<polygon fill="black" stroke="black" points="4197.35,-201.38 4207.24,-197.58 4197.14,-194.39 4197.35,-201.38"/>
+</g>
+<!-- styles -->
+<g id="node14" class="node" pointer-events="visible" data-name="styles">
+
+<polygon fill="none" stroke="black" points="4342.43,-213.6 4339.43,-217.6 4318.43,-217.6 4315.43,-213.6 4288.43,-213.6 4288.43,-177.6 4342.43,-177.6 4342.43,-213.6"/>
+<text text-anchor="middle" x="4315.43" y="-191.4" font-family="Times,serif" font-size="14.00">styles</text>
+</g>
+<!-- app&#45;&gt;styles -->
+<g id="edge13" class="edge" data-name="app-&gt;styles">
+
+<path fill="none" stroke="black" d="M1419.68,-283.43C1692.76,-283.62 3933.82,-283.12 4276.78,-213.43"/>
+<polygon fill="black" stroke="black" points="4277.45,-216.86 4286.47,-211.3 4275.95,-210.03 4277.45,-216.86"/>
+</g>
+<!-- App_js -->
+<g id="node15" class="node" pointer-events="visible" data-name="App_js">
+
+<polygon fill="none" stroke="black" points="4416.88,-213.6 4413.88,-217.6 4392.88,-217.6 4389.88,-213.6 4359.98,-213.6 4359.98,-177.6 4416.88,-177.6 4416.88,-213.6"/>
+<text text-anchor="middle" x="4388.43" y="-191.4" font-family="Times,serif" font-size="14.00">App_js</text>
+</g>
+<!-- app&#45;&gt;App_js -->
+<g id="edge14" class="edge" data-name="app-&gt;App_js">
+
+<path fill="none" stroke="black" d="M1419.75,-283.4C1664.85,-283.38 3488.95,-282.03 4035.43,-248.4 4172.88,-239.94 4213.23,-250.74 4348.88,-213.85"/>
+<polygon fill="black" stroke="black" points="4349.52,-217.31 4358.22,-211.28 4347.65,-210.56 4349.52,-217.31"/>
+<text text-anchor="middle" x="4292.91" y="-235.8" font-family="Times,serif" font-size="14.00">App.js</text>
+</g>
+<!-- config -->
+<g id="node65" class="node" pointer-events="visible" data-name="config">
+
+<polygon fill="none" stroke="black" points="4488.43,-213.6 4485.43,-217.6 4464.43,-217.6 4461.43,-213.6 4434.43,-213.6 4434.43,-177.6 4488.43,-177.6 4488.43,-213.6"/>
+<text text-anchor="middle" x="4461.43" y="-191.4" font-family="Times,serif" font-size="14.00">config</text>
+</g>
+<!-- backend&#45;&gt;config -->
+<g id="edge64" class="edge" data-name="backend-&gt;config">
+
+<path fill="none" stroke="black" d="M4696.93,-275.47C4654.02,-264.32 4574.76,-242.53 4499.38,-214.08"/>
+<polygon fill="black" stroke="black" points="4500.77,-210.86 4490.18,-210.56 4498.27,-217.4 4500.77,-210.86"/>
+</g>
+<!-- controllers -->
+<g id="node66" class="node" pointer-events="visible" data-name="controllers">
+
+<polygon fill="none" stroke="black" points="4582.3,-213.6 4579.3,-217.6 4558.3,-217.6 4555.3,-213.6 4506.57,-213.6 4506.57,-177.6 4582.3,-177.6 4582.3,-213.6"/>
+<text text-anchor="middle" x="4544.43" y="-191.4" font-family="Times,serif" font-size="14.00">controllers</text>
+</g>
+<!-- backend&#45;&gt;controllers -->
+<g id="edge65" class="edge" data-name="backend-&gt;controllers">
+
+<path fill="none" stroke="black" d="M4696.8,-268.48C4667.88,-254.83 4624.69,-234.46 4591.68,-218.89"/>
+<polygon fill="black" stroke="black" points="4593.25,-215.76 4582.71,-214.66 4590.26,-222.09 4593.25,-215.76"/>
+</g>
+<!-- middleware -->
+<g id="node67" class="node" pointer-events="visible" data-name="middleware">
+
+<polygon fill="none" stroke="black" points="4682.52,-213.6 4679.52,-217.6 4658.52,-217.6 4655.52,-213.6 4600.35,-213.6 4600.35,-177.6 4682.52,-177.6 4682.52,-213.6"/>
+<text text-anchor="middle" x="4641.43" y="-191.4" font-family="Times,serif" font-size="14.00">middleware</text>
+</g>
+<!-- backend&#45;&gt;middleware -->
+<g id="edge66" class="edge" data-name="backend-&gt;middleware">
+
+<path fill="none" stroke="black" d="M4711.25,-266.25C4698.58,-253.61 4681.14,-236.22 4666.87,-221.97"/>
+<polygon fill="black" stroke="black" points="4669.51,-219.66 4659.96,-215.08 4664.56,-224.62 4669.51,-219.66"/>
+</g>
+<!-- models -->
+<g id="node68" class="node" pointer-events="visible" data-name="models">
+
+<polygon fill="none" stroke="black" points="4756.88,-213.6 4753.88,-217.6 4732.88,-217.6 4729.88,-213.6 4699.99,-213.6 4699.99,-177.6 4756.88,-177.6 4756.88,-213.6"/>
+<text text-anchor="middle" x="4728.43" y="-191.4" font-family="Times,serif" font-size="14.00">models</text>
+</g>
+<!-- backend&#45;&gt;models -->
+<g id="edge67" class="edge" data-name="backend-&gt;models">
+
+<path fill="none" stroke="black" d="M4728.43,-266.25C4728.43,-254.56 4728.43,-238.79 4728.43,-225.22"/>
+<polygon fill="black" stroke="black" points="4731.93,-225.52 4728.43,-215.52 4724.93,-225.52 4731.93,-225.52"/>
+</g>
+<!-- routes -->
+<g id="node69" class="node" pointer-events="visible" data-name="routes">
+
+<polygon fill="none" stroke="black" points="4828.43,-213.6 4825.43,-217.6 4804.43,-217.6 4801.43,-213.6 4774.43,-213.6 4774.43,-177.6 4828.43,-177.6 4828.43,-213.6"/>
+<text text-anchor="middle" x="4801.43" y="-191.4" font-family="Times,serif" font-size="14.00">routes</text>
+</g>
+<!-- backend&#45;&gt;routes -->
+<g id="edge68" class="edge" data-name="backend-&gt;routes">
+
+<path fill="none" stroke="black" d="M4742.86,-266.25C4753.29,-253.85 4767.57,-236.87 4779.42,-222.78"/>
+<polygon fill="black" stroke="black" points="4782.06,-225.07 4785.82,-215.17 4776.7,-220.57 4782.06,-225.07"/>
+</g>
+<!-- utils -->
+<g id="node70" class="node" pointer-events="visible" data-name="utils">
+
+<polygon fill="none" stroke="black" points="4900.43,-213.6 4897.43,-217.6 4876.43,-217.6 4873.43,-213.6 4846.43,-213.6 4846.43,-177.6 4900.43,-177.6 4900.43,-213.6"/>
+<text text-anchor="middle" x="4873.43" y="-191.4" font-family="Times,serif" font-size="14.00">utils</text>
+</g>
+<!-- backend&#45;&gt;utils -->
+<g id="edge69" class="edge" data-name="backend-&gt;utils">
+
+<path fill="none" stroke="black" d="M4757.43,-266.04C4780.09,-252.48 4811.76,-233.52 4836.28,-218.84"/>
+<polygon fill="black" stroke="black" points="4837.88,-221.96 4844.67,-213.82 4834.29,-215.96 4837.88,-221.96"/>
+</g>
+<!-- server_js -->
+<g id="node71" class="node" pointer-events="visible" data-name="server_js">
+
+<polygon fill="none" stroke="black" points="4984.47,-213.6 4981.47,-217.6 4960.47,-217.6 4957.47,-213.6 4918.39,-213.6 4918.39,-177.6 4984.47,-177.6 4984.47,-213.6"/>
+<text text-anchor="middle" x="4951.43" y="-191.4" font-family="Times,serif" font-size="14.00">server_js</text>
+</g>
+<!-- backend&#45;&gt;server_js -->
+<g id="edge70" class="edge" data-name="backend-&gt;server_js">
+
+<path fill="none" stroke="black" d="M4759.82,-269.91C4762.73,-268.7 4765.63,-267.52 4768.43,-266.4 4796.96,-255.01 4865.66,-230.27 4907.48,-214.29"/>
+<polygon fill="black" stroke="black" points="4908.51,-217.64 4916.58,-210.77 4905.99,-211.11 4908.51,-217.64"/>
+<text text-anchor="middle" x="4881.95" y="-235.8" font-family="Times,serif" font-size="14.00">server.js</text>
+</g>
+<!-- package_json2 -->
+<g id="node72" class="node" pointer-events="visible" data-name="package_json2">
+
+<polygon fill="none" stroke="black" points="5102.13,-213.6 5099.13,-217.6 5078.13,-217.6 5075.13,-213.6 5002.74,-213.6 5002.74,-177.6 5102.13,-177.6 5102.13,-213.6"/>
+<text text-anchor="middle" x="5052.43" y="-191.4" font-family="Times,serif" font-size="14.00">package_json2</text>
+</g>
+<!-- backend&#45;&gt;package_json2 -->
+<g id="edge71" class="edge" data-name="backend-&gt;package_json2">
+
+<path fill="none" stroke="black" d="M4760.03,-269.04C4762.84,-268.05 4765.67,-267.15 4768.43,-266.4 4829.41,-249.89 4848.03,-263.25 4909.43,-248.4 4940.7,-240.84 4974.6,-228.74 5001.53,-218.14"/>
+<polygon fill="black" stroke="black" points="5002.48,-221.53 5010.47,-214.57 4999.88,-215.03 5002.48,-221.53"/>
+<text text-anchor="middle" x="4997.78" y="-235.8" font-family="Times,serif" font-size="14.00">package.json</text>
+</g>
+<!-- AuthStack_js -->
+<g id="node16" class="node" pointer-events="visible" data-name="AuthStack_js">
+
+<polygon fill="none" stroke="black" points="827.38,-124.8 824.38,-128.8 803.38,-128.8 800.38,-124.8 735.49,-124.8 735.49,-88.8 827.38,-88.8 827.38,-124.8"/>
+<text text-anchor="middle" x="781.43" y="-102.6" font-family="Times,serif" font-size="14.00">AuthStack_js</text>
+</g>
+<!-- navigation&#45;&gt;AuthStack_js -->
+<g id="edge15" class="edge" data-name="navigation-&gt;AuthStack_js">
+
+<path fill="none" stroke="black" d="M1354.49,-179.76C1351.46,-178.92 1348.42,-178.18 1345.43,-177.6 1239.8,-157.05 964.12,-191.99 861.49,-159.6 843.1,-153.8 824.87,-142.55 810.47,-132.01"/>
+<polygon fill="black" stroke="black" points="812.87,-129.44 802.79,-126.17 808.63,-135.02 812.87,-129.44"/>
+<text text-anchor="middle" x="898.41" y="-147" font-family="Times,serif" font-size="14.00">AuthStack.js</text>
+</g>
+<!-- StudentStack_js -->
+<g id="node17" class="node" pointer-events="visible" data-name="StudentStack_js">
+
+<polygon fill="none" stroke="black" points="951.66,-124.8 948.66,-128.8 927.66,-128.8 924.66,-124.8 845.21,-124.8 845.21,-88.8 951.66,-88.8 951.66,-124.8"/>
+<text text-anchor="middle" x="898.43" y="-102.6" font-family="Times,serif" font-size="14.00">StudentStack_js</text>
+</g>
+<!-- navigation&#45;&gt;StudentStack_js -->
+<g id="edge16" class="edge" data-name="navigation-&gt;StudentStack_js">
+
+<path fill="none" stroke="black" d="M1354.49,-179.8C1351.46,-178.94 1348.41,-178.19 1345.43,-177.6 1262.38,-161.01 1044.12,-189.07 964.71,-159.6 949.22,-153.85 934.47,-143.06 922.84,-132.82"/>
+<polygon fill="black" stroke="black" points="925.42,-130.43 915.7,-126.2 920.66,-135.57 925.42,-130.43"/>
+<text text-anchor="middle" x="1008.79" y="-147" font-family="Times,serif" font-size="14.00">StudentStack.js</text>
+</g>
+<!-- TeacherStack_js -->
+<g id="node18" class="node" pointer-events="visible" data-name="TeacherStack_js">
+
+<polygon fill="none" stroke="black" points="1077.45,-124.8 1074.45,-128.8 1053.45,-128.8 1050.45,-124.8 969.42,-124.8 969.42,-88.8 1077.45,-88.8 1077.45,-124.8"/>
+<text text-anchor="middle" x="1023.43" y="-102.6" font-family="Times,serif" font-size="14.00">TeacherStack_js</text>
+</g>
+<!-- navigation&#45;&gt;TeacherStack_js -->
+<g id="edge17" class="edge" data-name="navigation-&gt;TeacherStack_js">
+
+<path fill="none" stroke="black" d="M1354.47,-179.86C1351.44,-179 1348.41,-178.22 1345.43,-177.6 1287.24,-165.37 1132.93,-183.38 1078.42,-159.6 1065.31,-153.88 1053.4,-143.63 1044.03,-133.75"/>
+<polygon fill="black" stroke="black" points="1046.76,-131.56 1037.5,-126.42 1041.54,-136.22 1046.76,-131.56"/>
+<text text-anchor="middle" x="1122.94" y="-147" font-family="Times,serif" font-size="14.00">TeacherStack.js</text>
+</g>
+<!-- AdminStack_js -->
+<g id="node19" class="node" pointer-events="visible" data-name="AdminStack_js">
+
+<polygon fill="none" stroke="black" points="1197.77,-124.8 1194.77,-128.8 1173.77,-128.8 1170.77,-124.8 1095.1,-124.8 1095.1,-88.8 1197.77,-88.8 1197.77,-124.8"/>
+<text text-anchor="middle" x="1146.43" y="-102.6" font-family="Times,serif" font-size="14.00">AdminStack_js</text>
+</g>
+<!-- navigation&#45;&gt;AdminStack_js -->
+<g id="edge18" class="edge" data-name="navigation-&gt;AdminStack_js">
+
+<path fill="none" stroke="black" d="M1354.44,-180.02C1351.42,-179.12 1348.39,-178.3 1345.43,-177.6 1278,-161.71 1251.72,-192.22 1190.6,-159.6 1179.66,-153.76 1170.26,-143.99 1162.98,-134.51"/>
+<polygon fill="black" stroke="black" points="1165.95,-132.64 1157.31,-126.5 1160.24,-136.69 1165.95,-132.64"/>
+<text text-anchor="middle" x="1232.85" y="-147" font-family="Times,serif" font-size="14.00">AdminStack.js</text>
+</g>
+<!-- RootNavigator_js -->
+<g id="node20" class="node" pointer-events="visible" data-name="RootNavigator_js">
+
+<polygon fill="none" stroke="black" points="1330.98,-124.8 1327.98,-128.8 1306.98,-128.8 1303.98,-124.8 1215.89,-124.8 1215.89,-88.8 1330.98,-88.8 1330.98,-124.8"/>
+<text text-anchor="middle" x="1273.43" y="-102.6" font-family="Times,serif" font-size="14.00">RootNavigator_js</text>
+</g>
+<!-- navigation&#45;&gt;RootNavigator_js -->
+<g id="edge19" class="edge" data-name="navigation-&gt;RootNavigator_js">
+
+<path fill="none" stroke="black" d="M1354.53,-180.69C1351.46,-179.62 1348.4,-178.58 1345.43,-177.6 1318.98,-168.86 1304.44,-179.92 1285.39,-159.6 1279.55,-153.38 1276.37,-144.89 1274.69,-136.59"/>
+<polygon fill="black" stroke="black" points="1278.17,-136.2 1273.39,-126.74 1271.23,-137.11 1278.17,-136.2"/>
+<text text-anchor="middle" x="1333.46" y="-147" font-family="Times,serif" font-size="14.00">RootNavigator.js</text>
+</g>
+<!-- index_js -->
+<g id="node21" class="node" pointer-events="visible" data-name="index_js">
+
+<polygon fill="none" stroke="black" points="1412.38,-124.8 1409.38,-128.8 1388.38,-128.8 1385.38,-124.8 1348.49,-124.8 1348.49,-88.8 1412.38,-88.8 1412.38,-124.8"/>
+<text text-anchor="middle" x="1380.43" y="-102.6" font-family="Times,serif" font-size="14.00">index_js</text>
+</g>
+<!-- navigation&#45;&gt;index_js -->
+<g id="edge20" class="edge" data-name="navigation-&gt;index_js">
+
+<path fill="none" stroke="black" d="M1390.06,-177.45C1388.45,-165.76 1386.27,-149.99 1384.39,-136.42"/>
+<polygon fill="black" stroke="black" points="1387.89,-136.14 1383.05,-126.71 1380.95,-137.09 1387.89,-136.14"/>
+<text text-anchor="middle" x="1410.41" y="-147" font-family="Times,serif" font-size="14.00">index.js</text>
+</g>
+<!-- Auth -->
+<g id="node22" class="node" pointer-events="visible" data-name="Auth">
+
+<polygon fill="none" stroke="black" points="1484.43,-124.8 1481.43,-128.8 1460.43,-128.8 1457.43,-124.8 1430.43,-124.8 1430.43,-88.8 1484.43,-88.8 1484.43,-124.8"/>
+<text text-anchor="middle" x="1457.43" y="-102.6" font-family="Times,serif" font-size="14.00">Auth</text>
+</g>
+<!-- screens&#45;&gt;Auth -->
+<g id="edge21" class="edge" data-name="screens-&gt;Auth">
+
+<path fill="none" stroke="black" d="M2538.6,-194.22C2391.38,-192.04 1721.95,-179.41 1495.64,-124.68"/>
+<polygon fill="black" stroke="black" points="1496.58,-121.31 1486.03,-122.24 1494.86,-128.09 1496.58,-121.31"/>
+</g>
+<!-- Student -->
+<g id="node23" class="node" pointer-events="visible" data-name="Student">
+
+<polygon fill="none" stroke="black" points="1560.71,-124.8 1557.71,-128.8 1536.71,-128.8 1533.71,-124.8 1502.15,-124.8 1502.15,-88.8 1560.71,-88.8 1560.71,-124.8"/>
+<text text-anchor="middle" x="1531.43" y="-102.6" font-family="Times,serif" font-size="14.00">Student</text>
+</g>
+<!-- screens&#45;&gt;Student -->
+<g id="edge22" class="edge" data-name="screens-&gt;Student">
+
+<path fill="none" stroke="black" d="M2538.26,-192.04C2451.12,-184.41 2185.11,-161.2 1964.43,-142.8 1820.21,-130.78 1648.9,-117.11 1572.16,-111.02"/>
+<polygon fill="black" stroke="black" points="1572.85,-107.57 1562.61,-110.27 1572.3,-114.55 1572.85,-107.57"/>
+</g>
+<!-- Teacher -->
+<g id="node24" class="node" pointer-events="visible" data-name="Teacher">
+
+<polygon fill="none" stroke="black" points="2598,-124.8 2595,-128.8 2574,-128.8 2571,-124.8 2536.87,-124.8 2536.87,-88.8 2598,-88.8 2598,-124.8"/>
+<text text-anchor="middle" x="2567.43" y="-102.6" font-family="Times,serif" font-size="14.00">Teacher</text>
+</g>
+<!-- screens&#45;&gt;Teacher -->
+<g id="edge23" class="edge" data-name="screens-&gt;Teacher">
+
+<path fill="none" stroke="black" d="M2567.43,-177.45C2567.43,-165.76 2567.43,-149.99 2567.43,-136.42"/>
+<polygon fill="black" stroke="black" points="2570.93,-136.72 2567.43,-126.72 2563.93,-136.72 2570.93,-136.72"/>
+</g>
+<!-- SchoolAdmin -->
+<g id="node25" class="node" pointer-events="visible" data-name="SchoolAdmin">
+
+<polygon fill="none" stroke="black" points="3533.21,-124.8 3530.21,-128.8 3509.21,-128.8 3506.21,-124.8 3439.66,-124.8 3439.66,-88.8 3533.21,-88.8 3533.21,-124.8"/>
+<text text-anchor="middle" x="3486.43" y="-102.6" font-family="Times,serif" font-size="14.00">SchoolAdmin</text>
+</g>
+<!-- screens&#45;&gt;SchoolAdmin -->
+<g id="edge24" class="edge" data-name="screens-&gt;SchoolAdmin">
+
+<path fill="none" stroke="black" d="M2596.46,-191.86C2725.81,-179.64 3251.2,-130.02 3428.03,-113.32"/>
+<polygon fill="black" stroke="black" points="3428.28,-116.81 3437.91,-112.38 3427.62,-109.84 3428.28,-116.81"/>
+</g>
+<!-- SuperAdmin -->
+<g id="node26" class="node" pointer-events="visible" data-name="SuperAdmin">
+
+<polygon fill="none" stroke="black" points="4098.99,-124.8 4095.99,-128.8 4074.99,-128.8 4071.99,-124.8 4011.88,-124.8 4011.88,-88.8 4098.99,-88.8 4098.99,-124.8"/>
+<text text-anchor="middle" x="4055.43" y="-102.6" font-family="Times,serif" font-size="14.00">SuperAdmin</text>
+</g>
+<!-- screens&#45;&gt;SuperAdmin -->
+<g id="edge25" class="edge" data-name="screens-&gt;SuperAdmin">
+
+<path fill="none" stroke="black" d="M2596.49,-192.91C2778.01,-182.32 3756.41,-125.24 4000.32,-111.01"/>
+<polygon fill="black" stroke="black" points="4000.42,-114.52 4010.2,-110.44 4000.01,-107.53 4000.42,-114.52"/>
+</g>
+<!-- Shared -->
+<g id="node27" class="node" pointer-events="visible" data-name="Shared">
+
+<polygon fill="none" stroke="black" points="4171.81,-124.8 4168.81,-128.8 4147.81,-128.8 4144.81,-124.8 4117.06,-124.8 4117.06,-88.8 4171.81,-88.8 4171.81,-124.8"/>
+<text text-anchor="middle" x="4144.43" y="-102.6" font-family="Times,serif" font-size="14.00">Shared</text>
+</g>
+<!-- screens&#45;&gt;Shared -->
+<g id="edge26" class="edge" data-name="screens-&gt;Shared">
+
+<path fill="none" stroke="black" d="M2596.37,-194.84C2779.81,-196.12 3783.37,-199.7 4106.2,-124.7"/>
+<polygon fill="black" stroke="black" points="4106.56,-128.21 4115.46,-122.47 4104.92,-121.41 4106.56,-128.21"/>
+</g>
+<!-- authService_js -->
+<g id="node60" class="node" pointer-events="visible" data-name="authService_js">
+
+<polygon fill="none" stroke="black" points="4288.86,-124.8 4285.86,-128.8 4264.86,-128.8 4261.86,-124.8 4190.01,-124.8 4190.01,-88.8 4288.86,-88.8 4288.86,-124.8"/>
+<text text-anchor="middle" x="4239.43" y="-102.6" font-family="Times,serif" font-size="14.00">authService_js</text>
+</g>
+<!-- services&#45;&gt;authService_js -->
+<g id="edge59" class="edge" data-name="services-&gt;authService_js">
+
+<path fill="none" stroke="black" d="M4239.43,-177.45C4239.43,-165.76 4239.43,-149.99 4239.43,-136.42"/>
+<polygon fill="black" stroke="black" points="4242.93,-136.72 4239.43,-126.72 4235.93,-136.72 4242.93,-136.72"/>
+<text text-anchor="middle" x="4278.9" y="-147" font-family="Times,serif" font-size="14.00">authService.js</text>
+</g>
+<!-- studentService_js -->
+<g id="node61" class="node" pointer-events="visible" data-name="studentService_js">
+
+<polygon fill="none" stroke="black" points="4421.69,-124.8 4418.69,-128.8 4397.69,-128.8 4394.69,-124.8 4307.18,-124.8 4307.18,-88.8 4421.69,-88.8 4421.69,-124.8"/>
+<text text-anchor="middle" x="4364.43" y="-102.6" font-family="Times,serif" font-size="14.00">studentService_js</text>
+</g>
+<!-- services&#45;&gt;studentService_js -->
+<g id="edge60" class="edge" data-name="services-&gt;studentService_js">
+
+<path fill="none" stroke="black" d="M4270.44,-181.4C4273.48,-180.12 4276.51,-178.83 4279.43,-177.6 4298.52,-169.55 4305.85,-172.02 4322.43,-159.6 4331.69,-152.67 4340.11,-143.26 4346.95,-134.36"/>
+<polygon fill="black" stroke="black" points="4349.78,-136.43 4352.82,-126.28 4344.11,-132.31 4349.78,-136.43"/>
+<text text-anchor="middle" x="4388.06" y="-147" font-family="Times,serif" font-size="14.00">studentService.js</text>
+</g>
+<!-- teacherService_js -->
+<g id="node62" class="node" pointer-events="visible" data-name="teacherService_js">
+
+<polygon fill="none" stroke="black" points="4554.66,-124.8 4551.66,-128.8 4530.66,-128.8 4527.66,-124.8 4440.21,-124.8 4440.21,-88.8 4554.66,-88.8 4554.66,-124.8"/>
+<text text-anchor="middle" x="4497.43" y="-102.6" font-family="Times,serif" font-size="14.00">teacherService_js</text>
+</g>
+<!-- services&#45;&gt;teacherService_js -->
+<g id="edge61" class="edge" data-name="services-&gt;teacherService_js">
+
+<path fill="none" stroke="black" d="M4270.13,-180.51C4273.23,-179.4 4276.37,-178.41 4279.43,-177.6 4348.64,-159.41 4374.11,-188.81 4439.43,-159.6 4453.01,-153.53 4465.64,-143.09 4475.63,-133.17"/>
+<polygon fill="black" stroke="black" points="4477.95,-135.81 4482.31,-126.16 4472.88,-130.98 4477.95,-135.81"/>
+<text text-anchor="middle" x="4512.05" y="-147" font-family="Times,serif" font-size="14.00">teacherService.js</text>
+</g>
+<!-- adminService_js -->
+<g id="node63" class="node" pointer-events="visible" data-name="adminService_js">
+
+<polygon fill="none" stroke="black" points="4682.25,-124.8 4679.25,-128.8 4658.25,-128.8 4655.25,-124.8 4572.62,-124.8 4572.62,-88.8 4682.25,-88.8 4682.25,-124.8"/>
+<text text-anchor="middle" x="4627.43" y="-102.6" font-family="Times,serif" font-size="14.00">adminService_js</text>
+</g>
+<!-- services&#45;&gt;adminService_js -->
+<g id="edge62" class="edge" data-name="services-&gt;adminService_js">
+
+<path fill="none" stroke="black" d="M4270.09,-180.35C4273.2,-179.28 4276.35,-178.33 4279.43,-177.6 4340.97,-163.02 4504.52,-182.58 4563.43,-159.6 4578.36,-153.78 4592.48,-143.13 4603.64,-133"/>
+<polygon fill="black" stroke="black" points="4606.01,-135.57 4610.82,-126.13 4601.17,-130.51 4606.01,-135.57"/>
+<text text-anchor="middle" x="4636.34" y="-147" font-family="Times,serif" font-size="14.00">adminService.js</text>
+</g>
+<!-- superAdminService_js -->
+<g id="node64" class="node" pointer-events="visible" data-name="superAdminService_js">
+
+<polygon fill="none" stroke="black" points="4842.97,-124.8 4839.97,-128.8 4818.97,-128.8 4815.97,-124.8 4699.9,-124.8 4699.9,-88.8 4842.97,-88.8 4842.97,-124.8"/>
+<text text-anchor="middle" x="4771.43" y="-102.6" font-family="Times,serif" font-size="14.00">superAdminService_js</text>
+</g>
+<!-- services&#45;&gt;superAdminService_js -->
+<g id="edge63" class="edge" data-name="services-&gt;superAdminService_js">
+
+<path fill="none" stroke="black" d="M4270.52,-180.14C4273.49,-179.14 4276.49,-178.27 4279.43,-177.6 4367.51,-157.62 4598.98,-185.7 4685.43,-159.6 4705.06,-153.68 4724.8,-142.26 4740.41,-131.66"/>
+<polygon fill="black" stroke="black" points="4742.16,-134.7 4748.32,-126.08 4738.13,-128.98 4742.16,-134.7"/>
+<text text-anchor="middle" x="4783.45" y="-147" font-family="Times,serif" font-size="14.00">superAdminService.js</text>
+</g>
+<!-- LoginScreen_jsx -->
+<g id="node28" class="node" pointer-events="visible" data-name="LoginScreen_jsx">
+
+<polygon fill="none" stroke="black" points="110.8,-36 107.8,-40 86.8,-40 83.8,-36 0.07,-36 0.07,0 110.8,0 110.8,-36"/>
+<text text-anchor="middle" x="55.43" y="-13.8" font-family="Times,serif" font-size="14.00">LoginScreen_jsx</text>
+</g>
+<!-- Auth&#45;&gt;LoginScreen_jsx -->
+<g id="edge27" class="edge" data-name="Auth-&gt;LoginScreen_jsx">
+
+<path fill="none" stroke="black" d="M1429.95,-91.4C1427.13,-90.35 1424.26,-89.46 1421.43,-88.8 1283.37,-56.82 282.78,-108.15 146.07,-70.8 125.17,-65.09 104.02,-53.42 87.42,-42.6"/>
+<polygon fill="black" stroke="black" points="89.71,-39.92 79.46,-37.22 85.79,-45.72 89.71,-39.92"/>
+<text text-anchor="middle" x="192.12" y="-58.2" font-family="Times,serif" font-size="14.00">LoginScreen.jsx</text>
+</g>
+<!-- RegisterScreen_jsx -->
+<g id="node29" class="node" pointer-events="visible" data-name="RegisterScreen_jsx">
+
+<polygon fill="none" stroke="black" points="252.52,-36 249.52,-40 228.52,-40 225.52,-36 128.35,-36 128.35,0 252.52,0 252.52,-36"/>
+<text text-anchor="middle" x="190.43" y="-13.8" font-family="Times,serif" font-size="14.00">RegisterScreen_jsx</text>
+</g>
+<!-- Auth&#45;&gt;RegisterScreen_jsx -->
+<g id="edge28" class="edge" data-name="Auth-&gt;RegisterScreen_jsx">
+
+<path fill="none" stroke="black" d="M1429.95,-91.4C1427.13,-90.36 1424.26,-89.46 1421.43,-88.8 1297.87,-60.07 402.1,-104.69 279.85,-70.8 259.18,-65.07 238.32,-53.4 221.95,-42.58"/>
+<polygon fill="black" stroke="black" points="224.35,-39.98 214.12,-37.22 220.39,-45.75 224.35,-39.98"/>
+<text text-anchor="middle" x="332.73" y="-58.2" font-family="Times,serif" font-size="14.00">RegisterScreen.jsx</text>
+</g>
+<!-- RoleSelectionScreen_jsx -->
+<g id="node30" class="node" pointer-events="visible" data-name="RoleSelectionScreen_jsx">
+
+<polygon fill="none" stroke="black" points="426.4,-36 423.4,-40 402.4,-40 399.4,-36 270.47,-36 270.47,0 426.4,0 426.4,-36"/>
+<text text-anchor="middle" x="348.43" y="-13.8" font-family="Times,serif" font-size="14.00">RoleSelectionScreen_jsx</text>
+</g>
+<!-- Auth&#45;&gt;RoleSelectionScreen_jsx -->
+<g id="edge29" class="edge" data-name="Auth-&gt;RoleSelectionScreen_jsx">
+
+<path fill="none" stroke="black" d="M1429.95,-91.41C1427.13,-90.36 1424.26,-89.46 1421.43,-88.8 1312.95,-63.45 524.52,-106.45 418.97,-70.8 402.41,-65.21 386.48,-54.18 373.97,-43.73"/>
+<polygon fill="black" stroke="black" points="376.47,-41.26 366.64,-37.3 371.85,-46.52 376.47,-41.26"/>
+<text text-anchor="middle" x="487.67" y="-58.2" font-family="Times,serif" font-size="14.00">RoleSelectionScreen.jsx</text>
+</g>
+<!-- ForgotPasswordScreen_jsx -->
+<g id="node31" class="node" pointer-events="visible" data-name="ForgotPasswordScreen_jsx">
+
+<polygon fill="none" stroke="black" points="612.87,-36 609.87,-40 588.87,-40 585.87,-36 444,-36 444,0 612.87,0 612.87,-36"/>
+<text text-anchor="middle" x="528.43" y="-13.8" font-family="Times,serif" font-size="14.00">ForgotPasswordScreen_jsx</text>
+</g>
+<!-- Auth&#45;&gt;ForgotPasswordScreen_jsx -->
+<g id="edge30" class="edge" data-name="Auth-&gt;ForgotPasswordScreen_jsx">
+
+<path fill="none" stroke="black" d="M1429.95,-91.42C1427.13,-90.37 1424.26,-89.47 1421.43,-88.8 1330.9,-67.47 670.75,-105.62 584.5,-70.8 570.87,-65.3 558.52,-54.84 548.91,-44.75"/>
+<polygon fill="black" stroke="black" points="551.79,-42.72 542.51,-37.6 546.58,-47.39 551.79,-42.72"/>
+<text text-anchor="middle" x="659.9" y="-58.2" font-family="Times,serif" font-size="14.00">ForgotPasswordScreen.jsx</text>
+</g>
+<!-- DashboardScreen_jsx -->
+<g id="node32" class="node" pointer-events="visible" data-name="DashboardScreen_jsx">
+
+<polygon fill="none" stroke="black" points="768.51,-36 765.51,-40 744.51,-40 741.51,-36 630.36,-36 630.36,0 768.51,0 768.51,-36"/>
+<text text-anchor="middle" x="699.43" y="-13.8" font-family="Times,serif" font-size="14.00">DashboardScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;DashboardScreen_jsx -->
+<g id="edge31" class="edge" data-name="Student-&gt;DashboardScreen_jsx">
+
+<path fill="none" stroke="black" d="M1501.95,-91.28C1499.12,-90.29 1496.25,-89.44 1493.43,-88.8 1414.78,-70.99 843.98,-97.42 767.86,-70.8 751.83,-65.2 736.52,-54.32 724.45,-43.97"/>
+<polygon fill="black" stroke="black" points="726.8,-41.37 717.03,-37.27 722.11,-46.57 726.8,-41.37"/>
+<text text-anchor="middle" x="827.72" y="-58.2" font-family="Times,serif" font-size="14.00">DashboardScreen.jsx</text>
+</g>
+<!-- ClassesScreen_jsx -->
+<g id="node33" class="node" pointer-events="visible" data-name="ClassesScreen_jsx">
+
+<polygon fill="none" stroke="black" points="906.36,-36 903.36,-40 882.36,-40 879.36,-36 786.51,-36 786.51,0 906.36,0 906.36,-36"/>
+<text text-anchor="middle" x="846.43" y="-13.8" font-family="Times,serif" font-size="14.00">ClassesScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;ClassesScreen_jsx -->
+<g id="edge32" class="edge" data-name="Student-&gt;ClassesScreen_jsx">
+
+<path fill="none" stroke="black" d="M1501.94,-91.3C1499.12,-90.31 1496.25,-89.45 1493.43,-88.8 1370.16,-60.44 1045.02,-109.23 924.51,-70.8 906.63,-65.1 889.01,-54.01 875.04,-43.56"/>
+<polygon fill="black" stroke="black" points="877.23,-40.82 867.19,-37.42 872.92,-46.34 877.23,-40.82"/>
+<text text-anchor="middle" x="975.4" y="-58.2" font-family="Times,serif" font-size="14.00">ClassesScreen.jsx</text>
+</g>
+<!-- AttendanceScreen_jsx -->
+<g id="node34" class="node" pointer-events="visible" data-name="AttendanceScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1065.11,-36 1062.11,-40 1041.11,-40 1038.11,-36 923.76,-36 923.76,0 1065.11,0 1065.11,-36"/>
+<text text-anchor="middle" x="994.43" y="-13.8" font-family="Times,serif" font-size="14.00">AttendanceScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;AttendanceScreen_jsx -->
+<g id="edge33" class="edge" data-name="Student-&gt;AttendanceScreen_jsx">
+
+<path fill="none" stroke="black" d="M1501.94,-91.33C1499.11,-90.33 1496.25,-89.46 1493.43,-88.8 1398.02,-66.39 1143.65,-107.47 1052.76,-70.8 1038.83,-65.18 1026.02,-54.7 1015.97,-44.63"/>
+<polygon fill="black" stroke="black" points="1018.66,-42.38 1009.26,-37.49 1013.56,-47.17 1018.66,-42.38"/>
+<text text-anchor="middle" x="1114.27" y="-58.2" font-family="Times,serif" font-size="14.00">AttendanceScreen.jsx</text>
+</g>
+<!-- AnnouncementsScreen_jsx -->
+<g id="node35" class="node" pointer-events="visible" data-name="AnnouncementsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1251.84,-36 1248.84,-40 1227.84,-40 1224.84,-36 1083.03,-36 1083.03,0 1251.84,0 1251.84,-36"/>
+<text text-anchor="middle" x="1167.43" y="-13.8" font-family="Times,serif" font-size="14.00">AnnouncementsScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;AnnouncementsScreen_jsx -->
+<g id="edge34" class="edge" data-name="Student-&gt;AnnouncementsScreen_jsx">
+
+<path fill="none" stroke="black" d="M1501.93,-91.38C1499.1,-90.38 1496.24,-89.49 1493.43,-88.8 1460.79,-80.81 1219.31,-89.71 1191.53,-70.8 1183.37,-65.25 1177.91,-56.18 1174.29,-47.17"/>
+<polygon fill="black" stroke="black" points="1177.68,-46.28 1171.2,-37.89 1171.03,-48.49 1177.68,-46.28"/>
+<text text-anchor="middle" x="1266.89" y="-58.2" font-family="Times,serif" font-size="14.00">AnnouncementsScreen.jsx</text>
+</g>
+<!-- NewsScreen_jsx -->
+<g id="node36" class="node" pointer-events="visible" data-name="NewsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1379.25,-36 1376.25,-40 1355.25,-40 1352.25,-36 1269.62,-36 1269.62,0 1379.25,0 1379.25,-36"/>
+<text text-anchor="middle" x="1324.43" y="-13.8" font-family="Times,serif" font-size="14.00">NewsScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;NewsScreen_jsx -->
+<g id="edge35" class="edge" data-name="Student-&gt;NewsScreen_jsx">
+
+<path fill="none" stroke="black" d="M1501.86,-91.61C1499.05,-90.55 1496.21,-89.59 1493.43,-88.8 1436.58,-72.56 1412.28,-101.3 1361.62,-70.8 1351.87,-64.93 1343.96,-55.42 1337.97,-46.14"/>
+<polygon fill="black" stroke="black" points="1341.08,-44.52 1333.01,-37.65 1335.03,-48.05 1341.08,-44.52"/>
+<text text-anchor="middle" x="1407.34" y="-58.2" font-family="Times,serif" font-size="14.00">NewsScreen.jsx</text>
+</g>
+<!-- GradesScreen_jsx -->
+<g id="node37" class="node" pointer-events="visible" data-name="GradesScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1514.01,-36 1511.01,-40 1490.01,-40 1487.01,-36 1396.86,-36 1396.86,0 1514.01,0 1514.01,-36"/>
+<text text-anchor="middle" x="1455.43" y="-13.8" font-family="Times,serif" font-size="14.00">GradesScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;GradesScreen_jsx -->
+<g id="edge36" class="edge" data-name="Student-&gt;GradesScreen_jsx">
+
+<path fill="none" stroke="black" d="M1501.94,-91.96C1483.2,-83.05 1462.22,-72.77 1460.86,-70.8 1456.21,-64.12 1454.16,-55.73 1453.46,-47.66"/>
+<polygon fill="black" stroke="black" points="1456.96,-47.75 1453.27,-37.81 1449.96,-47.88 1456.96,-47.75"/>
+<text text-anchor="middle" x="1510.22" y="-58.2" font-family="Times,serif" font-size="14.00">GradesScreen.jsx</text>
+</g>
+<!-- AssignmentsScreen_jsx -->
+<g id="node38" class="node" pointer-events="visible" data-name="AssignmentsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1681.2,-36 1678.2,-40 1657.2,-40 1654.2,-36 1531.67,-36 1531.67,0 1681.2,0 1681.2,-36"/>
+<text text-anchor="middle" x="1606.43" y="-13.8" font-family="Times,serif" font-size="14.00">AssignmentsScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;AssignmentsScreen_jsx -->
+<g id="edge37" class="edge" data-name="Student-&gt;AssignmentsScreen_jsx">
+
+<path fill="none" stroke="black" d="M1546.25,-88.65C1557.07,-76.13 1571.92,-58.94 1584.16,-44.77"/>
+<polygon fill="black" stroke="black" points="1586.51,-47.41 1590.4,-37.56 1581.22,-42.83 1586.51,-47.41"/>
+<text text-anchor="middle" x="1641.57" y="-58.2" font-family="Times,serif" font-size="14.00">AssignmentsScreen.jsx</text>
+</g>
+<!-- LibraryScreen_jsx -->
+<g id="node39" class="node" pointer-events="visible" data-name="LibraryScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1819.34,-36 1816.34,-40 1795.34,-40 1792.34,-36 1699.53,-36 1699.53,0 1819.34,0 1819.34,-36"/>
+<text text-anchor="middle" x="1759.43" y="-13.8" font-family="Times,serif" font-size="14.00">LibraryScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;LibraryScreen_jsx -->
+<g id="edge38" class="edge" data-name="Student-&gt;LibraryScreen_jsx">
+
+<path fill="none" stroke="black" d="M1561.19,-105.45C1598.32,-103.83 1662.72,-97.06 1710.43,-70.8 1721.94,-64.47 1732.33,-54.49 1740.54,-44.97"/>
+<polygon fill="black" stroke="black" points="1743.19,-47.27 1746.77,-37.3 1737.75,-42.86 1743.19,-47.27"/>
+<text text-anchor="middle" x="1782.39" y="-58.2" font-family="Times,serif" font-size="14.00">LibraryScreen.jsx</text>
+</g>
+<!-- SettingsScreen_jsx -->
+<g id="node40" class="node" pointer-events="visible" data-name="SettingsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="1959.48,-36 1956.48,-40 1935.48,-40 1932.48,-36 1837.39,-36 1837.39,0 1959.48,0 1959.48,-36"/>
+<text text-anchor="middle" x="1898.43" y="-13.8" font-family="Times,serif" font-size="14.00">SettingsScreen_jsx</text>
+</g>
+<!-- Student&#45;&gt;SettingsScreen_jsx -->
+<g id="edge39" class="edge" data-name="Student-&gt;SettingsScreen_jsx">
+
+<path fill="none" stroke="black" d="M1560.8,-104.57C1627.26,-101.45 1787.21,-91.91 1836.43,-70.8 1850.78,-64.65 1864.36,-54.06 1875.14,-44.05"/>
+<polygon fill="black" stroke="black" points="1877.35,-46.79 1882.06,-37.31 1872.46,-41.78 1877.35,-46.79"/>
+<text text-anchor="middle" x="1914.96" y="-58.2" font-family="Times,serif" font-size="14.00">SettingsScreen.jsx</text>
+</g>
+<!-- DashboardScreen_jsx2 -->
+<g id="node41" class="node" pointer-events="visible" data-name="DashboardScreen_jsx2">
+
+<polygon fill="none" stroke="black" points="2123.01,-36 2120.01,-40 2099.01,-40 2096.01,-36 1977.86,-36 1977.86,0 2123.01,0 2123.01,-36"/>
+<text text-anchor="middle" x="2050.43" y="-13.8" font-family="Times,serif" font-size="14.00">DashboardScreen_jsx2</text>
+</g>
+<!-- Teacher&#45;&gt;DashboardScreen_jsx2 -->
+<g id="edge40" class="edge" data-name="Teacher-&gt;DashboardScreen_jsx2">
+
+<path fill="none" stroke="black" d="M2536.54,-105.3C2449.77,-103.59 2205.32,-96.55 2129.86,-70.8 2111.84,-64.65 2093.89,-53.48 2079.62,-43.09"/>
+<polygon fill="black" stroke="black" points="2082.11,-40.58 2072.03,-37.34 2077.89,-46.17 2082.11,-40.58"/>
+<text text-anchor="middle" x="2189.72" y="-58.2" font-family="Times,serif" font-size="14.00">DashboardScreen.jsx</text>
+</g>
+<!-- ManageClassesScreen_jsx -->
+<g id="node42" class="node" pointer-events="visible" data-name="ManageClassesScreen_jsx">
+
+<polygon fill="none" stroke="black" points="2305.45,-36 2302.45,-40 2281.45,-40 2278.45,-36 2141.42,-36 2141.42,0 2305.45,0 2305.45,-36"/>
+<text text-anchor="middle" x="2223.43" y="-13.8" font-family="Times,serif" font-size="14.00">ManageClassesScreen_jsx</text>
+</g>
+<!-- Teacher&#45;&gt;ManageClassesScreen_jsx -->
+<g id="edge41" class="edge" data-name="Teacher-&gt;ManageClassesScreen_jsx">
+
+<path fill="none" stroke="black" d="M2536.64,-104.69C2471.1,-101.9 2320.07,-93.2 2274.42,-70.8 2262.27,-64.84 2251.36,-54.79 2242.78,-45.12"/>
+<polygon fill="black" stroke="black" points="2245.64,-43.09 2236.55,-37.64 2240.26,-47.56 2245.64,-43.09"/>
+<text text-anchor="middle" x="2346.94" y="-58.2" font-family="Times,serif" font-size="14.00">ManageClassesScreen.jsx</text>
+</g>
+<!-- AttendanceScreen_jsx2 -->
+<g id="node43" class="node" pointer-events="visible" data-name="AttendanceScreen_jsx2">
+
+<polygon fill="none" stroke="black" points="2471.61,-36 2468.61,-40 2447.61,-40 2444.61,-36 2323.26,-36 2323.26,0 2471.61,0 2471.61,-36"/>
+<text text-anchor="middle" x="2397.43" y="-13.8" font-family="Times,serif" font-size="14.00">AttendanceScreen_jsx2</text>
+</g>
+<!-- Teacher&#45;&gt;AttendanceScreen_jsx2 -->
+<g id="edge42" class="edge" data-name="Teacher-&gt;AttendanceScreen_jsx2">
+
+<path fill="none" stroke="black" d="M2536.44,-102.32C2509.66,-98.17 2470.79,-89.3 2441.76,-70.8 2431.43,-64.22 2422.21,-54.49 2414.88,-45.24"/>
+<polygon fill="black" stroke="black" points="2417.9,-43.43 2409.13,-37.49 2412.28,-47.61 2417.9,-43.43"/>
+<text text-anchor="middle" x="2503.27" y="-58.2" font-family="Times,serif" font-size="14.00">AttendanceScreen.jsx</text>
+</g>
+<!-- AssignmentsScreen_jsx2 -->
+<g id="node44" class="node" pointer-events="visible" data-name="AssignmentsScreen_jsx2">
+
+<polygon fill="none" stroke="black" points="2645.7,-36 2642.7,-40 2621.7,-40 2618.7,-36 2489.17,-36 2489.17,0 2645.7,0 2645.7,-36"/>
+<text text-anchor="middle" x="2567.43" y="-13.8" font-family="Times,serif" font-size="14.00">AssignmentsScreen_jsx2</text>
+</g>
+<!-- Teacher&#45;&gt;AssignmentsScreen_jsx2 -->
+<g id="edge43" class="edge" data-name="Teacher-&gt;AssignmentsScreen_jsx2">
+
+<path fill="none" stroke="black" d="M2567.43,-88.65C2567.43,-76.96 2567.43,-61.19 2567.43,-47.62"/>
+<polygon fill="black" stroke="black" points="2570.93,-47.92 2567.43,-37.92 2563.93,-47.92 2570.93,-47.92"/>
+<text text-anchor="middle" x="2632.57" y="-58.2" font-family="Times,serif" font-size="14.00">AssignmentsScreen.jsx</text>
+</g>
+<!-- GradesScreen_jsx2 -->
+<g id="node45" class="node" pointer-events="visible" data-name="GradesScreen_jsx2">
+
+<polygon fill="none" stroke="black" points="2787.51,-36 2784.51,-40 2763.51,-40 2760.51,-36 2663.36,-36 2663.36,0 2787.51,0 2787.51,-36"/>
+<text text-anchor="middle" x="2725.43" y="-13.8" font-family="Times,serif" font-size="14.00">GradesScreen_jsx2</text>
+</g>
+<!-- Teacher&#45;&gt;GradesScreen_jsx2 -->
+<g id="edge44" class="edge" data-name="Teacher-&gt;GradesScreen_jsx2">
+
+<path fill="none" stroke="black" d="M2598.5,-105.05C2628.07,-102.79 2672.29,-95.16 2701.43,-70.8 2708.81,-64.63 2714.05,-55.7 2717.7,-46.98"/>
+<polygon fill="black" stroke="black" points="2720.95,-48.3 2721.02,-37.71 2714.36,-45.94 2720.95,-48.3"/>
+<text text-anchor="middle" x="2763.22" y="-58.2" font-family="Times,serif" font-size="14.00">GradesScreen.jsx</text>
+</g>
+<!-- AnnouncementsScreen_jsx2 -->
+<g id="node46" class="node" pointer-events="visible" data-name="AnnouncementsScreen_jsx2">
+
+<polygon fill="none" stroke="black" points="2981.34,-36 2978.34,-40 2957.34,-40 2954.34,-36 2805.53,-36 2805.53,0 2981.34,0 2981.34,-36"/>
+<text text-anchor="middle" x="2893.43" y="-13.8" font-family="Times,serif" font-size="14.00">AnnouncementsScreen_jsx2</text>
+</g>
+<!-- Teacher&#45;&gt;AnnouncementsScreen_jsx2 -->
+<g id="edge45" class="edge" data-name="Teacher-&gt;AnnouncementsScreen_jsx2">
+
+<path fill="none" stroke="black" d="M2598.43,-105.86C2646.65,-104.99 2741.84,-99.38 2816.43,-70.8 2833.55,-64.24 2850.66,-53.29 2864.38,-43.13"/>
+<polygon fill="black" stroke="black" points="2866.3,-46.08 2872.11,-37.22 2862.04,-40.52 2866.3,-46.08"/>
+<text text-anchor="middle" x="2922.89" y="-58.2" font-family="Times,serif" font-size="14.00">AnnouncementsScreen.jsx</text>
+</g>
+<!-- SettingsScreen_jsx2 -->
+<g id="node47" class="node" pointer-events="visible" data-name="SettingsScreen_jsx2">
+
+<polygon fill="none" stroke="black" points="3127.98,-36 3124.98,-40 3103.98,-40 3100.98,-36 2998.89,-36 2998.89,0 3127.98,0 3127.98,-36"/>
+<text text-anchor="middle" x="3063.43" y="-13.8" font-family="Times,serif" font-size="14.00">SettingsScreen_jsx2</text>
+</g>
+<!-- Teacher&#45;&gt;SettingsScreen_jsx2 -->
+<g id="edge46" class="edge" data-name="Teacher-&gt;SettingsScreen_jsx2">
+
+<path fill="none" stroke="black" d="M2598.25,-105.72C2684.74,-105.12 2928.23,-100.74 3001.43,-70.8 3015.88,-64.89 3029.48,-54.34 3040.24,-44.29"/>
+<polygon fill="black" stroke="black" points="3042.47,-47 3047.14,-37.5 3037.56,-42.01 3042.47,-47"/>
+<text text-anchor="middle" x="3079.96" y="-58.2" font-family="Times,serif" font-size="14.00">SettingsScreen.jsx</text>
+</g>
+<!-- DashboardScreen_jsx3 -->
+<g id="node48" class="node" pointer-events="visible" data-name="DashboardScreen_jsx3">
+
+<polygon fill="none" stroke="black" points="3291.01,-36 3288.01,-40 3267.01,-40 3264.01,-36 3145.86,-36 3145.86,0 3291.01,0 3291.01,-36"/>
+<text text-anchor="middle" x="3218.43" y="-13.8" font-family="Times,serif" font-size="14.00">DashboardScreen_jsx3</text>
+</g>
+<!-- SchoolAdmin&#45;&gt;DashboardScreen_jsx3 -->
+<g id="edge47" class="edge" data-name="SchoolAdmin-&gt;DashboardScreen_jsx3">
+
+<path fill="none" stroke="black" d="M3439.29,-101.98C3383.66,-96.84 3295.06,-86.5 3265.86,-70.8 3254.47,-64.67 3244.37,-54.73 3236.45,-45.18"/>
+<polygon fill="black" stroke="black" points="3239.38,-43.24 3230.49,-37.48 3233.85,-47.53 3239.38,-43.24"/>
+<text text-anchor="middle" x="3325.72" y="-58.2" font-family="Times,serif" font-size="14.00">DashboardScreen.jsx</text>
+</g>
+<!-- ManageAccountsScreen_jsx -->
+<g id="node49" class="node" pointer-events="visible" data-name="ManageAccountsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="3484.33,-36 3481.33,-40 3460.33,-40 3457.33,-36 3308.54,-36 3308.54,0 3484.33,0 3484.33,-36"/>
+<text text-anchor="middle" x="3396.43" y="-13.8" font-family="Times,serif" font-size="14.00">ManageAccountsScreen_jsx</text>
+</g>
+<!-- SchoolAdmin&#45;&gt;ManageAccountsScreen_jsx -->
+<g id="edge48" class="edge" data-name="SchoolAdmin-&gt;ManageAccountsScreen_jsx">
+
+<path fill="none" stroke="black" d="M3439.32,-99.44C3421.98,-94.57 3404.03,-85.96 3393.54,-70.8 3388.93,-64.13 3387.92,-55.75 3388.55,-47.68"/>
+<polygon fill="black" stroke="black" points="3392,-48.25 3390.17,-37.81 3385.09,-47.11 3392,-48.25"/>
+<text text-anchor="middle" x="3472.38" y="-58.2" font-family="Times,serif" font-size="14.00">ManageAccountsScreen.jsx</text>
+</g>
+<!-- PermissionsScreen_jsx -->
+<g id="node50" class="node" pointer-events="visible" data-name="PermissionsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="3647.04,-36 3644.04,-40 3623.04,-40 3620.04,-36 3501.83,-36 3501.83,0 3647.04,0 3647.04,-36"/>
+<text text-anchor="middle" x="3574.43" y="-13.8" font-family="Times,serif" font-size="14.00">PermissionsScreen_jsx</text>
+</g>
+<!-- SchoolAdmin&#45;&gt;PermissionsScreen_jsx -->
+<g id="edge49" class="edge" data-name="SchoolAdmin-&gt;PermissionsScreen_jsx">
+
+<path fill="none" stroke="black" d="M3530.67,-88.39C3539,-83.62 3547.08,-77.8 3553.43,-70.8 3559.6,-64.01 3564.08,-55.16 3567.27,-46.71"/>
+<polygon fill="black" stroke="black" points="3570.51,-48.07 3570.3,-37.47 3563.86,-45.89 3570.51,-48.07"/>
+<text text-anchor="middle" x="3627.24" y="-58.2" font-family="Times,serif" font-size="14.00">PermissionsScreen.jsx</text>
+</g>
+<!-- SchoolSettingsScreen_jsx -->
+<g id="node51" class="node" pointer-events="visible" data-name="SchoolSettingsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="3826.37,-36 3823.37,-40 3802.37,-40 3799.37,-36 3664.5,-36 3664.5,0 3826.37,0 3826.37,-36"/>
+<text text-anchor="middle" x="3745.43" y="-13.8" font-family="Times,serif" font-size="14.00">SchoolSettingsScreen_jsx</text>
+</g>
+<!-- SchoolAdmin&#45;&gt;SchoolSettingsScreen_jsx -->
+<g id="edge50" class="edge" data-name="SchoolAdmin-&gt;SchoolSettingsScreen_jsx">
+
+<path fill="none" stroke="black" d="M3533.66,-106.02C3577.61,-104.4 3643.76,-97.18 3694.43,-70.8 3706.35,-64.6 3717.17,-54.6 3725.75,-45.04"/>
+<polygon fill="black" stroke="black" points="3728.21,-47.55 3731.99,-37.65 3722.86,-43.03 3728.21,-47.55"/>
+<text text-anchor="middle" x="3788.4" y="-58.2" font-family="Times,serif" font-size="14.00">SchoolSettingsScreen.jsx</text>
+</g>
+<!-- ReportsScreen_jsx -->
+<g id="node52" class="node" pointer-events="visible" data-name="ReportsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="3964.91,-36 3961.91,-40 3940.91,-40 3937.91,-36 3843.96,-36 3843.96,0 3964.91,0 3964.91,-36"/>
+<text text-anchor="middle" x="3904.43" y="-13.8" font-family="Times,serif" font-size="14.00">ReportsScreen_jsx</text>
+</g>
+<!-- SchoolAdmin&#45;&gt;ReportsScreen_jsx -->
+<g id="edge51" class="edge" data-name="SchoolAdmin-&gt;ReportsScreen_jsx">
+
+<path fill="none" stroke="black" d="M3533.56,-105.98C3621.71,-105.58 3807.67,-101.04 3863.43,-70.8 3873.99,-65.08 3882.76,-55.38 3889.45,-45.91"/>
+<polygon fill="black" stroke="black" points="3892.35,-47.87 3894.83,-37.57 3886.47,-44.08 3892.35,-47.87"/>
+<text text-anchor="middle" x="3934.17" y="-58.2" font-family="Times,serif" font-size="14.00">ReportsScreen.jsx</text>
+</g>
+<!-- DashboardScreen_jsx4 -->
+<g id="node53" class="node" pointer-events="visible" data-name="DashboardScreen_jsx4">
+
+<polygon fill="none" stroke="black" points="4128.01,-36 4125.01,-40 4104.01,-40 4101.01,-36 3982.86,-36 3982.86,0 4128.01,0 4128.01,-36"/>
+<text text-anchor="middle" x="4055.43" y="-13.8" font-family="Times,serif" font-size="14.00">DashboardScreen_jsx4</text>
+</g>
+<!-- SuperAdmin&#45;&gt;DashboardScreen_jsx4 -->
+<g id="edge52" class="edge" data-name="SuperAdmin-&gt;DashboardScreen_jsx4">
+
+<path fill="none" stroke="black" d="M4055.43,-88.65C4055.43,-76.96 4055.43,-61.19 4055.43,-47.62"/>
+<polygon fill="black" stroke="black" points="4058.93,-47.92 4055.43,-37.92 4051.93,-47.92 4058.93,-47.92"/>
+<text text-anchor="middle" x="4114.72" y="-58.2" font-family="Times,serif" font-size="14.00">DashboardScreen.jsx</text>
+</g>
+<!-- ManageSchoolsScreen_jsx -->
+<g id="node54" class="node" pointer-events="visible" data-name="ManageSchoolsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="4312.79,-36 4309.79,-40 4288.79,-40 4285.79,-36 4146.08,-36 4146.08,0 4312.79,0 4312.79,-36"/>
+<text text-anchor="middle" x="4229.43" y="-13.8" font-family="Times,serif" font-size="14.00">ManageSchoolsScreen_jsx</text>
+</g>
+<!-- SuperAdmin&#45;&gt;ManageSchoolsScreen_jsx -->
+<g id="edge53" class="edge" data-name="SuperAdmin-&gt;ManageSchoolsScreen_jsx">
+
+<path fill="none" stroke="black" d="M4099.33,-91.5C4102.41,-90.57 4105.46,-89.66 4108.43,-88.8 4139.3,-79.89 4150.6,-86.83 4178.43,-70.8 4189.87,-64.21 4200.48,-54.36 4209.02,-45.02"/>
+<polygon fill="black" stroke="black" points="4211.65,-47.33 4215.55,-37.48 4206.35,-42.75 4211.65,-47.33"/>
+<text text-anchor="middle" x="4273.11" y="-58.2" font-family="Times,serif" font-size="14.00">ManageSchoolsScreen.jsx</text>
+</g>
+<!-- ManageAdminsScreen_jsx -->
+<g id="node55" class="node" pointer-events="visible" data-name="ManageAdminsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="4497.79,-36 4494.79,-40 4473.79,-40 4470.79,-36 4331.08,-36 4331.08,0 4497.79,0 4497.79,-36"/>
+<text text-anchor="middle" x="4414.43" y="-13.8" font-family="Times,serif" font-size="14.00">ManageAdminsScreen_jsx</text>
+</g>
+<!-- SuperAdmin&#45;&gt;ManageAdminsScreen_jsx -->
+<g id="edge54" class="edge" data-name="SuperAdmin-&gt;ManageAdminsScreen_jsx">
+
+<path fill="none" stroke="black" d="M4099.48,-90.81C4102.49,-90.06 4105.49,-89.37 4108.43,-88.8 4214.3,-68.19 4250.17,-110.54 4350.43,-70.8 4365.22,-64.94 4379.24,-54.39 4390.37,-44.33"/>
+<polygon fill="black" stroke="black" points="4392.71,-46.94 4397.54,-37.52 4387.88,-41.87 4392.71,-46.94"/>
+<text text-anchor="middle" x="4452.11" y="-58.2" font-family="Times,serif" font-size="14.00">ManageAdminsScreen.jsx</text>
+</g>
+<!-- GlobalSettingsScreen_jsx -->
+<g id="node56" class="node" pointer-events="visible" data-name="GlobalSettingsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="4676.58,-36 4673.58,-40 4652.58,-40 4649.58,-36 4516.29,-36 4516.29,0 4676.58,0 4676.58,-36"/>
+<text text-anchor="middle" x="4596.43" y="-13.8" font-family="Times,serif" font-size="14.00">GlobalSettingsScreen_jsx</text>
+</g>
+<!-- SuperAdmin&#45;&gt;GlobalSettingsScreen_jsx -->
+<g id="edge55" class="edge" data-name="SuperAdmin-&gt;GlobalSettingsScreen_jsx">
+
+<path fill="none" stroke="black" d="M4099.46,-90.71C4102.47,-89.97 4105.49,-89.33 4108.43,-88.8 4200.62,-72.35 4441.48,-102.95 4529.43,-70.8 4545.06,-65.09 4559.96,-54.31 4571.73,-44.05"/>
+<polygon fill="black" stroke="black" points="4573.95,-46.76 4578.96,-37.43 4569.22,-41.6 4573.95,-46.76"/>
+<text text-anchor="middle" x="4629.01" y="-58.2" font-family="Times,serif" font-size="14.00">GlobalSettingsScreen.jsx</text>
+</g>
+<!-- AnalyticsScreen_jsx -->
+<g id="node57" class="node" pointer-events="visible" data-name="AnalyticsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="4826.02,-36 4823.02,-40 4802.02,-40 4799.02,-36 4694.85,-36 4694.85,0 4826.02,0 4826.02,-36"/>
+<text text-anchor="middle" x="4760.43" y="-13.8" font-family="Times,serif" font-size="14.00">AnalyticsScreen_jsx</text>
+</g>
+<!-- SuperAdmin&#45;&gt;AnalyticsScreen_jsx -->
+<g id="edge56" class="edge" data-name="SuperAdmin-&gt;AnalyticsScreen_jsx">
+
+<path fill="none" stroke="black" d="M4099.45,-90.66C4102.47,-89.94 4105.48,-89.31 4108.43,-88.8 4173.62,-77.59 4642.11,-95.58 4703.43,-70.8 4717.19,-65.24 4729.73,-54.78 4739.52,-44.7"/>
+<polygon fill="black" stroke="black" points="4741.88,-47.3 4746.04,-37.55 4736.72,-42.58 4741.88,-47.3"/>
+<text text-anchor="middle" x="4784.23" y="-58.2" font-family="Times,serif" font-size="14.00">AnalyticsScreen.jsx</text>
+</g>
+<!-- ProfileScreen_jsx -->
+<g id="node58" class="node" pointer-events="visible" data-name="ProfileScreen_jsx">
+
+<polygon fill="none" stroke="black" points="4958.97,-36 4955.97,-40 4934.97,-40 4931.97,-36 4843.9,-36 4843.9,0 4958.97,0 4958.97,-36"/>
+<text text-anchor="middle" x="4901.43" y="-13.8" font-family="Times,serif" font-size="14.00">ProfileScreen_jsx</text>
+</g>
+<!-- Shared&#45;&gt;ProfileScreen_jsx -->
+<g id="edge57" class="edge" data-name="Shared-&gt;ProfileScreen_jsx">
+
+<path fill="none" stroke="black" d="M4172.3,-91.59C4175.32,-90.47 4178.41,-89.51 4181.43,-88.8 4253.21,-72.08 4776.06,-98.3 4844.43,-70.8 4858.2,-65.26 4870.74,-54.8 4880.53,-44.72"/>
+<polygon fill="black" stroke="black" points="4882.89,-47.32 4887.05,-37.57 4877.72,-42.6 4882.89,-47.32"/>
+<text text-anchor="middle" x="4916.45" y="-58.2" font-family="Times,serif" font-size="14.00">ProfileScreen.jsx</text>
+</g>
+<!-- NotificationsScreen_jsx -->
+<g id="node59" class="node" pointer-events="visible" data-name="NotificationsScreen_jsx">
+
+<polygon fill="none" stroke="black" points="5127.46,-36 5124.46,-40 5103.46,-40 5100.46,-36 4977.41,-36 4977.41,0 5127.46,0 5127.46,-36"/>
+<text text-anchor="middle" x="5052.43" y="-13.8" font-family="Times,serif" font-size="14.00">NotificationsScreen_jsx</text>
+</g>
+<!-- Shared&#45;&gt;NotificationsScreen_jsx -->
+<g id="edge58" class="edge" data-name="Shared-&gt;NotificationsScreen_jsx">
+
+<path fill="none" stroke="black" d="M4172.3,-91.57C4175.32,-90.46 4178.4,-89.5 4181.43,-88.8 4266.66,-69.13 4884.56,-95.62 4968.43,-70.8 4987.89,-65.04 5007.32,-53.53 5022.59,-42.81"/>
+<polygon fill="black" stroke="black" points="5024.27,-45.91 5030.29,-37.2 5020.15,-40.26 5024.27,-45.91"/>
+<text text-anchor="middle" x="5069.95" y="-58.2" font-family="Times,serif" font-size="14.00">NotificationsScreen.jsx</text>
+</g>
+</g>
+</svg>

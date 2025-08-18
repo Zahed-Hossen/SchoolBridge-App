@@ -92,27 +92,82 @@ A modern, role-based educational platform built with React Native and Node.js, d
 ## 📁 Project Structure
 
 ```
-schoolbridge/
-├── frontend/                 # React Native App
-│   ├── src/
-│   │   ├── components/       # Reusable components
-│   │   ├── screens/          # App screens
-│   │   ├── services/         # API services
-│   │   ├── context/          # React contexts
-│   │   └── constants/        # Configuration
-│   ├── assets/               # Images, fonts
+SchoolBridgeApp/
+│
+├── app/                        # Main app code
+│   ├── assets/                  # Images, fonts, icons
+│   ├── components/              # Reusable components (Buttons, Inputs, Modals)
+│   ├── constants/               # Colors, Fonts, App config
+│   ├── context/                 # Context API (Auth, Theme, User Role)
+│   ├── hooks/                   # Custom hooks (useAuth, useFetch)
+│   ├── navigation/              # All navigation stacks & tabs
+│   │   ├── AuthStack.js
+│   │   ├── StudentStack.js
+│   │   ├── TeacherStack.js
+│   │   ├── AdminStack.js
+│   │   ├── RootNavigator.js
+│   │   └── index.js
+│   ├── screens/                 # Screen Pages
+│   │   ├── Auth/
+│   │   │   ├── LoginScreen.jsx
+│   │   │   ├── RegisterScreen.jsx
+│   │   │   ├── RoleSelectionScreen.jsx
+│   │   │   └── ForgotPasswordScreen.jsx
+│   │   ├── Student/
+│   │   │   ├── DashboardScreen.jsx
+│   │   │   ├── ClassesScreen.jsx
+│   │   │   ├── AttendanceScreen.jsx
+│   │   │   ├── AnnouncementsScreen.jsx
+│   │   │   ├── NewsScreen.jsx
+│   │   │   ├── GradesScreen.jsx
+│   │   │   ├── AssignmentsScreen.jsx
+│   │   │   ├── LibraryScreen.jsx
+│   │   │   └── SettingsScreen.jsx
+│   │   ├── Teacher/
+│   │   │   ├── DashboardScreen.jsx
+│   │   │   ├── ManageClassesScreen.jsx
+│   │   │   ├── AttendanceScreen.jsx
+│   │   │   ├── AssignmentsScreen.jsx
+│   │   │   ├── GradesScreen.jsx
+│   │   │   ├── AnnouncementsScreen.jsx
+│   │   │   └── SettingsScreen.jsx
+│   │   ├── SchoolAdmin/
+│   │   │   ├── DashboardScreen.jsx
+│   │   │   ├── ManageAccountsScreen.jsx
+│   │   │   ├── PermissionsScreen.jsx
+│   │   │   ├── SchoolSettingsScreen.jsx
+│   │   │   └── ReportsScreen.jsx
+│   │   ├── SuperAdmin/   # App builder's control
+│   │   │   ├── DashboardScreen.jsx
+│   │   │   ├── ManageSchoolsScreen.jsx
+│   │   │   ├── ManageAdminsScreen.jsx
+│   │   │   ├── GlobalSettingsScreen.jsx
+│   │   │   └── AnalyticsScreen.jsx
+│   │   └── Shared/
+│   │       ├── ProfileScreen.jsx
+│   │       └── NotificationsScreen.jsx
+│   ├── services/                 # API calls
+│   │   ├── authService.js
+│   │   ├── studentService.js
+│   │   ├── teacherService.js
+│   │   ├── adminService.js
+│   │   └── superAdminService.js
+│   ├── styles/                   # Global styles
+│   └── App.js
+│
+├── backend/                      # Node.js + Express API
+│   ├── config/                   # DB config, JWT secret
+│   ├── controllers/              # Route handlers
+│   ├── middleware/               # Auth, Role check
+│   ├── models/                   # MongoDB Schemas
+│   ├── routes/                   # API routes
+│   ├── utils/                    # Helpers
+│   ├── server.js
 │   └── package.json
 │
-├── backend/                  # Node.js API
-│   ├── models/               # MongoDB models
-│   ├── routes/               # API routes
-│   ├── middleware/           # Custom middleware
-│   ├── config/               # Configuration
-│   └── package.json
-│
-├── docs/                     # Documentation
-├── .gitignore
+├── package.json
 └── README.md
+
 ```
 
 ## 🔧 API Documentation

@@ -16,6 +16,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../context/AuthContext';
@@ -27,13 +28,19 @@ import {
   TEACHER_THEME,
   SPACING,
   BORDER_RADIUS,
-  getRoleColors
+  getRoleColors,
 } from '../../constants/theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const HamburgerMenu = ({ visible, onClose, navigation, userRole = 'Teacher' }) => {
+const HamburgerMenu = ({
+  visible,
+  onClose,
+  navigation: navigationProp,
+  userRole = 'Teacher',
+}) => {
   const { logout, isLoading, user } = useAuth();
+  const navigation = navigationProp || useNavigation();
   // Mock user data (replace with actual context later)
   const userInfo = user || {
     name: 'Zahed Hossen',
@@ -85,261 +92,255 @@ const HamburgerMenu = ({ visible, onClose, navigation, userRole = 'Teacher' }) =
   }, [visible]);
 
   // ✅ Professional Menu Items with Theme Colors
-  const getMenuItems = () => {
-    const roleSpecificItems = {
-      Teacher: [
-        {
-          icon: 'home-outline',
-          title: 'Dashboard',
-          subtitle: 'Overview & quick stats',
-          color: TEACHER_COLORS.primary,
-          onPress: () => { onClose(); navigation.navigate('TeacherDashboard'); },
-        },
-        {
-          icon: 'school-outline',
-          title: 'My Classes',
-          subtitle: 'Manage your teaching schedule',
-          color: COLORS.teacherPalette.subjects.mathematics,
-          onPress: () => { onClose(); navigation.navigate('MyClasses'); },
-        },
-        {
-          icon: 'document-text-outline',
-          title: 'Assignments',
-          subtitle: 'Create and track assignments',
-          color: COLORS.teacherPalette.subjects.science,
-          badge: 12,
-          onPress: () => { onClose(); navigation.navigate('TeacherAssignments'); },
-        },
-        {
-          icon: 'star-outline',
-          title: 'Grading',
-          subtitle: 'Review student submissions',
-          color: TEACHER_COLORS.warning,
-          badge: 8,
-          onPress: () => { onClose(); navigation.navigate('GradingDashboard'); },
-        },
-        {
-          icon: 'bar-chart-outline',
-          title: 'Analytics',
-          subtitle: 'Performance insights',
-          color: TEACHER_COLORS.success,
-          onPress: () => { onClose(); navigation.navigate('Analytics'); },
-        },
-      ],
-      Student: [
-        {
-          icon: 'book-outline',
-          title: 'My Assignments',
-          subtitle: 'View and submit work',
-          color: COLORS.student,
-          badge: 3,
-          onPress: () => { onClose(); navigation.navigate('StudentAssignments'); },
-        },
-        {
-          icon: 'trophy-outline',
-          title: 'Grades',
-          subtitle: 'Check your performance',
-          color: TEACHER_COLORS.warning,
-          onPress: () => { onClose(); navigation.navigate('StudentGrades'); },
-        },
-        {
-          icon: 'calendar-outline',
-          title: 'Schedule',
-          subtitle: 'Class timetable',
-          color: COLORS.teacherPalette.subjects.mathematics,
-          onPress: () => { onClose(); navigation.navigate('StudentSchedule'); },
-        },
-      ],
-    };
 
-    const commonItems = [
+  // Dynamic role-based menu config
+  const menuConfig = {
+    Teacher: [
       {
-        icon: 'person-outline',
-        title: 'Profile',
-        subtitle: 'Manage your account',
-        color: COLORS.teacherPalette.subjects.english,
-        onPress: () => { onClose(); navigation.navigate('Profile'); },
+        icon: 'home-outline',
+        title: 'Dashboard',
+        subtitle: 'Overview & quick stats',
+        color: TEACHER_COLORS.primary,
+        onPress: () => {
+          onClose();
+          navigation.navigate('TeacherDashboard');
+        },
       },
       {
-        icon: 'notifications-outline',
-        title: 'Notifications',
-        subtitle: 'Messages & alerts',
+        icon: 'school-outline',
+        title: 'My Classes',
+        subtitle: 'Manage your teaching schedule',
+        color: COLORS.teacherPalette.subjects.mathematics,
+        onPress: () => {
+          onClose();
+          navigation.navigate('MyClasses');
+        },
+      },
+      {
+        icon: 'document-text-outline',
+        title: 'Assignments',
+        subtitle: 'Create and track assignments',
+        color: COLORS.teacherPalette.subjects.science,
+        badge: 12,
+        onPress: () => {
+          onClose();
+          navigation.navigate('TeacherAssignments');
+        },
+      },
+      {
+        icon: 'star-outline',
+        title: 'Grading',
+        subtitle: 'Review student submissions',
         color: TEACHER_COLORS.warning,
-        badge: 5,
-        onPress: () => { onClose(); navigation.navigate('Notifications'); },
+        badge: 8,
+        onPress: () => {
+          onClose();
+          navigation.navigate('GradingDashboard');
+        },
       },
       {
-        icon: 'settings-outline',
-        title: 'Settings',
-        subtitle: 'App preferences',
-        color: COLORS.teacherPalette.subjects.computer,
-        onPress: () => { onClose(); navigation.navigate('Settings'); },
+        icon: 'bar-chart-outline',
+        title: 'Analytics',
+        subtitle: 'Performance insights',
+        color: TEACHER_COLORS.success,
+        onPress: () => {
+          onClose();
+          navigation.navigate('Analytics');
+        },
       },
-    ];
-
-    return {
-      roleItems: roleSpecificItems[userRole] || [],
-      commonItems,
-    };
+    ],
+    Student: [
+      {
+        icon: 'home-outline',
+        title: 'Dashboard',
+        subtitle: 'Your student overview',
+        color: TEACHER_COLORS.primary,
+        onPress: () => {
+          onClose();
+          navigation.navigate('StudentDashboard');
+        },
+      },
+      {
+        icon: 'book-outline',
+        title: 'Assignments',
+        subtitle: 'View and submit work',
+        color: COLORS.student,
+        badge: 3,
+        onPress: () => {
+          onClose();
+          navigation.navigate('AssignmentStack');
+        },
+      },
+      {
+        icon: 'trophy-outline',
+        title: 'Grades',
+        subtitle: 'Check your performance',
+        color: TEACHER_COLORS.warning,
+        onPress: () => {
+          onClose();
+          navigation.navigate('GradesStack');
+        },
+      },
+      {
+        icon: 'megaphone-outline',
+        title: 'Announcements',
+        subtitle: 'School news & updates',
+        color: TEACHER_COLORS.success,
+        onPress: () => {
+          onClose();
+          navigation.navigate('AnnouncementsStack');
+        },
+      },
+      {
+        icon: 'calendar-outline',
+        title: 'Attendance',
+        subtitle: 'View your attendance',
+        color: COLORS.teacherPalette.subjects.mathematics,
+        onPress: () => {
+          onClose();
+          navigation.navigate('AttendanceStack');
+        },
+      },
+    ],
   };
 
-
-const handleLogout = async () => {
-  try {
-    console.log('🚪 Starting logout process from HamburgerMenu...');
-    console.log('🔧 Navigation object available:', !!navigation);
-    console.log('🔧 Logout function available:', typeof logout === 'function');
-
-    // Verify navigation and logout are available
-    if (!navigation) {
-      console.error('❌ Navigation object not available');
-      Alert.alert(
-        'Navigation Error',
-        'Unable to navigate after logout. Please restart the app.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-
-    if (typeof logout !== 'function') {
-      console.error('❌ Logout function not available from AuthContext');
-      Alert.alert(
-        'Authentication Error',
-        'Sign out function is not available. Please restart the app and try again.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-
-    // Show confirmation dialog with enhanced messaging
-    Alert.alert(
-      '🚪 Sign Out',
-      `Are you sure you want to sign out of your account?\n\n• Your data will be saved securely\n• You'll be redirected to the welcome screen\n• You'll need to log in again to access your information`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: () => console.log('❌ Logout cancelled by user'),
-        },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            await performLogout();
-          },
-        },
-      ],
-      {
-        cancelable: true,
-        onDismiss: () => console.log('❌ Logout dialog dismissed'),
+  // Common items for all roles
+  const _commonItems = [
+    {
+      icon: 'person-outline',
+      title: 'Profile',
+      subtitle: 'Manage your account',
+      color: COLORS.teacherPalette.subjects.english,
+      onPress: () => {
+        onClose();
+        navigation.navigate('Profile');
       },
-    );
-  } catch (error) {
-    console.error('❌ Logout confirmation error from HamburgerMenu:', error);
-    // Fallback alert in case of error
-    Alert.alert(
-      'Error',
-      'Unable to show logout confirmation. Try again?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Try Again', onPress: handleLogout },
-        {
-          text: 'Direct Logout',
-          style: 'destructive',
-          onPress: () => {
-            onClose();
-            navigation.navigate('Landing');
-          }
-        }
-      ]
-    );
-  }
-};
+    },
+    {
+      icon: 'notifications-outline',
+      title: 'Notifications',
+      subtitle: 'Messages & alerts',
+      color: TEACHER_COLORS.warning,
+      badge: 5,
+      onPress: () => {
+        onClose();
+        navigation.navigate('Notifications');
+      },
+    },
+    {
+      icon: 'settings-outline',
+      title: 'Settings',
+      subtitle: 'App preferences',
+      color: COLORS.teacherPalette.subjects.computer,
+      onPress: () => {
+        onClose();
+        navigation.navigate('Settings');
+      },
+    },
+  ];
+
+  // Dynamic getter for menu items
+  const getMenuItems = () => ({
+    roleItems: menuConfig[userRole] || [],
+    commonItems: _commonItems,
+  });
 
   const { roleItems, commonItems } = getMenuItems();
 
-const performLogout = async () => {
-  try {
-    console.log('🔄 Processing logout from HamburgerMenu...');
+  const performLogout = async () => {
+    try {
+      console.log('🔄 Processing logout from HamburgerMenu...');
 
-    // Close menu immediately for better UX
-    onClose();
+      // Close menu immediately for better UX
+      onClose();
 
-    // Show processing message
-    Alert.alert(
-      '🔄 Signing Out',
-      'Please wait while we securely sign you out...\n\n• Clearing session data\n• Saving preferences\n• Disconnecting services',
-      [],
-      { cancelable: false }
-    );
+      // Show processing message
+      Alert.alert(
+        '🔄 Signing Out',
+        'Please wait while we securely sign you out...\n\n• Clearing session data\n• Saving preferences\n• Disconnecting services',
+        [],
+        { cancelable: false },
+      );
 
-    // Perform the actual logout
-    await logout();
+      // Perform the actual logout
+      await logout();
 
-    console.log('✅ Logout completed successfully from HamburgerMenu');
+      console.log('✅ Logout completed successfully from HamburgerMenu');
 
-    // Navigate to Landing page after successful logout
-    setTimeout(() => {
-      console.log('🚀 Navigating to Landing page...');
-      navigation.navigate('Landing');
-
-      // Show success message after navigation
+      // Do NOT navigate after logout; app will redirect automatically
+      // Optionally, show a success message after a short delay
       setTimeout(() => {
         Alert.alert(
           '✅ Signed Out',
           'You have been successfully signed out. Thank you for using SchoolBridge!',
-          [{ text: 'OK', style: 'default' }]
+          [{ text: 'OK', style: 'default' }],
         );
       }, 1000);
-    }, 500);
+    } catch (error) {
+      console.error('❌ Logout execution error from HamburgerMenu:', error);
 
-  } catch (error) {
-    console.error('❌ Logout execution error from HamburgerMenu:', error);
+      // Show error with retry option
+      Alert.alert(
+        '❌ Logout Error',
+        `There was an issue signing you out: ${
+          error.message || 'Unknown error'
+        }\n\nPlease try again or contact support if the problem persists.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Try Again',
+            style: 'default',
+            onPress: () => performLogout(),
+          },
+          {
+            text: 'Force Logout',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                console.log('🚨 Forcing logout from HamburgerMenu...');
 
-    // Show error with retry option
+                // Force close menu
+                onClose();
+
+                // Clear local storage manually if logout fails
+                // This is a fallback mechanism
+                navigation.navigate('Landing');
+
+                Alert.alert(
+                  '⚠️ Force Logout',
+                  'You have been forcefully signed out. Some data may still be cached. Please restart the app for full cleanup.',
+                  [{ text: 'OK' }],
+                );
+              } catch (forceError) {
+                console.error(
+                  '❌ Force logout failed from HamburgerMenu:',
+                  forceError,
+                );
+                Alert.alert(
+                  'Critical Error',
+                  'Unable to sign out. Please restart the app.',
+                  [{ text: 'OK' }],
+                );
+              }
+            },
+          },
+        ],
+      );
+    }
+  };
+
+  const handleLogout = () => {
     Alert.alert(
-      '❌ Logout Error',
-      `There was an issue signing you out: ${error.message || 'Unknown error'}\n\nPlease try again or contact support if the problem persists.`,
+      'Sign Out',
+      'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Try Again',
-          style: 'default',
-          onPress: () => performLogout()
-        },
-        {
-          text: 'Force Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              console.log('🚨 Forcing logout from HamburgerMenu...');
-
-              // Force close menu
-              onClose();
-
-              // Clear local storage manually if logout fails
-              // This is a fallback mechanism
-              navigation.navigate('Landing');
-
-              Alert.alert(
-                '⚠️ Force Logout',
-                'You have been forcefully signed out. Some data may still be cached. Please restart the app for full cleanup.',
-                [{ text: 'OK' }]
-              );
-            } catch (forceError) {
-              console.error('❌ Force logout failed from HamburgerMenu:', forceError);
-              Alert.alert(
-                'Critical Error',
-                'Unable to sign out. Please restart the app.',
-                [{ text: 'OK' }]
-              );
-            }
-          }
-        }
-      ]
+        { text: 'Sign Out', style: 'destructive', onPress: performLogout },
+      ],
+      { cancelable: true },
     );
-  }
-};
+  };
+
   return (
     <Modal
       visible={visible}
@@ -364,8 +365,12 @@ const performLogout = async () => {
             styles.menuPanel,
             {
               width: menuWidth,
-              paddingTop: insets.top + SPACING.lg - 4,
+              paddingTop: insets.top,
               paddingBottom: insets.bottom + SPACING.lg - 4,
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
               transform: [{ translateX: slideAnim }],
             },
           ]}
@@ -626,6 +631,10 @@ const performLogout = async () => {
               <TouchableOpacity
                 style={styles.enhancedMenuItem}
                 activeOpacity={0.7}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('Support');
+                }}
               >
                 <View
                   style={[
@@ -657,6 +666,10 @@ const performLogout = async () => {
               <TouchableOpacity
                 style={styles.enhancedMenuItem}
                 activeOpacity={0.7}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('AboutUs');
+                }}
               >
                 <View
                   style={[
@@ -689,10 +702,7 @@ const performLogout = async () => {
           {/* ✅ Professional Logout Button */}
 
           <TouchableOpacity
-            style={[
-              styles.logoutButton,
-              isLoading && styles.logoutDisabled
-            ]}
+            style={[styles.logoutButton, isLoading && styles.logoutDisabled]}
             onPress={handleLogout}
             activeOpacity={isLoading ? 1 : 0.8}
             disabled={isLoading}
@@ -700,7 +710,10 @@ const performLogout = async () => {
             <LinearGradient
               colors={
                 isLoading
-                  ? [COLORS.teacherPalette.neutral.medium, COLORS.teacherPalette.neutral.dark]
+                  ? [
+                      COLORS.teacherPalette.neutral.medium,
+                      COLORS.teacherPalette.neutral.dark,
+                    ]
                   : [TEACHER_COLORS.error, COLORS.teacherPalette.error.dark]
               }
               style={[

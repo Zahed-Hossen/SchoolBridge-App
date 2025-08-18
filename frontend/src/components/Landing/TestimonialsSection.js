@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const testimonials = [
@@ -23,20 +30,21 @@ const testimonials = [
   },
 ];
 
-const TestimonialCard = ({ name, role, text, image }) => (
-  <View style={styles.testimonialCard}>
-    <Image source={image} style={styles.testimonialImage} />
+const TestimonialCard = ({ name, role, text, image, onPress }) => (
+  <TouchableOpacity style={styles.testimonialCard} onPress={onPress}>
+    <View style={styles.imageContainer}>
+      <Image source={image} style={styles.testimonialImage} />
+    </View>
     <Text style={styles.testimonialName}>{name}</Text>
     <Text style={styles.testimonialRole}>{role}</Text>
     <Text style={styles.testimonialText}>"{text}"</Text>
-  </View>
+  </TouchableOpacity>
 );
 
-const TestimonialsSection = () => {
+const TestimonialsSection = ({ onTestimonialPress }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>What Our Users Are Saying</Text>
-
+      <Text style={styles.sectionTitle}>What Our Users Say</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -49,6 +57,7 @@ const TestimonialsSection = () => {
             role={testimonial.role}
             text={testimonial.text}
             image={testimonial.image}
+            onPress={() => onTestimonialPress(testimonial)}
           />
         ))}
       </ScrollView>
@@ -58,14 +67,14 @@ const TestimonialsSection = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#c1e5f6',
+    backgroundColor: '#e6f4ff',
     paddingVertical: SIZES.padding * 3,
     paddingHorizontal: SIZES.padding,
   },
   sectionTitle: {
     fontSize: SIZES.h1,
     fontFamily: FONTS.bold,
-    color: '#155677',
+    color: COLORS.primaryDark,
     textAlign: 'center',
     marginBottom: SIZES.padding * 2,
   },
@@ -73,46 +82,52 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIZES.base,
   },
   testimonialCard: {
-    backgroundColor: '#e3f1fb',
-    borderRadius: SIZES.radius,
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radius * 1.5,
     padding: SIZES.padding * 1.5,
     marginHorizontal: SIZES.base,
     width: 280,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#c1e5f6',
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: COLORS.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  testimonialImage: {
+  imageContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
+    backgroundColor: '#e6f0fa',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: SIZES.padding,
+    overflow: 'hidden',
+  },
+  testimonialImage: {
+    width: '100%',
+    height: '100%',
   },
   testimonialName: {
     fontSize: SIZES.h3,
     fontFamily: FONTS.semiBold,
-    color: '#155677',
+    color: COLORS.primary,
     textAlign: 'center',
     marginBottom: SIZES.base / 2,
   },
   testimonialRole: {
     fontSize: SIZES.body2,
     fontFamily: FONTS.regular,
-    color: '#155677',
+    color: COLORS.gray,
     textAlign: 'center',
     marginBottom: SIZES.base,
   },
   testimonialText: {
-    fontSize: SIZES.body2,
+    fontSize: SIZES.body3,
     fontFamily: FONTS.regular,
-    color: '#155677',
+    color: COLORS.darkGray,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
   },
 });
 

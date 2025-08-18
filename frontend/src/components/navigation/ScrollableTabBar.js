@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 import {
   View,
   Text,
@@ -25,6 +31,7 @@ const ScrollableTabBar = ({
   badges = {},
   customIcons = {},
   customLabels = {},
+  role = 'Teacher',
   onTabPress = null,
   enableHaptics = true,
   enableAnimations = true,
@@ -44,17 +51,20 @@ const ScrollableTabBar = ({
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   // ✅ Interactive Theme Configuration
-  const themeConfig = useMemo(() => ({
-    primaryColor: theme.primaryColor || '#2563EB',
-    backgroundColor: theme.backgroundColor || '#FFFFFF',
-    textColor: theme.textColor || '#1F2937',
-    inactiveColor: theme.inactiveColor || '#9CA3AF',
-    borderColor: theme.borderColor || '#E5E7EB',
-    shadowColor: theme.shadowColor || '#000000',
-    surfaceColor: theme.surfaceColor || '#F8FAFC',
-    accentColor: theme.accentColor || '#3B82F6',
-    ...theme,
-  }), [theme]);
+  const themeConfig = useMemo(
+    () => ({
+      primaryColor: theme.primaryColor || '#2563EB',
+      backgroundColor: theme.backgroundColor || '#FFFFFF',
+      textColor: theme.textColor || '#1F2937',
+      inactiveColor: theme.inactiveColor || '#9CA3AF',
+      borderColor: theme.borderColor || '#E5E7EB',
+      shadowColor: theme.shadowColor || '#000000',
+      surfaceColor: theme.surfaceColor || '#F8FAFC',
+      accentColor: theme.accentColor || '#3B82F6',
+      ...theme,
+    }),
+    [theme],
+  );
 
   // ✅ Optimized Configuration for Smooth Scrolling
   const tabBarConfig = useMemo(() => {
@@ -77,9 +87,12 @@ const ScrollableTabBar = ({
 
     const mergedConfig = { ...defaultConfig, ...config };
     const shouldScroll = tabCount > mergedConfig.maxVisibleTabs;
-    const calculatedTabWidth = shouldScroll ?
-      mergedConfig.tabWidth :
-      Math.max((screenWidth - (mergedConfig.padding * 2)) / tabCount, mergedConfig.minTabWidth);
+    const calculatedTabWidth = shouldScroll
+      ? mergedConfig.tabWidth
+      : Math.max(
+          (screenWidth - mergedConfig.padding * 2) / tabCount,
+          mergedConfig.minTabWidth,
+        );
 
     return {
       ...mergedConfig,
@@ -94,34 +107,45 @@ const ScrollableTabBar = ({
     return null;
   }
 
-  // ✅ Smooth Auto-scroll without Conflicts
+  // ✅ Only auto-scroll if selected tab is out of view, for smoothness
   useEffect(() => {
-    if (!tabBarConfig.shouldScroll || !scrollViewRef.current || state.index === undefined) {
+    if (
+      !tabBarConfig.shouldScroll ||
+      !scrollViewRef.current ||
+      state.index === undefined
+    ) {
       return;
     }
 
     const tabSpacing = tabBarConfig.tabWidth + tabBarConfig.spacing;
-    const targetX = Math.max(0,
+    const totalTabsWidth = tabBarConfig.tabCount * tabSpacing;
+    const tabStart = state.index * tabSpacing;
+    const tabEnd = tabStart + tabBarConfig.tabWidth;
+    // Clamp scroll position to avoid repeated scrolls at the end
+    let targetScrollX = Math.max(
+      0,
       Math.min(
-        state.index * tabSpacing - (screenWidth / 2) + (tabBarConfig.tabWidth / 2),
-        (tabBarConfig.tabCount * tabSpacing) - screenWidth + 20
-      )
+        state.index * tabSpacing - screenWidth / 2 + tabBarConfig.tabWidth / 2,
+        totalTabsWidth - screenWidth + 20,
+      ),
     );
 
-    // ✅ Smooth scroll without animation conflicts
-    const scrollToTarget = () => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollTo({
-          x: targetX,
-          animated: true,
-        });
+    // Only scroll if the tab is not fully visible (left or right)
+    scrollViewRef.current?.measure?.((x, y, width, height, pageX, pageY) => {
+      // For simplicity, just check if tabEnd > screenWidth (right overflow) or tabStart < 0 (left overflow)
+      if (tabStart < 0 || tabEnd > screenWidth) {
+        // Get current scroll position
+        if (
+          scrollViewRef.current &&
+          scrollViewRef.current._scrollPos !== targetScrollX
+        ) {
+          scrollViewRef.current.scrollTo({ x: targetScrollX, animated: true });
+          scrollViewRef.current._scrollPos = targetScrollX;
+        }
       }
-    };
+    });
 
-    // ✅ Delay to prevent conflicts
-    setTimeout(scrollToTarget, 50);
-
-    // ✅ Selection glow animation
+    // Selection glow animation
     if (enableAnimations) {
       Animated.timing(glowAnim, {
         toValue: 1,
@@ -137,315 +161,410 @@ const ScrollableTabBar = ({
         }).start();
       });
     }
-
   }, [state.index, tabBarConfig, enableAnimations]);
 
   // ✅ Enhanced Tab Press with Clean Animation
-  const handleTabPress = useCallback((route, index) => {
-    if (state.index === index) {
-      // ✅ Double-tap animation
-      if (enableAnimations) {
-        Animated.sequence([
-          Animated.spring(elasticAnim, {
-            toValue: 1.15,
-            tension: 200,
-            friction: 5,
-            useNativeDriver: true,
-          }),
-          Animated.spring(elasticAnim, {
-            toValue: 1,
-            tension: 200,
-            friction: 7,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-      return;
-    }
-
-    if (onTabPress && typeof onTabPress === 'function') {
-      const shouldContinue = onTabPress(route, index, state);
-      if (shouldContinue === false) return;
-    }
-
-    // ✅ Haptic feedback
-    if (enableHaptics) {
-      try {
-        if (Platform.OS === 'ios') {
-          Vibration.vibrate([30, 20, 30]);
-        } else {
-          Vibration.vibrate([40, 30, 40]);
+  const handleTabPress = useCallback(
+    (route, index) => {
+      if (state.index === index) {
+        // ✅ Double-tap animation
+        if (enableAnimations) {
+          Animated.sequence([
+            Animated.spring(elasticAnim, {
+              toValue: 1.15,
+              tension: 200,
+              friction: 5,
+              useNativeDriver: true,
+            }),
+            Animated.spring(elasticAnim, {
+              toValue: 1,
+              tension: 200,
+              friction: 7,
+              useNativeDriver: true,
+            }),
+          ]).start();
         }
-      } catch (error) {
-        // Silent fail
+        return;
       }
-    }
 
-    // ✅ Clean press animation
-    if (enableAnimations) {
-      Animated.spring(scaleAnim, {
-        toValue: 0.95,
-        tension: 300,
-        friction: 8,
-        useNativeDriver: true,
-      }).start(() => {
+      if (onTabPress && typeof onTabPress === 'function') {
+        const shouldContinue = onTabPress(route, index, state);
+        if (shouldContinue === false) return;
+      }
+
+      // ✅ Haptic feedback
+      if (enableHaptics) {
+        try {
+          if (Platform.OS === 'ios') {
+            Vibration.vibrate([30, 20, 30]);
+          } else {
+            Vibration.vibrate([40, 30, 40]);
+          }
+        } catch (error) {
+          // Silent fail
+        }
+      }
+
+      // ✅ Clean press animation
+      if (enableAnimations) {
         Animated.spring(scaleAnim, {
-          toValue: 1,
+          toValue: 0.95,
           tension: 300,
           friction: 8,
           useNativeDriver: true,
-        }).start();
-      });
-    }
-
-    navigation.navigate(route.name);
-  }, [state.index, navigation, onTabPress, enableHaptics, enableAnimations, scaleAnim, elasticAnim]);
-
-  // ✅ Fixed Scroll Handling - No More Trembling
-  const handleScroll = useCallback((event) => {
-    const { contentOffset, velocity } = event.nativeEvent;
-    const currentX = contentOffset.x;
-    const currentVelocity = velocity?.x || 0;
-
-    // ✅ Only update if significant movement
-    if (Math.abs(currentX - lastScrollX) > tabBarConfig.scrollThreshold) {
-      setLastScrollX(currentX);
-      setScrollVelocity(Math.abs(currentVelocity));
-      setIsScrolling(true);
-
-      // ✅ Clear existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+        }).start(() => {
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            tension: 300,
+            friction: 8,
+            useNativeDriver: true,
+          }).start();
+        });
       }
 
-      // ✅ Set scrolling to false after movement stops
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-        setScrollVelocity(0);
-      }, 150);
-    }
-  }, [lastScrollX, tabBarConfig.scrollThreshold]);
+      navigation.navigate(route.name);
+    },
+    [
+      state.index,
+      navigation,
+      onTabPress,
+      enableHaptics,
+      enableAnimations,
+      scaleAnim,
+      elasticAnim,
+    ],
+  );
 
-  // ✅ Enhanced Icon System
-  const getTabIcon = useCallback((routeName, isFocused) => {
-    if (customIcons[routeName]) {
-      const customIcon = customIcons[routeName];
-      return {
-        icon: isFocused ? (customIcon.focused || customIcon.icon) : (customIcon.unfocused || customIcon.icon),
-        color: isFocused ? (customIcon.activeColor || themeConfig.primaryColor) : themeConfig.inactiveColor,
+  // ✅ Fixed Scroll Handling - No More Trembling
+  const handleScroll = useCallback(
+    (event) => {
+      const { contentOffset, velocity } = event.nativeEvent;
+      const currentX = contentOffset.x;
+      const currentVelocity = velocity?.x || 0;
+
+      // ✅ Only update if significant movement
+      if (Math.abs(currentX - lastScrollX) > tabBarConfig.scrollThreshold) {
+        setLastScrollX(currentX);
+        setScrollVelocity(Math.abs(currentVelocity));
+        setIsScrolling(true);
+
+        // ✅ Clear existing timeout
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+
+        // ✅ Set scrolling to false after movement stops
+        scrollTimeoutRef.current = setTimeout(() => {
+          setIsScrolling(false);
+          setScrollVelocity(0);
+        }, 150);
+      }
+    },
+    [lastScrollX, tabBarConfig.scrollThreshold],
+  );
+
+  // ✅ Centralized Icon System for all roles
+  // Updated adminIcons for SuperAdminTabNavigator
+  const adminIcons = {
+    Dashboard: { focused: 'speedometer', unfocused: 'speedometer-outline' },
+    Schools: { focused: 'business', unfocused: 'business-outline' },
+    RoleMatrix: { focused: 'key', unfocused: 'key-outline' },
+    Logs: { focused: 'list', unfocused: 'list-outline' },
+    Settings: { focused: 'settings', unfocused: 'settings-outline' },
+  };
+  const teacherIcons = {
+    TeacherDashboard: { focused: 'home', unfocused: 'home-outline' },
+    MyClasses: { focused: 'school', unfocused: 'school-outline' },
+    AssignmentStack: {
+      focused: 'document-text',
+      unfocused: 'document-text-outline',
+    },
+    AttendanceStack: { focused: 'people', unfocused: 'people-outline' },
+    GradingStack: { focused: 'star', unfocused: 'star-outline' },
+    Analytics: { focused: 'analytics', unfocused: 'analytics-outline' },
+    Settings: { focused: 'settings', unfocused: 'settings-outline' },
+    Reports: { focused: 'document', unfocused: 'document-outline' },
+  };
+  const studentIcons = {
+    Dashboard: { focused: 'home', unfocused: 'home-outline' },
+    MyClasses: { focused: 'school', unfocused: 'school-outline' },
+    Assignment: { focused: 'book', unfocused: 'book-outline' },
+    Grades: { focused: 'trophy', unfocused: 'trophy-outline' },
+    Announcements: {
+      focused: 'megaphone',
+      unfocused: 'megaphone-outline',
+    },
+    Attendance: { focused: 'calendar', unfocused: 'calendar-outline' },
+    Settings: { focused: 'settings', unfocused: 'settings-outline' },
+  };
+
+  const getTabIcon = useCallback(
+    (routeName, isFocused) => {
+      let iconSet = teacherIcons;
+      if (role === 'Student') iconSet = studentIcons;
+      else if (role === 'admin' || role === 'Admin') iconSet = adminIcons;
+
+      if (customIcons[routeName]) {
+        const customIcon = customIcons[routeName];
+        return {
+          icon: isFocused
+            ? customIcon.focused || customIcon.icon
+            : customIcon.unfocused || customIcon.icon,
+          color: isFocused
+            ? customIcon.activeColor || themeConfig.primaryColor
+            : themeConfig.inactiveColor,
+        };
+      }
+
+      const iconConfig = iconSet[routeName] || {
+        focused: 'ellipse',
+        unfocused: 'ellipse-outline',
       };
-    }
-
-    const defaultIcons = {
-      TeacherDashboard: { focused: 'home', unfocused: 'home-outline' },
-      MyClasses: { focused: 'school', unfocused: 'school-outline' },
-      TeacherAssignments: { focused: 'document-text', unfocused: 'document-text-outline' },
-      Attendance: { focused: 'people', unfocused: 'people-outline' },
-      GradingDashboard: { focused: 'star', unfocused: 'star-outline' },
-      Analytics: { focused: 'analytics', unfocused: 'analytics-outline' },
-      Settings: { focused: 'settings', unfocused: 'settings-outline' },
-      Reports: { focused: 'document', unfocused: 'document-outline' },
-    };
-
-    const iconConfig = defaultIcons[routeName] || { focused: 'ellipse', unfocused: 'ellipse-outline' };
-
-    return {
-      icon: isFocused ? iconConfig.focused : iconConfig.unfocused,
-      color: isFocused ? themeConfig.primaryColor : themeConfig.inactiveColor,
-    };
-  }, [customIcons, themeConfig]);
+      return {
+        icon: isFocused ? iconConfig.focused : iconConfig.unfocused,
+        color: isFocused ? themeConfig.primaryColor : themeConfig.inactiveColor,
+      };
+    },
+    [customIcons, themeConfig, role],
+  );
 
   // ✅ Clean Label System
-  const getTabLabel = useCallback((routeName) => {
-    if (customLabels[routeName]) {
-      return customLabels[routeName];
-    }
+  const getTabLabel = useCallback(
+    (routeName) => {
+      if (customLabels[routeName]) {
+        return customLabels[routeName];
+      }
 
-    const defaultLabels = {
-      TeacherDashboard: 'Home',
-      MyClasses: 'Classes',
-      TeacherAssignments: 'Tasks',
-      Attendance: 'Attendance',
-      GradingDashboard: 'Grading',
-      Analytics: 'Analytics',
-      Settings: 'Settings',
-      Reports: 'Reports',
-    };
-
-    return defaultLabels[routeName] || routeName.replace(/([A-Z])/g, ' $1').trim();
-  }, [customLabels]);
+      // Default labels for each role
+      const teacherLabels = {
+        TeacherDashboard: 'Home',
+        MyClasses: 'Classes',
+        AssignmentStack: 'Tasks',
+        AttendanceStack: 'Attendance',
+        GradingStack: 'Grading',
+        Analytics: 'Analytics',
+        Settings: 'Settings',
+        Reports: 'Reports',
+      };
+      const studentLabels = {
+        Dashboard: 'Home',
+        MyClasses: 'Classes',
+        Assignment: 'Assignments',
+        Grades: 'Grades',
+        Announcements: 'News',
+        Attendance: 'Attendance',
+      };
+      const defaultLabels = role === 'Student' ? studentLabels : teacherLabels;
+      return (
+        defaultLabels[routeName] || routeName.replace(/([A-Z])/g, ' $1').trim()
+      );
+    },
+    [customLabels, role],
+  );
 
   // ✅ Professional Badge System
-  const getBadgeInfo = useCallback((routeName) => {
-    return badges[routeName] || null;
-  }, [badges]);
+  const getBadgeInfo = useCallback(
+    (routeName) => {
+      return badges[routeName] || null;
+    },
+    [badges],
+  );
 
   // ✅ Smooth Tab Rendering without Conflicts
-  const renderTab = useCallback((route, index) => {
-    const isFocused = state.index === index;
-    const iconConfig = getTabIcon(route.name, isFocused);
-    const badgeInfo = getBadgeInfo(route.name);
-    const label = getTabLabel(route.name);
+  const renderTab = useCallback(
+    (route, index) => {
+      const isFocused = state.index === index;
+      const iconConfig = getTabIcon(route.name, isFocused);
+      const badgeInfo = getBadgeInfo(route.name);
+      const label = getTabLabel(route.name);
 
-    return (
-      <Animated.View
-        key={route.key}
-        style={[
-          styles.tabWrapper,
-          {
-            width: tabBarConfig.tabWidth,
-            transform: [
-              { scale: isFocused ? elasticAnim : 1 },
-            ]
-          }
-        ]}
-      >
-        <TouchableOpacity
+      return (
+        <Animated.View
+          key={route.key}
           style={[
-            styles.tab,
+            styles.tabWrapper,
             {
-              backgroundColor: isFocused ?
-                `${themeConfig.primaryColor}08` :
-                'transparent',
-              borderRadius: tabBarConfig.borderRadius,
-              minHeight: tabBarConfig.height - 16,
-              borderWidth: isFocused ? 1 : 0,
-              borderColor: isFocused ?
-                `${themeConfig.primaryColor}30` :
-                'transparent',
-              shadowColor: isFocused ? themeConfig.primaryColor : 'transparent',
-              shadowOffset: { width: 0, height: isFocused ? 4 : 2 },
-              shadowOpacity: isFocused ? 0.15 : 0.05,
-              shadowRadius: isFocused ? 8 : 4,
-              elevation: isFocused ? 6 : 2,
-            }
+              width: tabBarConfig.tabWidth,
+              transform: [{ scale: isFocused ? elasticAnim : 1 }],
+            },
           ]}
-          onPress={() => handleTabPress(route, index)}
-          activeOpacity={0.8}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: isFocused }}
-          accessibilityLabel={`${label} tab`}
         >
-          {/* ✅ Icon Container with Smooth Glow */}
-          <Animated.View style={[
-            styles.iconContainer,
-            {
-              transform: [
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              {
+                backgroundColor: isFocused
+                  ? `${themeConfig.primaryColor}08`
+                  : 'transparent',
+                borderRadius: tabBarConfig.borderRadius,
+                minHeight: tabBarConfig.height - 16,
+                borderWidth: isFocused ? 1 : 0,
+                borderColor: isFocused
+                  ? `${themeConfig.primaryColor}30`
+                  : 'transparent',
+                shadowColor: isFocused
+                  ? themeConfig.primaryColor
+                  : 'transparent',
+                shadowOffset: { width: 0, height: isFocused ? 4 : 2 },
+                shadowOpacity: isFocused ? 0.15 : 0.05,
+                shadowRadius: isFocused ? 8 : 4,
+                elevation: isFocused ? 6 : 2,
+              },
+            ]}
+            onPress={() => handleTabPress(route, index)}
+            activeOpacity={0.8}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isFocused }}
+            accessibilityLabel={`${label} tab`}
+          >
+            {/* ✅ Icon Container with Smooth Glow */}
+            <Animated.View
+              style={[
+                styles.iconContainer,
                 {
-                  scale: isFocused && enableAnimations ?
-                    glowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 1.1],
-                    }) : 1
-                }
-              ]
-            }
-          ]}>
-            {/* ✅ Clean glow background */}
-            {isFocused && enableAnimations && (
-              <Animated.View style={[
-                styles.iconGlow,
-                {
-                  backgroundColor: themeConfig.primaryColor,
-                  opacity: glowAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0.12],
-                  }),
-                  transform: [{
-                    scale: glowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.8, 1.3],
-                    })
-                  }]
-                }
-              ]} />
-            )}
-
-            <Ionicons
-              name={iconConfig.icon}
-              size={isFocused ? tabBarConfig.iconSize.focused : tabBarConfig.iconSize.unfocused}
-              color={iconConfig.color}
-            />
-
-            {/* ✅ Smooth Pulsing Badge */}
-            {badgeInfo && (
-              <Animated.View style={[
-                styles.badge,
-                {
-                  backgroundColor: badgeInfo.color || themeConfig.primaryColor,
                   transform: [
                     {
-                      scale: enableAnimations && badgeInfo.pulse ?
-                        pulseAnim.interpolate({
-                          inputRange: [0, 0.5, 1],
-                          outputRange: [1, 1.15, 1],
-                        }) : 1
-                    }
+                      scale:
+                        isFocused && enableAnimations
+                          ? glowAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [1, 1.1],
+                            })
+                          : 1,
+                    },
                   ],
+                },
+              ]}
+            >
+              {/* ✅ Clean glow background */}
+              {isFocused && enableAnimations && (
+                <Animated.View
+                  style={[
+                    styles.iconGlow,
+                    {
+                      backgroundColor: themeConfig.primaryColor,
+                      opacity: glowAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 0.12],
+                      }),
+                      transform: [
+                        {
+                          scale: glowAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.8, 1.3],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              )}
+
+              <Ionicons
+                name={iconConfig.icon}
+                size={
+                  isFocused
+                    ? tabBarConfig.iconSize.focused
+                    : tabBarConfig.iconSize.unfocused
                 }
-              ]}>
-                <Text style={styles.badgeText}>
-                  {badgeInfo.count > 99 ? '99+' : badgeInfo.count}
-                </Text>
-              </Animated.View>
-            )}
-          </Animated.View>
+                color={iconConfig.color}
+              />
 
-          {/* ✅ Smooth Label Scaling */}
-          <Animated.Text
-            style={[
-              styles.label,
-              {
-                color: iconConfig.color,
-                fontWeight: isFocused ? '700' : '500',
-                fontSize: isFocused ? tabBarConfig.fontSize.focused : tabBarConfig.fontSize.unfocused,
-                transform: [{
-                  scale: isFocused && enableAnimations ?
-                    glowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 1.04],
-                    }) : 1
-                }],
-              }
-            ]}
-            numberOfLines={1}
-          >
-            {label}
-          </Animated.Text>
+              {/* ✅ Smooth Pulsing Badge */}
+              {badgeInfo && (
+                <Animated.View
+                  style={[
+                    styles.badge,
+                    {
+                      backgroundColor:
+                        badgeInfo.color || themeConfig.primaryColor,
+                      transform: [
+                        {
+                          scale:
+                            enableAnimations && badgeInfo.pulse
+                              ? pulseAnim.interpolate({
+                                  inputRange: [0, 0.5, 1],
+                                  outputRange: [1, 1.15, 1],
+                                })
+                              : 1,
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  <Text style={styles.badgeText}>
+                    {badgeInfo.count > 99 ? '99+' : badgeInfo.count}
+                  </Text>
+                </Animated.View>
+              )}
+            </Animated.View>
 
-          {/* ✅ Clean Active Indicator */}
-          {isFocused && (
-            <Animated.View style={[
-              styles.activeIndicator,
-              {
-                backgroundColor: themeConfig.primaryColor,
-                transform: enableAnimations ? [
+            {/* ✅ Smooth Label Scaling: Only show label for focused tab */}
+            {isFocused && (
+              <Animated.Text
+                style={[
+                  styles.label,
                   {
-                    scaleX: glowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 1.2],
-                    })
-                  }
-                ] : [],
-              }
-            ]} />
-          )}
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }, [
-    state.index,
-    tabBarConfig,
-    getTabIcon,
-    getBadgeInfo,
-    getTabLabel,
-    handleTabPress,
-    enableAnimations,
-    pulseAnim,
-    elasticAnim,
-    glowAnim,
-    themeConfig
-  ]);
+                    color: iconConfig.color,
+                    fontWeight: '700',
+                    fontSize: tabBarConfig.fontSize.focused,
+                    transform: [
+                      {
+                        scale: enableAnimations
+                          ? glowAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [1, 1.04],
+                            })
+                          : 1,
+                      },
+                    ],
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {label}
+              </Animated.Text>
+            )}
+
+            {/* ✅ Clean Active Indicator */}
+            {isFocused && (
+              <Animated.View
+                style={[
+                  styles.activeIndicator,
+                  {
+                    backgroundColor: themeConfig.primaryColor,
+                    transform: enableAnimations
+                      ? [
+                          {
+                            scaleX: glowAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [1, 1.2],
+                            }),
+                          },
+                        ]
+                      : [],
+                  },
+                ]}
+              />
+            )}
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    },
+    [
+      state.index,
+      tabBarConfig,
+      getTabIcon,
+      getBadgeInfo,
+      getTabLabel,
+      handleTabPress,
+      enableAnimations,
+      pulseAnim,
+      elasticAnim,
+      glowAnim,
+      themeConfig,
+    ],
+  );
 
   // ✅ Smooth Badge Pulse Animation
   useEffect(() => {
@@ -465,7 +584,7 @@ const ScrollableTabBar = ({
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
 
     pulseAnimation.start();
@@ -475,7 +594,7 @@ const ScrollableTabBar = ({
   // ✅ Cleanup animations and timeouts
   useEffect(() => {
     return () => {
-      [scaleAnim, pulseAnim, elasticAnim, glowAnim].forEach(anim => {
+      [scaleAnim, pulseAnim, elasticAnim, glowAnim].forEach((anim) => {
         anim.stopAnimation();
       });
       if (scrollTimeoutRef.current) {
@@ -485,26 +604,35 @@ const ScrollableTabBar = ({
   }, []);
 
   return (
-    <Animated.View style={[
-      styles.container,
-      {
-        backgroundColor: themeConfig.backgroundColor,
-        borderTopColor: themeConfig.borderColor,
-        minHeight: tabBarConfig.height,
-        paddingBottom: Math.max(insets.bottom, 4),
-        transform: enableAnimations ? [{ scale: scaleAnim }] : [],
-      },
-      style,
-    ]}>
-      {/* ✅ Clean Top Border */}
-      <View style={[
-        styles.topBorder,
+    <Animated.View
+      style={[
+        styles.container,
         {
-          backgroundColor: themeConfig.primaryColor,
-          opacity: isScrolling ? 0.3 : 0.1,
-          height: isScrolling ? 2 : 1,
-        }
-      ]} />
+          backgroundColor: themeConfig.backgroundColor,
+          borderTopColor: themeConfig.borderColor,
+          minHeight: tabBarConfig.height,
+          paddingBottom: Math.max(insets.bottom, 4),
+          transform: enableAnimations ? [{ scale: scaleAnim }] : [],
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 10,
+        },
+        style,
+      ]}
+    >
+      {/* ✅ Clean Top Border */}
+      <View
+        style={[
+          styles.topBorder,
+          {
+            backgroundColor: themeConfig.primaryColor,
+            opacity: isScrolling ? 0.3 : 0.1,
+            height: isScrolling ? 2 : 1,
+          },
+        ]}
+      />
 
       {/* ✅ Smooth Scroll Container - Fixed Trembling */}
       <ScrollView
@@ -520,7 +648,7 @@ const ScrollableTabBar = ({
           !tabBarConfig.shouldScroll && styles.centeredContent,
         ]}
         onScroll={handleScroll}
-        scrollEventThrottle={16} // Reduced frequency for stability
+        scrollEventThrottle={16}
         bounces={true}
         scrollEnabled={tabBarConfig.shouldScroll}
         decelerationRate={tabBarConfig.scrollDamping}
@@ -530,7 +658,6 @@ const ScrollableTabBar = ({
         automaticallyAdjustContentInsets={false}
         removeClippedSubviews={false}
         pagingEnabled={false}
-        // ✅ Removed conflicting scroll properties
         overScrollMode="auto"
         alwaysBounceHorizontal={false}
         scrollsToTop={false}
@@ -541,13 +668,15 @@ const ScrollableTabBar = ({
 
       {/* ✅ Clean Scroll Indicator */}
       {tabBarConfig.shouldScroll && isScrolling && (
-        <View style={[
-          styles.scrollIndicator,
-          {
-            backgroundColor: themeConfig.primaryColor,
-            opacity: 0.6,
-          }
-        ]} />
+        <View
+          style={[
+            styles.scrollIndicator,
+            {
+              backgroundColor: themeConfig.primaryColor,
+              opacity: 0.6,
+            },
+          ]}
+        />
       )}
     </Animated.View>
   );

@@ -1,12 +1,10 @@
 import React from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  Alert
-} from 'react-native';
+import { StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
+import { COLORS } from '../../constants/theme';
+import { useAuth } from '../../context/AuthContext';
 
 // Import all section components
 import HeroSection from '../../components/Landing/HeroSection';
@@ -18,91 +16,123 @@ import FooterSection from '../../components/Landing/FooterSection';
 
 const LandingScreen = () => {
   const navigation = useNavigation();
+  const { user } = useAuth();
+  const isVisitor = !user || user?.role?.toLowerCase() === 'visitor';
 
   // ✅ HERO SECTION - Navigation handlers
   const handleLoginPress = () => {
-    console.log('Navigating to Login...');
     navigation.navigate('Login');
   };
 
   const handleSignUpPress = () => {
-    console.log('Navigating to SignUp...');
     navigation.navigate('SignUp');
   };
 
   // ✅ FEATURES SECTION - Feature interaction handler
   const handleFeaturePress = (feature) => {
-    console.log('Feature pressed:', feature);
-    Alert.alert(
-      'Feature',
-      `Learn more about ${feature.title || feature}`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Up',
-          onPress: () => navigation.navigate('SignUp'),
-        },
-      ]
-    );
+    if (isVisitor) {
+      Alert.alert(
+        'Sign Up Required',
+        'You need to create an account to access this feature',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign Up',
+            onPress: () => navigation.navigate('SignUp'),
+          },
+        ],
+      );
+    } else {
+      navigation.navigate('Features');
+    }
   };
 
   // ✅ USER ROLES SECTION - Role selection handler
   const handleRolePress = (role) => {
-    console.log('Role pressed:', role);
     const roleName = role.role || role;
-    Alert.alert(
-      roleName,
-      `Learn more about how ${roleName.toLowerCase()}s use SchoolBridge`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Get Started',
-          onPress: () => navigation.navigate('SignUp'),
-        },
-        {
-          text: 'Login',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]
-    );
+    if (isVisitor) {
+      navigation.navigate('AboutUs');
+    } else {
+      Alert.alert(
+        'Sign Up Required',
+        `Sign up to learn more about ${roleName} features`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign Up',
+            onPress: () => navigation.navigate('SignUp'),
+          },
+        ],
+      );
+    }
   };
 
   // ✅ TESTIMONIALS SECTION - Testimonial interaction handler
   const handleTestimonialPress = (testimonial) => {
-    console.log('Testimonial pressed:', testimonial);
     Alert.alert(
       'Testimonial',
       `"${testimonial.text}" - ${testimonial.name}, ${testimonial.role}`,
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
   // ✅ CALL TO ACTION SECTION - Final conversion handlers
   const handleGetStartedPress = () => {
-    console.log('Get Started CTA pressed');
-    navigation.navigate('Login');
+    navigation.navigate('SignUp');
   };
 
   const handleLearnMorePress = () => {
-    console.log('Learn More pressed');
-    Alert.alert(
-      'Learn More',
-      'Visit our website or contact us for more information about SchoolBridge.\n\n📧 info@schoolbridge.com\n🌐 www.schoolbridge.com\n📱 +1-555-0123',
-      [
-        { text: 'Contact Us', onPress: () => console.log('Contact pressed') },
-        { text: 'OK' }
-      ]
-    );
+    if (isVisitor) {
+      Alert.alert(
+        'Sign Up Required',
+        'Create an account to learn more about our features',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign Up',
+            onPress: () => navigation.navigate('SignUp'),
+          },
+        ],
+      );
+    } else {
+      navigation.navigate('Features');
+    }
   };
 
   // ✅ FOOTER SECTION - Footer link handlers
   const handleFooterLinkPress = (linkType) => {
-    console.log('Footer link pressed:', linkType);
-    Alert.alert(
-      'Coming Soon',
-      `${linkType} page will be available soon!`,
-      [{ text: 'OK' }]
-    );
+    switch (linkType) {
+      case 'about':
+      case 'features':
+      case 'pricing':
+      case 'contact':
+      case 'privacy':
+      case 'terms':
+        navigation.navigate(
+          linkType.charAt(0).toUpperCase() + linkType.slice(1),
+        );
+        break;
+      case 'facebook':
+      case 'twitter':
+      case 'linkedin':
+        Alert.alert(
+          'Social Media',
+          `Would you like to visit our ${linkType} page?`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Continue',
+              onPress: () => {
+                // In a real app, you would use Linking.openURL()
+                console.log(`Opening ${linkType} page`);
+              },
+            },
+          ],
+        );
+        break;
+      default:
+        navigation.navigate('Features');
+    }
   };
 
   return (
@@ -114,7 +144,6 @@ const LandingScreen = () => {
         bounces={true}
         bouncesZoom={false}
       >
-
         {/* 🎨 HERO SECTION - Welcome banner with primary CTAs */}
         <HeroSection
           onLoginPress={handleLoginPress}
@@ -123,18 +152,15 @@ const LandingScreen = () => {
 
         {/* 📋 FEATURES SECTION - 4 key features in 2x2 grid */}
         <FeaturesSection
+          navigation={navigation}
           onFeaturePress={handleFeaturePress}
         />
 
         {/* 👥 USER ROLES SECTION - Different user types */}
-        <UserRoleSection
-          onRolePress={handleRolePress}
-        />
+        <UserRoleSection onRolePress={handleRolePress} />
 
         {/* 💬 TESTIMONIALS SECTION - Social proof from users */}
-        <TestimonialsSection
-          onTestimonialPress={handleTestimonialPress}
-        />
+        <TestimonialsSection onTestimonialPress={handleTestimonialPress} />
 
         {/* 🚀 CALL TO ACTION SECTION - Final conversion push */}
         <CallToActionSection
@@ -143,10 +169,7 @@ const LandingScreen = () => {
         />
 
         {/* 📞 FOOTER SECTION - Links, contact info, legal */}
-        <FooterSection
-          onLinkPress={handleFooterLinkPress}
-        />
-
+        <FooterSection onLinkPress={handleFooterLinkPress} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -155,7 +178,7 @@ const LandingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.background.landing,
   },
   scrollView: {
     flex: 1,

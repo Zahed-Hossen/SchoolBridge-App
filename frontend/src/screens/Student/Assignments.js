@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
   Modal,
   TextInput,
   Platform,
+  Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -19,6 +21,15 @@ import * as FileSystem from 'expo-file-system';
 import { useAuth } from '../../context/AuthContext';
 import { useRole } from '../../context/RoleContext';
 import { useTenant } from '../../context/TenantContext';
+import {
+  COLORS,
+  TEACHER_COLORS,
+  TEACHER_THEME,
+  FONTS,
+  SPACING,
+  BORDER_RADIUS,
+  getRoleColors,
+} from '../../constants/theme';
 
 // ✅ FIX: Update import to use new modular API structure
 import { studentService } from '../../api/services/studentService';
@@ -55,20 +66,17 @@ const AssignmentDetails = ({ route, navigation }) => {
         setAssignment(response.data.assignment);
         console.log('✅ Assignment details loaded successfully');
       } else {
-        throw new Error(response.message || 'Failed to load assignment details');
+        throw new Error(
+          response.message || 'Failed to load assignment details',
+        );
       }
-
     } catch (error) {
       console.error('❌ Error loading assignment details:', error);
 
       // Use mock data as fallback
       setAssignment(getMockAssignmentDetails(assignmentId));
 
-      Alert.alert(
-        'Connection Issue',
-        'Using offline data.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Connection Issue', 'Using offline data.', [{ text: 'OK' }]);
     } finally {
       setLoading(false);
     }
@@ -101,31 +109,29 @@ const AssignmentDetails = ({ route, navigation }) => {
       };
 
       // ✅ Updated API call using new service structure
-      const response = await studentService.submitAssignment(assignment.id, submissionData);
+      const response = await studentService.submitAssignment(
+        assignment.id,
+        submissionData,
+      );
 
       if (response.success) {
-        Alert.alert(
-          'Success!',
-          'Assignment submitted successfully',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setSubmissionModalVisible(false);
-                setAssignment(prev => ({
-                  ...prev,
-                  status: 'submitted',
-                  submittedAt: new Date().toISOString()
-                }));
-                navigation.goBack();
-              }
-            }
-          ]
-        );
+        Alert.alert('Success!', 'Assignment submitted successfully', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setSubmissionModalVisible(false);
+              setAssignment((prev) => ({
+                ...prev,
+                status: 'submitted',
+                submittedAt: new Date().toISOString(),
+              }));
+              navigation.goBack();
+            },
+          },
+        ]);
       } else {
         throw new Error(response.message || 'Submission failed');
       }
-
     } catch (error) {
       console.error('❌ Error submitting assignment:', error);
       Alert.alert('Submission Failed', error.message || 'Please try again');
@@ -139,7 +145,8 @@ const AssignmentDetails = ({ route, navigation }) => {
     id: parseInt(id) || 1,
     title: 'Calculus Problem Set 6',
     subject: 'Mathematics',
-    description: 'Complete problems 1-20 from Chapter 8. Focus on integration by parts and substitution methods. Show all work clearly and provide detailed explanations for each step.',
+    description:
+      'Complete problems 1-20 from Chapter 8. Focus on integration by parts and substitution methods. Show all work clearly and provide detailed explanations for each step.',
     instructions: `Instructions for Assignment:
 1. Read Chapter 8 sections 8.1-8.3 thoroughly
 2. Complete all odd-numbered problems from 1-20
@@ -177,7 +184,11 @@ Late submissions will be penalized 10% per day.`,
   const handleFileSelection = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: assignment?.allowedFileTypes || ['application/pdf', 'image/*', 'application/msword'],
+        type: assignment?.allowedFileTypes || [
+          'application/pdf',
+          'image/*',
+          'application/msword',
+        ],
         copyToCacheDirectory: true,
       });
 
@@ -187,7 +198,10 @@ Late submissions will be penalized 10% per day.`,
         // Check file size (10MB limit)
         const maxSize = 10 * 1024 * 1024; // 10MB in bytes
         if (file.size > maxSize) {
-          Alert.alert('File Too Large', 'Please select a file smaller than 10MB');
+          Alert.alert(
+            'File Too Large',
+            'Please select a file smaller than 10MB',
+          );
           return;
         }
 
@@ -219,7 +233,11 @@ Late submissions will be penalized 10% per day.`,
       case 'pending':
         return { color: '#F39C12', icon: 'time', label: 'Pending' };
       case 'submitted':
-        return { color: '#27AE60', icon: 'checkmark-circle', label: 'Submitted' };
+        return {
+          color: '#27AE60',
+          icon: 'checkmark-circle',
+          label: 'Submitted',
+        };
       case 'overdue':
         return { color: '#E74C3C', icon: 'alert-circle', label: 'Overdue' };
       case 'graded':
@@ -232,10 +250,14 @@ Late submissions will be penalized 10% per day.`,
   // ✅ Get priority color (keep existing function)
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return '#E74C3C';
-      case 'medium': return '#F39C12';
-      case 'low': return '#27AE60';
-      default: return '#95A5A6';
+      case 'high':
+        return '#E74C3C';
+      case 'medium':
+        return '#F39C12';
+      case 'low':
+        return '#27AE60';
+      default:
+        return '#95A5A6';
     }
   };
 
@@ -243,278 +265,371 @@ Late submissions will be penalized 10% per day.`,
   useFocusEffect(
     useCallback(() => {
       loadAssignmentDetails();
-    }, [assignmentId])
+    }, [assignmentId]),
   );
 
   // Theme colors
-  const primaryColor = roleTheme?.primary || tenantBranding?.primaryColor || '#3498DB';
+  const primaryColor =
+    roleTheme?.primary || tenantBranding?.primaryColor || '#3498DB';
   const statusInfo = assignment ? getStatusInfo(assignment.status) : null;
 
-  // ✅ Rest of your component code remains exactly the same...
   // Loading state
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={enhancedStyles.loadingContainer}>
         <ActivityIndicator size="large" color={primaryColor} />
-        <Text style={styles.loadingText}>Loading assignment details...</Text>
+        <Text style={enhancedStyles.loadingText}>
+          Loading assignment details...
+        </Text>
       </View>
     );
   }
 
   if (!assignment) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle" size={64} color="#E74C3C" />
-        <Text style={styles.errorTitle}>Assignment Not Found</Text>
-        <Text style={styles.errorText}>The requested assignment could not be loaded.</Text>
+      <View style={enhancedStyles.errorContainer}>
+        <Ionicons name="alert-circle" size={64} color={TEACHER_COLORS.error} />
+        <Text style={enhancedStyles.errorTitle}>Assignment Not Found</Text>
+        <Text style={enhancedStyles.errorText}>
+          The requested assignment could not be loaded.
+        </Text>
         <TouchableOpacity
-          style={[styles.retryButton, { backgroundColor: primaryColor }]}
+          style={[
+            enhancedStyles.retryButton,
+            { backgroundColor: primaryColor },
+          ]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.retryButtonText}>Go Back</Text>
+          <Text style={enhancedStyles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  return (
-    <View style={styles.container}>
-      {/* ✅ Your existing JSX code stays exactly the same */}
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: primaryColor }]}>
+  // --- ENHANCED STRUCTURE ---
+  // Modular header with back, title, and status badge
+  const Header = () => (
+    <SafeAreaView edges={['top']} style={{ backgroundColor: primaryColor }}>
+      <View style={[enhancedStyles.header, { backgroundColor: primaryColor }]}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={enhancedStyles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Ionicons name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
+        <Text style={enhancedStyles.headerTitle} numberOfLines={1}>
           {assignment.title}
         </Text>
-        <View style={styles.headerActions}>
+        <View style={enhancedStyles.headerActions}>
           {statusInfo && (
-            <View style={[styles.statusBadge, { backgroundColor: statusInfo.color }]}>
-              <Ionicons name={statusInfo.icon} size={16} color="#FFFFFF" />
-              <Text style={styles.statusBadgeText}>{statusInfo.label}</Text>
+            <View
+              style={[
+                enhancedStyles.statusBadge,
+                { backgroundColor: statusInfo.color },
+              ]}
+            >
+              <Ionicons name={statusInfo.icon} size={16} color="#fff" />
+              <Text style={enhancedStyles.statusBadgeText}>
+                {statusInfo.label}
+              </Text>
             </View>
           )}
         </View>
       </View>
+    </SafeAreaView>
+  );
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* ✅ Assignment Overview */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📋 Assignment Overview</Text>
-          <View style={styles.overviewGrid}>
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewLabel}>Subject</Text>
-              <Text style={styles.overviewValue}>{assignment.subject}</Text>
+  // Card section wrapper
+  const SectionCard = ({ title, icon, children, style }) => (
+    <View style={[enhancedStyles.sectionCard, style]}>
+      <View style={enhancedStyles.sectionHeaderRow}>
+        {icon && (
+          <Ionicons
+            name={icon}
+            size={22}
+            color={primaryColor}
+            style={{ marginRight: 8 }}
+          />
+        )}
+        <Text style={enhancedStyles.sectionTitle}>{title}</Text>
+      </View>
+      {children}
+    </View>
+  );
+
+  // Resource link
+  const ResourceLink = ({ resource }) => (
+    <TouchableOpacity
+      style={enhancedStyles.resourceItem}
+      onPress={() => Alert.alert('Resource', `Opening: ${resource.name}`)}
+      activeOpacity={0.7}
+    >
+      <Ionicons name="link" size={20} color={primaryColor} />
+      <Text style={[enhancedStyles.resourceText, { color: primaryColor }]}>
+        {resource.name}
+      </Text>
+      <Ionicons name="chevron-forward" size={20} color="#999" />
+    </TouchableOpacity>
+  );
+
+  // Main render
+  return (
+    <View style={enhancedStyles.container}>
+      <Header />
+      <ScrollView
+        style={enhancedStyles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <SectionCard title="Assignment Overview" icon="clipboard-outline">
+          <View style={enhancedStyles.overviewGrid}>
+            <View style={enhancedStyles.overviewItem}>
+              <Text style={enhancedStyles.overviewLabel}>Subject</Text>
+              <Text style={enhancedStyles.overviewValue}>
+                {assignment.subject}
+              </Text>
             </View>
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewLabel}>Teacher</Text>
-              <Text style={styles.overviewValue}>{assignment.teacher}</Text>
+            <View style={enhancedStyles.overviewItem}>
+              <Text style={enhancedStyles.overviewLabel}>Teacher</Text>
+              <Text style={enhancedStyles.overviewValue}>
+                {assignment.teacher}
+              </Text>
             </View>
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewLabel}>Total Points</Text>
-              <Text style={styles.overviewValue}>{assignment.totalPoints} pts</Text>
+            <View style={enhancedStyles.overviewItem}>
+              <Text style={enhancedStyles.overviewLabel}>Total Points</Text>
+              <Text style={enhancedStyles.overviewValue}>
+                {assignment.totalPoints} pts
+              </Text>
             </View>
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewLabel}>Estimated Time</Text>
-              <Text style={styles.overviewValue}>{assignment.estimatedTime || 'N/A'}</Text>
+            <View style={enhancedStyles.overviewItem}>
+              <Text style={enhancedStyles.overviewLabel}>Estimated Time</Text>
+              <Text style={enhancedStyles.overviewValue}>
+                {assignment.estimatedTime || 'N/A'}
+              </Text>
             </View>
           </View>
-        </View>
+        </SectionCard>
 
-        {/* ✅ Due Date & Priority */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⏰ Due Date & Priority</Text>
-          <View style={styles.dueDateContainer}>
-            <View style={styles.dueDateInfo}>
+        <SectionCard title="Due Date & Priority" icon="calendar-outline">
+          <View style={enhancedStyles.dueDateContainer}>
+            <View style={enhancedStyles.dueDateInfo}>
               <Ionicons name="calendar" size={24} color={primaryColor} />
-              <View style={styles.dueDateText}>
-                <Text style={styles.dueDate}>{formatDate(assignment.dueDate)}</Text>
-                <Text style={styles.dueDateHelper}>
-                  {assignment.status === 'overdue' ? 'This assignment is overdue' : 'Submit before this time'}
+              <View style={enhancedStyles.dueDateText}>
+                <Text style={enhancedStyles.dueDate}>
+                  {formatDate(assignment.dueDate)}
+                </Text>
+                <Text style={enhancedStyles.dueDateHelper}>
+                  {assignment.status === 'overdue'
+                    ? 'This assignment is overdue'
+                    : 'Submit before this time'}
                 </Text>
               </View>
             </View>
             <View
               style={[
-                styles.priorityBadge,
-                { backgroundColor: getPriorityColor(assignment.priority) }
+                enhancedStyles.priorityBadge,
+                { backgroundColor: getPriorityColor(assignment.priority) },
               ]}
             >
-              <Text style={styles.priorityText}>
+              <Text style={enhancedStyles.priorityText}>
                 {assignment.priority.toUpperCase()} PRIORITY
               </Text>
             </View>
           </View>
-        </View>
+        </SectionCard>
 
-        {/* ✅ Description */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📝 Description</Text>
-          <Text style={styles.description}>{assignment.description}</Text>
-        </View>
+        <SectionCard title="Description" icon="document-text-outline">
+          <Text style={enhancedStyles.description}>
+            {assignment.description}
+          </Text>
+        </SectionCard>
 
-        {/* ✅ Instructions */}
         {assignment.instructions && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📖 Instructions</Text>
-            <View style={styles.instructionsContainer}>
-              <Text style={styles.instructions}>{assignment.instructions}</Text>
-            </View>
-          </View>
-        )}
-
-        {/* ✅ Resources */}
-        {assignment.resources && assignment.resources.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📚 Resources</Text>
-            {assignment.resources.map((resource, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.resourceItem}
-                onPress={() => Alert.alert('Resource', `Opening: ${resource.name}`)}
-              >
-                <Ionicons name="link" size={20} color={primaryColor} />
-                <Text style={[styles.resourceText, { color: primaryColor }]}>
-                  {resource.name}
-                </Text>
-                <Ionicons name="chevron-forward" size={20} color="#999" />
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* ✅ Submission Section */}
-        {assignment.status === 'pending' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📤 Submit Assignment</Text>
-            <View style={styles.submissionInfo}>
-              <Text style={styles.submissionInfoText}>
-                Accepted file types: {assignment.allowedFileTypes?.join(', ') || 'PDF, DOC, Images'}
+          <SectionCard title="Instructions" icon="book-outline">
+            <View style={enhancedStyles.instructionsContainer}>
+              <Text style={enhancedStyles.instructions}>
+                {assignment.instructions}
               </Text>
-              <Text style={styles.submissionInfoText}>
+            </View>
+          </SectionCard>
+        )}
+
+        {assignment.resources && assignment.resources.length > 0 && (
+          <SectionCard title="Resources" icon="library-outline">
+            {assignment.resources.map((resource, idx) => (
+              <ResourceLink key={idx} resource={resource} />
+            ))}
+          </SectionCard>
+        )}
+
+        {assignment.status === 'pending' && (
+          <SectionCard title="Submit Assignment" icon="cloud-upload-outline">
+            <View style={enhancedStyles.submissionInfo}>
+              <Text style={enhancedStyles.submissionInfoText}>
+                Accepted file types:{' '}
+                {assignment.allowedFileTypes?.join(', ') || 'PDF, DOC, Images'}
+              </Text>
+              <Text style={enhancedStyles.submissionInfoText}>
                 Maximum file size: {assignment.maxFileSize || '10MB'}
               </Text>
             </View>
             <TouchableOpacity
-              style={[styles.submitButton, { backgroundColor: primaryColor }]}
+              style={[
+                enhancedStyles.submitButton,
+                { backgroundColor: primaryColor },
+              ]}
               onPress={() => setSubmissionModalVisible(true)}
+              activeOpacity={0.8}
             >
-              <Ionicons name="cloud-upload" size={20} color="#FFFFFF" />
-              <Text style={styles.submitButtonText}>Submit Assignment</Text>
+              <Ionicons name="cloud-upload" size={20} color="#fff" />
+              <Text style={enhancedStyles.submitButtonText}>
+                Submit Assignment
+              </Text>
             </TouchableOpacity>
-          </View>
+          </SectionCard>
         )}
 
-        {/* ✅ Submission Status */}
         {assignment.status === 'submitted' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>✅ Submission Status</Text>
-            <View style={styles.submissionStatus}>
-              <Ionicons name="checkmark-circle" size={48} color="#27AE60" />
-              <Text style={styles.submissionStatusTitle}>Assignment Submitted</Text>
-              <Text style={styles.submissionStatusText}>
-                Submitted on: {assignment.submittedAt ? formatDate(assignment.submittedAt) : 'N/A'}
+          <SectionCard title="Submission Status" icon="checkmark-done-outline">
+            <View style={enhancedStyles.submissionStatus}>
+              <Ionicons
+                name="checkmark-circle"
+                size={48}
+                color={TEACHER_COLORS.success}
+              />
+              <Text style={enhancedStyles.submissionStatusTitle}>
+                Assignment Submitted
               </Text>
-              <Text style={styles.submissionStatusText}>
+              <Text style={enhancedStyles.submissionStatusText}>
+                Submitted on:{' '}
+                {assignment.submittedAt
+                  ? formatDate(assignment.submittedAt)
+                  : 'N/A'}
+              </Text>
+              <Text style={enhancedStyles.submissionStatusText}>
                 Your assignment is being reviewed by {assignment.teacher}
               </Text>
             </View>
-          </View>
+          </SectionCard>
         )}
 
-        {/* ✅ Grade Section */}
         {assignment.grade && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🎯 Grade</Text>
-            <View style={styles.gradeContainer}>
-              <Text style={styles.gradeNumber}>{assignment.grade}%</Text>
-              <Text style={styles.gradeTotal}>out of {assignment.totalPoints} points</Text>
+          <SectionCard title="Grade" icon="star-outline">
+            <View style={enhancedStyles.gradeContainer}>
+              <Text style={enhancedStyles.gradeNumber}>
+                {assignment.grade}%
+              </Text>
+              <Text style={enhancedStyles.gradeTotal}>
+                out of {assignment.totalPoints} points
+              </Text>
               {assignment.feedback && (
-                <View style={styles.feedbackContainer}>
-                  <Text style={styles.feedbackTitle}>Teacher Feedback:</Text>
-                  <Text style={styles.feedbackText}>{assignment.feedback}</Text>
+                <View style={enhancedStyles.feedbackContainer}>
+                  <Text style={enhancedStyles.feedbackTitle}>
+                    Teacher Feedback:
+                  </Text>
+                  <Text style={enhancedStyles.feedbackText}>
+                    {assignment.feedback}
+                  </Text>
                 </View>
               )}
             </View>
-          </View>
+          </SectionCard>
         )}
       </ScrollView>
 
-      {/* ✅ Submission Modal - All existing code stays the same */}
+      {/* Submission Modal (structure unchanged, but use enhancedStyles) */}
       <Modal
         visible={submissionModalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
         onRequestClose={() => setSubmissionModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
+        <View style={enhancedStyles.modalContainer}>
+          <View style={enhancedStyles.modalHeader}>
             <TouchableOpacity onPress={() => setSubmissionModalVisible(false)}>
-              <Text style={[styles.modalCancelText, { color: primaryColor }]}>Cancel</Text>
+              <Text
+                style={[
+                  enhancedStyles.modalCancelText,
+                  { color: primaryColor },
+                ]}
+              >
+                Cancel
+              </Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Submit Assignment</Text>
+            <Text style={enhancedStyles.modalTitle}>Submit Assignment</Text>
             <TouchableOpacity onPress={handleSubmission} disabled={submitting}>
-              <Text style={[styles.modalSubmitText, { color: primaryColor }]}>
+              <Text
+                style={[
+                  enhancedStyles.modalSubmitText,
+                  { color: primaryColor },
+                ]}
+              >
                 {submitting ? 'Submitting...' : 'Submit'}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalContent}>
-            {/* ✅ Submission Type Selector */}
-            <Text style={styles.modalSectionTitle}>Submission Type</Text>
-            <View style={styles.submissionTypeContainer}>
+          <ScrollView style={enhancedStyles.modalContent}>
+            <Text style={enhancedStyles.modalSectionTitle}>
+              Submission Type
+            </Text>
+            <View style={enhancedStyles.submissionTypeContainer}>
               <TouchableOpacity
                 style={[
-                  styles.submissionTypeButton,
-                  submissionType === 'text' && { backgroundColor: primaryColor }
+                  enhancedStyles.submissionTypeButton,
+                  submissionType === 'text' && {
+                    backgroundColor: primaryColor,
+                  },
                 ]}
                 onPress={() => setSubmissionType('text')}
               >
                 <Ionicons
                   name="document-text"
                   size={20}
-                  color={submissionType === 'text' ? '#FFFFFF' : '#666'}
+                  color={submissionType === 'text' ? '#fff' : '#666'}
                 />
-                <Text style={[
-                  styles.submissionTypeText,
-                  submissionType === 'text' && { color: '#FFFFFF' }
-                ]}>
+                <Text
+                  style={[
+                    enhancedStyles.submissionTypeText,
+                    submissionType === 'text' && { color: '#fff' },
+                  ]}
+                >
                   Text Entry
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[
-                  styles.submissionTypeButton,
-                  submissionType === 'file' && { backgroundColor: primaryColor }
+                  enhancedStyles.submissionTypeButton,
+                  submissionType === 'file' && {
+                    backgroundColor: primaryColor,
+                  },
                 ]}
                 onPress={() => setSubmissionType('file')}
               >
                 <Ionicons
                   name="attach"
                   size={20}
-                  color={submissionType === 'file' ? '#FFFFFF' : '#666'}
+                  color={submissionType === 'file' ? '#fff' : '#666'}
                 />
-                <Text style={[
-                  styles.submissionTypeText,
-                  submissionType === 'file' && { color: '#FFFFFF' }
-                ]}>
+                <Text
+                  style={[
+                    enhancedStyles.submissionTypeText,
+                    submissionType === 'file' && { color: '#fff' },
+                  ]}
+                >
                   File Upload
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* ✅ Text Submission */}
             {submissionType === 'text' && (
-              <View style={styles.textSubmissionContainer}>
-                <Text style={styles.modalSectionTitle}>Your Submission</Text>
+              <View style={enhancedStyles.textSubmissionContainer}>
+                <Text style={enhancedStyles.modalSectionTitle}>
+                  Your Submission
+                </Text>
                 <TextInput
-                  style={styles.textSubmissionInput}
+                  style={enhancedStyles.textSubmissionInput}
                   placeholder="Enter your assignment submission here..."
                   value={textSubmission}
                   onChangeText={setTextSubmission}
@@ -522,45 +637,68 @@ Late submissions will be penalized 10% per day.`,
                   numberOfLines={10}
                   textAlignVertical="top"
                 />
-                <Text style={styles.characterCount}>
+                <Text style={enhancedStyles.characterCount}>
                   {textSubmission.length} characters
                 </Text>
               </View>
             )}
 
-            {/* ✅ File Submission */}
             {submissionType === 'file' && (
-              <View style={styles.fileSubmissionContainer}>
-                <Text style={styles.modalSectionTitle}>Select File</Text>
+              <View style={enhancedStyles.fileSubmissionContainer}>
+                <Text style={enhancedStyles.modalSectionTitle}>
+                  Select File
+                </Text>
 
                 {selectedFile ? (
-                  <View style={styles.selectedFileContainer}>
-                    <View style={styles.fileInfo}>
-                      <Ionicons name="document" size={24} color={primaryColor} />
-                      <View style={styles.fileDetails}>
-                        <Text style={styles.fileName}>{selectedFile.name}</Text>
-                        <Text style={styles.fileSize}>
+                  <View style={enhancedStyles.selectedFileContainer}>
+                    <View style={enhancedStyles.fileInfo}>
+                      <Ionicons
+                        name="document"
+                        size={24}
+                        color={primaryColor}
+                      />
+                      <View style={enhancedStyles.fileDetails}>
+                        <Text style={enhancedStyles.fileName}>
+                          {selectedFile.name}
+                        </Text>
+                        <Text style={enhancedStyles.fileSize}>
                           {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                         </Text>
                       </View>
                     </View>
                     <TouchableOpacity
-                      style={styles.removeFileButton}
+                      style={enhancedStyles.removeFileButton}
                       onPress={() => setSelectedFile(null)}
                     >
-                      <Ionicons name="close-circle" size={24} color="#E74C3C" />
+                      <Ionicons
+                        name="close-circle"
+                        size={24}
+                        color={TEACHER_COLORS.error}
+                      />
                     </TouchableOpacity>
                   </View>
                 ) : (
                   <TouchableOpacity
-                    style={[styles.fileSelectionButton, { borderColor: primaryColor }]}
+                    style={[
+                      enhancedStyles.fileSelectionButton,
+                      { borderColor: primaryColor },
+                    ]}
                     onPress={handleFileSelection}
                   >
-                    <Ionicons name="cloud-upload" size={32} color={primaryColor} />
-                    <Text style={[styles.fileSelectionText, { color: primaryColor }]}>
+                    <Ionicons
+                      name="cloud-upload"
+                      size={32}
+                      color={primaryColor}
+                    />
+                    <Text
+                      style={[
+                        enhancedStyles.fileSelectionText,
+                        { color: primaryColor },
+                      ]}
+                    >
                       Tap to select file
                     </Text>
-                    <Text style={styles.fileSelectionSubtext}>
+                    <Text style={enhancedStyles.fileSelectionSubtext}>
                       Supported: PDF, DOC, Images (Max 10MB)
                     </Text>
                   </TouchableOpacity>
@@ -570,9 +708,11 @@ Late submissions will be penalized 10% per day.`,
           </ScrollView>
 
           {submitting && (
-            <View style={styles.submittingOverlay}>
+            <View style={enhancedStyles.submittingOverlay}>
               <ActivityIndicator size="large" color={primaryColor} />
-              <Text style={styles.submittingText}>Submitting assignment...</Text>
+              <Text style={enhancedStyles.submittingText}>
+                Submitting assignment...
+              </Text>
             </View>
           )}
         </View>
@@ -581,9 +721,420 @@ Late submissions will be penalized 10% per day.`,
   );
 };
 
-// ✅ All styles remain exactly the same
-const styles = StyleSheet.create({
-  // ... your existing styles stay exactly the same
+// --- ENHANCED STYLES ---
+const { width: screenWidth } = Dimensions.get('window');
+const enhancedStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background.primary,
+  },
+  loadingText: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.textMuted,
+    marginTop: SPACING.md,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background.primary,
+    padding: SPACING.lg,
+  },
+  errorTitle: {
+    ...TEACHER_THEME.typography.h3,
+    color: TEACHER_COLORS.error,
+    marginTop: SPACING.md,
+  },
+  errorText: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.textMuted,
+    marginBottom: SPACING.lg,
+    textAlign: 'center',
+  },
+  retryButton: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: BORDER_RADIUS.lg,
+    marginTop: SPACING.md,
+  },
+  retryButtonText: {
+    ...TEACHER_THEME.typography.body,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingTop: Platform.OS === 'ios' ? 44 : 16,
+    paddingBottom: SPACING.md,
+    backgroundColor: TEACHER_COLORS.primary,
+    borderBottomLeftRadius: BORDER_RADIUS.xl,
+    borderBottomRightRadius: BORDER_RADIUS.xl,
+    elevation: 2,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    marginRight: 8,
+  },
+  headerTitle: {
+    ...TEACHER_THEME.typography.h3,
+    color: '#fff',
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: TEACHER_COLORS.warning,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginLeft: 4,
+  },
+  statusBadgeText: {
+    ...TEACHER_THEME.typography.small,
+    color: '#fff',
+    marginLeft: 4,
+    fontWeight: '600',
+  },
+  content: {
+    flex: 1,
+    padding: SPACING.md,
+  },
+  sectionCard: {
+    backgroundColor: COLORS.teacherPalette.background.secondary,
+    borderRadius: BORDER_RADIUS.lg,
+    marginBottom: SPACING.lg,
+    padding: SPACING.lg,
+    shadowColor: COLORS.teacherPalette.shadow.light,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  sectionTitle: {
+    ...TEACHER_THEME.typography.h4,
+    color: TEACHER_COLORS.text,
+    fontWeight: '600',
+  },
+  overviewGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+  },
+  overviewItem: {
+    flexBasis: '48%',
+    marginBottom: SPACING.md,
+  },
+  overviewLabel: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+    marginBottom: 2,
+  },
+  overviewValue: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    fontWeight: '500',
+  },
+  dueDateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+  },
+  dueDateInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  dueDateText: {
+    marginLeft: SPACING.md,
+  },
+  dueDate: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    fontWeight: '600',
+  },
+  dueDateHelper: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+  },
+  priorityBadge: {
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginLeft: SPACING.md,
+  },
+  priorityText: {
+    ...TEACHER_THEME.typography.small,
+    color: '#fff',
+    fontWeight: '700',
+  },
+  description: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    lineHeight: 22,
+  },
+  instructionsContainer: {
+    backgroundColor: COLORS.teacherPalette.background.accent,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+  },
+  instructions: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    lineHeight: 22,
+  },
+  resourceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.teacherPalette.background.accent,
+  },
+  resourceText: {
+    ...TEACHER_THEME.typography.body,
+    marginLeft: SPACING.md,
+    flex: 1,
+  },
+  submissionInfo: {
+    marginBottom: SPACING.md,
+  },
+  submissionInfoText: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+    marginBottom: 2,
+  },
+  submitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: BORDER_RADIUS.lg,
+    paddingVertical: SPACING.md,
+    marginTop: SPACING.md,
+    backgroundColor: TEACHER_COLORS.primary,
+  },
+  submitButtonText: {
+    ...TEACHER_THEME.typography.body,
+    color: '#fff',
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  submissionStatus: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  submissionStatusTitle: {
+    ...TEACHER_THEME.typography.h4,
+    color: TEACHER_COLORS.success,
+    marginTop: SPACING.md,
+    fontWeight: '700',
+  },
+  submissionStatusText: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    marginTop: 2,
+  },
+  gradeContainer: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  gradeNumber: {
+    ...TEACHER_THEME.typography.h2,
+    color: TEACHER_COLORS.gradeA,
+    fontWeight: '700',
+  },
+  gradeTotal: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.textMuted,
+    marginTop: 2,
+  },
+  feedbackContainer: {
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.teacherPalette.background.accent,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    width: '100%',
+  },
+  feedbackTitle: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.text,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  feedbackText: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+  },
+  // --- Modal ---
+  modalContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background.primary,
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingTop: Platform.OS === 'ios' ? 32 : 16,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.teacherPalette.background.accent,
+  },
+  modalCancelText: {
+    ...TEACHER_THEME.typography.body,
+    fontWeight: '600',
+  },
+  modalTitle: {
+    ...TEACHER_THEME.typography.h4,
+    color: TEACHER_COLORS.text,
+    fontWeight: '700',
+  },
+  modalSubmitText: {
+    ...TEACHER_THEME.typography.body,
+    fontWeight: '600',
+  },
+  modalContent: {
+    flex: 1,
+    padding: SPACING.md,
+  },
+  modalSectionTitle: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+    marginBottom: SPACING.sm,
+    fontWeight: '600',
+  },
+  submissionTypeContainer: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  submissionTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.teacherPalette.background.accent,
+    paddingVertical: SPACING.md,
+    backgroundColor: '#fff',
+  },
+  submissionTypeText: {
+    ...TEACHER_THEME.typography.body,
+    marginLeft: 8,
+    color: TEACHER_COLORS.text,
+    fontWeight: '600',
+  },
+  textSubmissionContainer: {
+    marginBottom: SPACING.md,
+  },
+  textSubmissionInput: {
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: COLORS.teacherPalette.background.accent,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    backgroundColor: '#fff',
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+  },
+  characterCount: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  fileSubmissionContainer: {
+    marginBottom: SPACING.md,
+  },
+  fileSelectionButton: {
+    borderWidth: 1,
+    borderColor: COLORS.teacherPalette.background.accent,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  fileSelectionText: {
+    ...TEACHER_THEME.typography.body,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  fileSelectionSubtext: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+    marginTop: 2,
+  },
+  selectedFileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.teacherPalette.background.accent,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  fileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  fileDetails: {
+    marginLeft: SPACING.md,
+  },
+  fileName: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    fontWeight: '600',
+  },
+  fileSize: {
+    ...TEACHER_THEME.typography.caption,
+    color: TEACHER_COLORS.textMuted,
+  },
+  removeFileButton: {
+    marginLeft: SPACING.md,
+  },
+  submittingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  submittingText: {
+    ...TEACHER_THEME.typography.body,
+    color: TEACHER_COLORS.text,
+    marginTop: SPACING.md,
+  },
 });
 
 export default AssignmentDetails;

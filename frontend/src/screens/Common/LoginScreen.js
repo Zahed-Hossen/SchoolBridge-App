@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Modal } from 'react-native';
 import {
   View,
   Text,
@@ -11,6 +12,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { USER_ROLES } from '../../constants/config';
 import GoogleOAuthService from '../../services/GoogleOAuthService';
@@ -19,22 +21,40 @@ const LoginScreen = ({ navigation }) => {
   const { login, signInWithGoogle, isLoading, user, role, isAuthenticated } =
     useAuth();
   const [formData, setFormData] = useState({
-    email: 'mdzahedsiddique@gmail.com', // Pre-filled for easy testing
-    password: 'Ananas@Guava#', // Pre-filled for easy testing
-    role: USER_ROLES.STUDENT,
+    email: '',
+    password: '',
+    role: USER_ROLES.PLATFORM_USER, // Default to platform user
   });
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginType, setLoginType] = useState('platform');
+  const [showRolePicker, setShowRolePicker] = useState(false);
 
-  // ✅ Auto-navigate OAuth users to role selection
+  // Auto-navigate OAuth users to role selection ONLY for platform users
   useEffect(() => {
-    // Only navigate if we have a user but no role and we're not loading
-    if (user && !role && !isAuthenticated && !googleLoading && !isLoading) {
+    if (
+      user &&
+      !role &&
+      !isAuthenticated &&
+      !googleLoading &&
+      !isLoading &&
+      loginType === 'platform'
+    ) {
       console.log(
-        '🎯 Auto-navigating OAuth user to role selection from LoginScreen',
+        'Auto-navigating OAuth platform user to role selection from LoginScreen',
       );
       navigation.navigate('RoleSelection', { user });
     }
-  }, [user, role, isAuthenticated, googleLoading, isLoading, navigation]);
+  }, [
+    user,
+    role,
+    isAuthenticated,
+    googleLoading,
+    isLoading,
+    navigation,
+    loginType,
+  ]);
+
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -45,22 +65,22 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
+    const loginRole =
+      loginType === 'platform' ? formData.role : USER_ROLES.VISITOR;
     console.log('Attempting login with:', {
       email: formData.email,
-      role: formData.role,
+      loginType: loginType,
+      role: loginRole,
     });
 
     try {
-      const result = await login(
-        formData.email,
-        formData.password,
-        formData.role,
-      );
+      const result = await login(formData.email, formData.password, loginRole);
 
       console.log('Login result:', result);
 
       if (result.success) {
-        Alert.alert('Success', 'Login successful!');
+        console.log('Login successful!');
+        // Navigation handled by AuthContext based on user role
       } else {
         Alert.alert('Login Failed', result.error || 'Invalid credentials');
       }
@@ -73,43 +93,33 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ UPDATED: Use GoogleOAuthService directly
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
 
     try {
-      console.log('🔐 Starting Google OAuth sign-in...');
-
-      // ✅ Call GoogleOAuthService directly instead of AuthContext
+      console.log('Starting Google OAuth sign-in...');
       const result = await GoogleOAuthService.signIn();
 
       if (result.success) {
-        console.log('✅ Google OAuth successful:', result.user.email);
-
-        // ✅ Now call AuthContext to handle the OAuth result
+        console.log('Google OAuth successful:', result.user.email);
         const authResult = await signInWithGoogle(result);
 
         if (authResult.success && authResult.needsRoleSelection) {
-          console.log('🎯 User needs role selection, waiting for auto-navigation...');
-          // Navigation will be handled by useEffect
+          console.log('New user signup, waiting for auto-navigation...');
         }
       } else if (result.cancelled) {
-        console.log('ℹ️ User cancelled Google sign-in');
-        // Don't show error for cancelled sign-in
+        console.log('User cancelled Google sign-in');
       } else {
         throw new Error(result.error || 'Google sign-in failed');
       }
     } catch (error) {
-      console.error('❌ Google OAuth error:', error);
+      console.error('Google OAuth error:', error);
 
       let errorMessage = 'Failed to sign in with Google';
-
       if (error.message.includes('cancelled')) {
         errorMessage = 'Sign-in was cancelled';
       } else if (error.message.includes('network')) {
         errorMessage = 'Network error. Please check your connection.';
-      } else if (error.message.includes('PLAY_SERVICES_NOT_AVAILABLE')) {
-        errorMessage = 'Google Play Services not available. Please update Google Play Services.';
       }
 
       Alert.alert('Google Sign In Failed', errorMessage);
@@ -118,8 +128,8 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const navigateToSignUp = () => {
-    navigation.navigate('SignUp');
+  const navigateToSignUp = (type) => {
+    navigation.navigate('SignUp', { signupType: type });
   };
 
   return (
@@ -136,9 +146,47 @@ const LoginScreen = ({ navigation }) => {
           </Text>
         </View>
 
+        {/* Login Type Toggle */}
+        <View style={styles.loginTypeContainer}>
+          <TouchableOpacity
+            style={[
+              styles.loginTypeButton,
+              loginType === 'platform' && styles.loginTypeActive,
+            ]}
+            onPress={() => setLoginType('platform')}
+          >
+            <Text
+              style={[
+                styles.loginTypeText,
+                loginType === 'platform' && styles.loginTypeTextActive,
+              ]}
+            >
+              Platform User
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.loginTypeButton,
+              loginType === 'visitor' && styles.loginTypeActive,
+            ]}
+            onPress={() => setLoginType('visitor')}
+          >
+            <Text
+              style={[
+                styles.loginTypeText,
+                loginType === 'visitor' && styles.loginTypeTextActive,
+              ]}
+            >
+              Visitor
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Login Form */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Sign In</Text>
+          <Text style={styles.cardTitle}>
+            {loginType === 'platform' ? 'Platform User Login' : 'Visitor Login'}
+          </Text>
 
           {/* Email Input */}
           <View style={styles.inputGroup}>
@@ -157,52 +205,73 @@ const LoginScreen = ({ navigation }) => {
           {/* Password Input */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.password}
-              onChangeText={(text) => handleInputChange('password', text)}
-              placeholder="Enter your password"
-              secureTextEntry
-              editable={!isLoading && !googleLoading}
-            />
-          </View>
-
-          {/* Role Selection */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Select Role:</Text>
-            <View style={styles.roleContainer}>
-              {Object.values(USER_ROLES).map((role) => (
-                <TouchableOpacity
-                  key={role}
-                  style={[
-                    styles.roleOption,
-                    formData.role === role && styles.selectedRole,
-                  ]}
-                  onPress={() => handleInputChange('role', role)}
-                  disabled={isLoading || googleLoading}
-                >
-                  <View
-                    style={[
-                      styles.radioButton,
-                      formData.role === role && styles.radioButtonSelected,
-                    ]}
-                  >
-                    {formData.role === role && (
-                      <View style={styles.radioButtonInner} />
-                    )}
-                  </View>
-                  <Text
-                    style={[
-                      styles.roleText,
-                      formData.role === role && styles.selectedRoleText,
-                    ]}
-                  >
-                    {role}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.passwordFieldWrapper}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                value={formData.password}
+                onChangeText={(text) => handleInputChange('password', text)}
+                placeholder="Enter your password"
+                secureTextEntry={!showPassword}
+                editable={!isLoading && !googleLoading}
+              />
+              <TouchableOpacity
+                style={styles.eyeIconAbsolute}
+                onPress={() => setShowPassword((prev) => !prev)}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={22}
+                  color="#888"
+                />
+              </TouchableOpacity>
             </View>
           </View>
+
+          {/* Role Selection - Only for platform users */}
+          {loginType === 'platform' && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Select Role:</Text>
+              <TouchableOpacity
+                style={[styles.input, { justifyContent: 'center' }]}
+                onPress={() => setShowRolePicker(true)}
+                disabled={isLoading || googleLoading}
+              >
+                <Text style={{ color: formData.role ? '#333' : '#999' }}>
+                  {formData.role || 'Select your role'}
+                </Text>
+              </TouchableOpacity>
+              <Modal
+                visible={showRolePicker}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowRolePicker(false)}
+              >
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+                  <View style={{ backgroundColor: '#4d99a3ff', borderRadius: 12, padding: 24, minWidth: 250 }}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>Select Role</Text>
+                    {Object.values(USER_ROLES)
+                      .filter((role) => role !== USER_ROLES.VISITOR)
+                      .map((role) => (
+                        <TouchableOpacity
+                          key={role}
+                          style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' }}
+                          onPress={() => {
+                            handleInputChange('role', role);
+                            setShowRolePicker(false);
+                          }}
+                        >
+                          <Text style={{ fontSize: 16, color: '#333', textAlign: 'center' }}>{role}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    <TouchableOpacity style={{ paddingVertical: 12, alignItems: 'center', marginTop: 8 }} onPress={() => setShowRolePicker(false)}>
+                      <Text style={{ fontSize: 16, color: '#d62323ff', fontWeight: 'bold' }}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </View>
+          )}
 
           {/* Login Button */}
           <TouchableOpacity
@@ -227,7 +296,7 @@ const LoginScreen = ({ navigation }) => {
             <View style={styles.divider} />
           </View>
 
-          {/* ✅ UPDATED: Use native GoogleSigninButton */}
+          {/* Google Sign In */}
           <TouchableOpacity
             style={[
               styles.googleButton,
@@ -240,21 +309,37 @@ const LoginScreen = ({ navigation }) => {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <>
-                <Text style={styles.googleButtonIcon}>🔍</Text>
-                <Text style={styles.googleButtonText}>Continue with Google</Text>
+                <Ionicons
+                  name="logo-google"
+                  size={20}
+                  color="#FFFFFF"
+                  style={styles.googleButtonIcon}
+                />
+                <Text style={styles.googleButtonText}>
+                  Continue with Google
+                </Text>
               </>
             )}
           </TouchableOpacity>
 
-          {/* Sign Up Link */}
+          {/* Sign Up Links */}
           <View style={styles.linkContainer}>
             <Text style={styles.linkText}>Don't have an account? </Text>
-            <TouchableOpacity
-              onPress={navigateToSignUp}
-              disabled={isLoading || googleLoading}
-            >
-              <Text style={styles.linkButton}>Sign Up</Text>
-            </TouchableOpacity>
+            <View style={styles.signupLinks}>
+              <TouchableOpacity
+                onPress={() => navigateToSignUp('platform')}
+                disabled={isLoading || googleLoading}
+              >
+                <Text style={styles.linkButton}>Platform User</Text>
+              </TouchableOpacity>
+              <Text style={styles.linkText}> or </Text>
+              <TouchableOpacity
+                onPress={() => navigateToSignUp('visitor')}
+                disabled={isLoading || googleLoading}
+              >
+                <Text style={styles.linkButton}>Visitor</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -274,7 +359,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   appTitle: {
     fontSize: 32,
@@ -286,6 +371,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
+  },
+  loginTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  loginTypeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  loginTypeActive: {
+    backgroundColor: '#2E86AB',
+  },
+  loginTypeText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  loginTypeTextActive: {
+    color: '#FFFFFF',
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -312,6 +426,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333333',
     marginBottom: 8,
+  },
+  passwordFieldWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  passwordInput: {
+    paddingRight: 40,
+  },
+  eyeIconAbsolute: {
+    position: 'absolute',
+    right: 10,
+    top: 0,
+    bottom: 0,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+    zIndex: 2,
   },
   input: {
     borderWidth: 1,
@@ -373,6 +505,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 16,
+    shadowColor: '#2E86AB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   loginButtonDisabled: {
     opacity: 0.6,
@@ -398,7 +535,6 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontWeight: '500',
   },
-  // ✅ UPDATED: Custom Google button styles
   googleButton: {
     backgroundColor: '#4285F4',
     paddingVertical: 14,
@@ -407,7 +543,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -418,7 +554,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   googleButtonIcon: {
-    fontSize: 18,
     marginRight: 12,
   },
   googleButtonText: {
@@ -427,97 +562,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
   },
   linkText: {
     fontSize: 16,
     color: '#666666',
+    textAlign: 'center',
+  },
+  signupLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 4,
   },
   linkButton: {
     fontSize: 16,
     color: '#2E86AB',
     fontWeight: 'bold',
+    marginHorizontal: 4,
   },
 });
 
 export default LoginScreen;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect, useRef } from 'react';
 // import {

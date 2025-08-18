@@ -11,7 +11,10 @@ router.get('/profile', auth, async (req, res) => {
     const user = await User.findById(req.user.userId)
       .select('-password -refreshTokens')
       .populate('studentInfo.parentIds', 'firstName lastName email')
-      .populate('parentInfo.children', 'firstName lastName email studentInfo.grade');
+      .populate(
+        'parentInfo.children',
+        'firstName lastName email studentInfo.grade',
+      );
 
     if (!user) {
       return res.status(404).json({
@@ -34,42 +37,47 @@ router.get('/profile', auth, async (req, res) => {
 });
 
 // ✅ PUT /api/users/profile - Update user profile
-router.put('/profile', auth, [
-  body('firstName').optional().trim().notEmpty(),
-  body('lastName').optional().trim().notEmpty(),
-  body('profile.phone').optional().isMobilePhone(),
-  body('profile.dateOfBirth').optional().isISO8601().toDate(),
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.put(
+  '/profile',
+  auth,
+  [
+    body('firstName').optional().trim().notEmpty(),
+    body('lastName').optional().trim().notEmpty(),
+    body('profile.phone').optional().isMobilePhone(),
+    body('profile.dateOfBirth').optional().isISO8601().toDate(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validation failed',
+          details: errors.array(),
+        });
+      }
+
+      const updates = req.body;
+      const user = await User.findByIdAndUpdate(
+        req.user.userId,
+        { $set: updates },
+        { new: true, runValidators: true },
+      ).select('-password -refreshTokens');
+
+      res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully',
+        user,
+      });
+    } catch (error) {
+      console.error('❌ Update profile error:', error);
+      res.status(500).json({
         success: false,
-        error: 'Validation failed',
-        details: errors.array(),
+        error: 'Failed to update profile',
       });
     }
-
-    const updates = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user.userId,
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-password -refreshTokens');
-
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      user,
-    });
-  } catch (error) {
-    console.error('❌ Update profile error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update profile',
-    });
-  }
-});
+  },
+);
 
 // ✅ GET /api/users/dashboard - Get role-specific dashboard data
 router.get('/dashboard', auth, async (req, res) => {
@@ -105,8 +113,18 @@ router.get('/dashboard', auth, async (req, res) => {
           attendanceRate: '95%',
         };
         dashboardData.recentActivity = [
-          { id: 1, type: 'grade', message: 'New grade posted for Math Quiz', time: '2 hours ago' },
-          { id: 2, type: 'assignment', message: 'Science project due tomorrow', time: '1 day ago' },
+          {
+            id: 1,
+            type: 'grade',
+            message: 'New grade posted for Math Quiz',
+            time: '2 hours ago',
+          },
+          {
+            id: 2,
+            type: 'assignment',
+            message: 'Science project due tomorrow',
+            time: '1 day ago',
+          },
         ];
         break;
 
@@ -118,14 +136,24 @@ router.get('/dashboard', auth, async (req, res) => {
           upcomingLessons: 8,
         };
         dashboardData.recentActivity = [
-          { id: 1, type: 'submission', message: '5 new assignment submissions', time: '1 hour ago' },
-          { id: 2, type: 'message', message: 'Parent message from John\'s mother', time: '3 hours ago' },
+          {
+            id: 1,
+            type: 'submission',
+            message: '5 new assignment submissions',
+            time: '1 hour ago',
+          },
+          {
+            id: 2,
+            type: 'message',
+            message: "Parent message from John's mother",
+            time: '3 hours ago',
+          },
         ];
         break;
 
       case 'Parent':
         const children = await User.find({
-          _id: { $in: user.parentInfo?.children || [] }
+          _id: { $in: user.parentInfo?.children || [] },
         }).select('firstName lastName studentInfo.grade');
 
         dashboardData.stats = {
@@ -136,8 +164,18 @@ router.get('/dashboard', auth, async (req, res) => {
         };
         dashboardData.children = children;
         dashboardData.recentActivity = [
-          { id: 1, type: 'grade', message: 'Sarah received A- in Math', time: '4 hours ago' },
-          { id: 2, type: 'attendance', message: 'Mike was absent today', time: '1 day ago' },
+          {
+            id: 1,
+            type: 'grade',
+            message: 'Sarah received A- in Math',
+            time: '4 hours ago',
+          },
+          {
+            id: 2,
+            type: 'attendance',
+            message: 'Mike was absent today',
+            time: '1 day ago',
+          },
         ];
         break;
 
@@ -153,8 +191,40 @@ router.get('/dashboard', auth, async (req, res) => {
           systemHealth: 'Good',
         };
         dashboardData.recentActivity = [
-          { id: 1, type: 'user', message: '3 new users registered', time: '2 hours ago' },
-          { id: 2, type: 'system', message: 'System backup completed', time: '6 hours ago' },
+          {
+            id: 1,
+            type: 'user',
+            message: '3 new users registered',
+            time: '2 hours ago',
+          },
+          {
+            id: 2,
+            type: 'system',
+            message: 'System backup completed',
+            time: '6 hours ago',
+          },
+        ];
+        break;
+
+      case 'Visitor':
+        dashboardData.stats = {
+          featuresUnlocked: 3,
+          upcomingEvents: 5,
+          resourceAccess: 12,
+        };
+        dashboardData.recentActivity = [
+          {
+            id: 1,
+            type: 'event',
+            message: 'School tour scheduled',
+            time: '2 days ago',
+          },
+          {
+            id: 2,
+            type: 'resource',
+            message: 'Downloaded prospectus',
+            time: '1 day ago',
+          },
         ];
         break;
     }
@@ -163,7 +233,6 @@ router.get('/dashboard', auth, async (req, res) => {
       success: true,
       dashboard: dashboardData,
     });
-
   } catch (error) {
     console.error('❌ Get dashboard error:', error);
     res.status(500).json({

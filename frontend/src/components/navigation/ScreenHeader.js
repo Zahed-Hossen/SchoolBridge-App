@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  Platform,           // ✅ Add Platform import
+  Platform,
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
@@ -12,7 +12,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // ✅ Import Teacher Theme
-import { TEACHER_COLORS, COLORS, TEACHER_THEME, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import {
+  TEACHER_COLORS,
+  COLORS,
+  TEACHER_THEME,
+  SPACING,
+  BORDER_RADIUS,
+} from '../../constants/theme';
 
 const ScreenHeader = ({
   title,
@@ -20,6 +26,10 @@ const ScreenHeader = ({
   showBackButton = false,
   onBackPress,
   rightComponent = null,
+  headerStyle = {},
+  titleStyle = {},
+  backButtonStyle = {},
+  // gradientColors = [primaryColor, `${primaryColor}DD`, `${primaryColor}BB`],
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -42,31 +52,39 @@ const ScreenHeader = ({
           {
             paddingTop: insets.top + SPACING.md,
             paddingBottom: SPACING.lg - 4,
-          }
+          },
+          headerStyle,
         ]}
       >
         <View style={styles.headerContent}>
           {/* Left - Back Button (if needed) */}
           {showBackButton && (
             <TouchableOpacity
-              style={styles.backButton}
+              style={[styles.backButton, backButtonStyle]}
               onPress={onBackPress}
               activeOpacity={0.7}
             >
-              <Ionicons name="arrow-back" size={24} color={TEACHER_COLORS.textWhite} />
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={TEACHER_COLORS.textWhite}
+              />
             </TouchableOpacity>
           )}
 
           {/* Center - Title */}
-          <View style={[styles.titleContainer, !showBackButton && styles.titleCentered]}>
-            <Text style={styles.screenTitle}>{title}</Text>
+          <View
+            style={[
+              styles.titleContainer,
+              !showBackButton && styles.titleCentered,
+            ]}
+          >
+            <Text style={[styles.screenTitle, titleStyle]}>{title}</Text>
           </View>
 
           {/* Right - Custom Component */}
           {rightComponent && (
-            <View style={styles.rightComponent}>
-              {rightComponent}
-            </View>
+            <View style={styles.rightComponent}>{rightComponent}</View>
           )}
         </View>
       </LinearGradient>
