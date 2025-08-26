@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 
 /**
@@ -12,28 +12,36 @@ export const useApi = (apiFunction, dependencies = [], immediate = true) => {
   const [loading, setLoading] = useState(immediate);
   const [error, setError] = useState(null);
 
-  const execute = async (...args) => {
-    try {
+  const execute = useCallback(
+    async (...args) => {
       setLoading(true);
       setError(null);
-      const response = await apiFunction(...args);
-      setData(response.data);
-      return { success: true, data: response.data };
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || err.message || 'An error occurred';
-      setError(errorMessage);
-      console.error('API Error:', err);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const response = await apiFunction(...args);
+        setData(response.data);
+        return { success: true, data: response.data };
+      } catch (err) {
+        const errorMessage =
+          err.response?.data?.message || err.message || 'An error occurred';
+        setError(errorMessage);
+        console.error('API Error:', err);
+        return { success: false, error: errorMessage };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [apiFunction],
+  );
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   useEffect(() => {
     if (immediate) {
       execute();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 
   return {
@@ -42,6 +50,7 @@ export const useApi = (apiFunction, dependencies = [], immediate = true) => {
     error,
     execute,
     refetch: execute,
+    clearError,
   };
 };
 

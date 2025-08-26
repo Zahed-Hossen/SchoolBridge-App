@@ -1,11 +1,12 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User.js';
-import auth from '../middleware/auth.js'; // We'll create this next
+import auth from '../middleware/auth.js';
 
 const router = express.Router();
 
-// ✅ GET /api/users/profile - Get user profile
+
+// GET /api/users/profile - Get user profile
 router.get('/profile', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId)
@@ -36,7 +37,8 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
-// ✅ PUT /api/users/profile - Update user profile
+
+// PUT /api/users/profile - Update user profile
 router.put(
   '/profile',
   auth,
@@ -79,7 +81,8 @@ router.put(
   },
 );
 
-// ✅ GET /api/users/dashboard - Get role-specific dashboard data
+
+// GET /api/users/dashboard - Get role-specific dashboard data
 router.get('/dashboard', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);

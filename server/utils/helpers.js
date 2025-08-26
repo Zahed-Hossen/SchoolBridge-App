@@ -1,6 +1,6 @@
 import os from 'os';
 
-// ✅ Get network IP address
+// Get network IP address
 export const getNetworkIP = () => {
   const interfaces = os.networkInterfaces();
 
@@ -14,7 +14,7 @@ export const getNetworkIP = () => {
   return 'localhost';
 };
 
-// ✅ Remove sensitive data from user object
+// Remove sensitive data from user object
 export const sanitizeUser = (user) => {
   if (!user) return null;
 
@@ -43,7 +43,7 @@ export const sanitizeUser = (user) => {
   };
 };
 
-// ✅ Create API response format
+// Create API response format
 export const createResponse = (success, message, data = null, error = null) => {
   const response = {
     success,
@@ -57,7 +57,7 @@ export const createResponse = (success, message, data = null, error = null) => {
   return response;
 };
 
-// ✅ Error handler
+// Error handler
 export const handleError = (error, context = 'Operation') => {
   console.error(`❌ ${context} error:`, error);
 

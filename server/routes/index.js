@@ -1,93 +1,105 @@
 import express from 'express';
 import authRoutes from './auth.js';
 import userRoutes from './users.js';
-import { getNetworkIP } from '../utils/helpers.js';
-import { createResponse } from '../utils/helpers.js';
-import attendanceRoutes from './Student/attendance.js';
-import announcementsRoutes from './Student/announcements.js';
-import notificationsRoutes from './Student/notifications.js';
-import dashboardRoutes from './Student/dashboard.js';
+import invitationRoutes from './invitations.js';
+import schoolsRoutes from './schools.js';
 
+import { getNetworkIP, createResponse } from '../utils/helpers.js';
+
+import teacherRoutes from './teacherRoutes.js';
+import studentRoutes from './studentRoutes.js';
+import classesRoutes from './teacherClasses.js';
+import classStudentsRoutes from './classStudents.js';
 
 const router = express.Router();
 
-// ✅ Mount route modules
+// Mount route modules
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
-router.use('/user', userRoutes);
-router.use('/attendance', attendanceRoutes);
-router.use('/announcements', announcementsRoutes);
-router.use('/notifications', notificationsRoutes);
-router.use('/dashboard', dashboardRoutes);
+router.use('/invitations', invitationRoutes);
+router.use('/schools', schoolsRoutes);
 
-// ✅ Health check endpoint
+// Teacher, Student, and Classes routes
+router.use('/teachers', teacherRoutes);
+router.use('/students', studentRoutes);
+router.use('/classes', classesRoutes);
+// Mount student CRD endpoints for classes
+router.use('/classes', classStudentsRoutes);
+
+// Health check endpoint
 router.get('/health', (req, res) => {
-  res.json(createResponse(true, 'SchoolBridge API is running', {
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    version: '1.0.0',
-    uptime: Math.floor(process.uptime()),
-    memory: {
-      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-    },
-    database: {
-      status: 'Connected',
-      readyState: 1,
-      name: 'schoolbridge',
-    },
-    network: {
-      ip: getNetworkIP(),
-      port: process.env.PORT || 5000,
-    },
-  }));
+  res.json(
+    createResponse(true, 'SchoolBridge API is running', {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      version: '1.0.0',
+      uptime: Math.floor(process.uptime()),
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+      },
+      database: {
+        status: 'Connected',
+        readyState: 1,
+        name: 'schoolbridge',
+      },
+      network: {
+        ip: getNetworkIP(),
+        port: process.env.PORT || 5000,
+      },
+    }),
+  );
 });
 
 // ✅ Test endpoint
 router.get('/test', (req, res) => {
-  res.json(createResponse(true, 'API test successful', {
-    timestamp: new Date().toISOString(),
-    server: 'SchoolBridge API Server',
-    network: {
-      clientIP: req.ip || req.connection.remoteAddress,
-      serverIP: getNetworkIP(),
-      port: process.env.PORT || 5000,
-      userAgent: req.get('User-Agent'),
-    },
-    endpoints: {
-      health: '/api/health',
-      test: '/api/test',
-      auth: '/api/auth/*',
-      users: '/api/users/*',
-      announcements: '/api/announcements',
-    },
-  }));
+  res.json(
+    createResponse(true, 'API test successful', {
+      timestamp: new Date().toISOString(),
+      server: 'SchoolBridge API Server',
+      network: {
+        clientIP: req.ip || req.connection.remoteAddress,
+        serverIP: getNetworkIP(),
+        port: process.env.PORT || 5000,
+        userAgent: req.get('User-Agent'),
+      },
+      endpoints: {
+        health: '/api/health',
+        test: '/api/test',
+        auth: '/api/auth/*',
+        users: '/api/users/*',
+        announcements: '/api/announcements',
+      },
+    }),
+  );
 });
 
-// ✅ Status endpoint
+// Status endpoint
 router.get('/status', (req, res) => {
-  res.json(createResponse(true, 'All systems operational', {
-    api: 'SchoolBridge',
-    version: '1.0.0',
-    status: 'operational',
-    services: {
-      database: 'healthy',
-      authentication: 'healthy',
-      fileStorage: 'healthy',
-    },
-    endpoints: [
-      'GET /api/health',
-      'GET /api/test',
-      'GET /api/status',
-      'POST /api/auth/login',
-      'POST /api/auth/signup',
-      'POST /api/auth/google',
-      'GET /api/announcements',
-    ],
-  }));
+  res.json(
+    createResponse(true, 'All systems operational', {
+      api: 'SchoolBridge',
+      version: '1.0.0',
+      status: 'operational',
+      services: {
+        database: 'healthy',
+        authentication: 'healthy',
+        fileStorage: 'healthy',
+      },
+      endpoints: [
+        'GET /api/health',
+        'GET /api/test',
+        'GET /api/status',
+        'POST /api/auth/login',
+        'POST /api/auth/signup',
+        'POST /api/auth/google',
+        'GET /api/announcements',
+      ],
+    }),
+  );
 });
 
-// ✅ API documentation endpoint
+// API documentation endpoint
 router.get('/docs', (req, res) => {
   res.json({
     success: true,

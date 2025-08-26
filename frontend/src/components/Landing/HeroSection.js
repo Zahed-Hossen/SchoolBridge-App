@@ -85,7 +85,7 @@ const HeroSection = ({ onLoginPress, onSignUpPress }) => {
         break;
 
       case 'phone':
-        Linking.openURL('tel:+15550123');
+        Linking.openURL('tel:+8801888227599');
         break;
 
       default:

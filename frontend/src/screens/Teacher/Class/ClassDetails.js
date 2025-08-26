@@ -19,22 +19,27 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import SimpleHeader from '../../../components/navigation/SimpleHeader';
+import teacherService from '../../../api/services/teacherService';
+import { useAuth } from '../../../context/AuthContext';
+
 // ✅ Import Professional Theme System
 import {
   COLORS,
   TEACHER_COLORS,
   TEACHER_THEME,
   SPACING,
-  BORDER_RADIUS
+  BORDER_RADIUS,
 } from '../../../constants/theme';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const ClassDetails = ({ navigation, route }) => {
+  const { user } = useAuth();
   // ✅ Professional State Management
   const { classId, className, classData: passedClassData } = route.params || {};
 
   const [classData, setClassData] = useState(null);
+  // Students state
   const [students, setStudents] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState({});
@@ -44,7 +49,7 @@ const ClassDetails = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [newStudentData, setNewStudentData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     rollNumber: '',
   });
@@ -55,6 +60,58 @@ const ClassDetails = ({ navigation, route }) => {
   const tabOpacityAnim = useRef(new Animated.Value(1)).current;
 
   // ✅ Enhanced Tab Configuration
+  // API Integration: Only real API call for class details
+  // Load class details and students
+  const loadClassDetails = async (isRefresh = false) => {
+    try {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
+      // Use real API call for class details
+      const response = await teacherService.getClass(classId);
+      setClassData(response?.data || null);
+
+      // Fetch students for this class
+      const studentsRes = await teacherService.getClassStudents(classId);
+      // Normalize student objects (add fallback fields if missing)
+      const studentsList = (studentsRes?.data || []).map((s) => ({
+        id: s._id || s.id,
+        name: s.name || s.fullName || s.firstName || s.lastName || 'Unnamed',
+        email: s.email,
+        rollNumber: s.rollNumber || '',
+        averageGrade: s.averageGrade || 0,
+        attendancePercentage: s.attendancePercentage || 100,
+        status: s.status || 'active',
+      }));
+      setStudents(studentsList);
+
+      // Fetch all assignments for the teacher, then filter for this class
+      if (user?._id || user?.id) {
+        const teacherId = user._id || user.id;
+        const assignmentsRes = await teacherService.getTeacherAssignments(
+          teacherId,
+        );
+        const allAssignments = assignmentsRes?.data || [];
+        // Filter assignments for this class
+        const classAssignments = allAssignments.filter(
+          (a) => a.class === classId || a.class?._id === classId,
+        );
+        setAssignments(classAssignments);
+      } else {
+        setAssignments([]);
+      }
+
+      setLoading(false);
+      setRefreshing(false);
+    } catch (error) {
+      console.error('❌ Error loading class details:', error);
+      Alert.alert('Error', 'Failed to load class details');
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Tab configuration (restored)
   const tabs = [
     {
       key: 'overview',
@@ -92,149 +149,32 @@ const ClassDetails = ({ navigation, route }) => {
     },
   ];
 
-  // ✅ API Integration (same as before)
-  const loadClassDetails = async (isRefresh = false) => {
-    try {
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
-
-      // 🔄 TODO: Replace with actual API calls
-      /*
-      const [classResponse, studentsResponse, assignmentsResponse, attendanceResponse] = await Promise.all([
-        fetch(`/api/teacher/classes/${classId}`, {
-          headers: { 'Authorization': `Bearer ${userToken}` }
-        }),
-        fetch(`/api/teacher/classes/${classId}/students`, {
-          headers: { 'Authorization': `Bearer ${userToken}` }
-        }),
-        fetch(`/api/teacher/classes/${classId}/assignments`, {
-          headers: { 'Authorization': `Bearer ${userToken}` }
-        }),
-        fetch(`/api/teacher/classes/${classId}/attendance/stats`, {
-          headers: { 'Authorization': `Bearer ${userToken}` }
-        })
-      ]);
-
-      const classData = await classResponse.json();
-      const studentsData = await studentsResponse.json();
-      const assignmentsData = await assignmentsResponse.json();
-      const attendanceData = await attendanceResponse.json();
-
-      setClassData(classData);
-      setStudents(studentsData);
-      setAssignments(assignmentsData);
-      setAttendanceStats(attendanceData);
-      */
-
-      // ✅ Minimal Mock Data (for development)
-      setTimeout(() => {
-        setClassData(passedClassData || getMockClassData());
-        setStudents(getMockStudents());
-        setAssignments(getMockAssignments());
-        setAttendanceStats(getMockAttendanceStats());
-        setLoading(false);
-        setRefreshing(false);
-      }, 800);
-
-    } catch (error) {
-      console.error('❌ Error loading class details:', error);
-      Alert.alert('Error', 'Failed to load class details');
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  // ✅ Mock Data Functions (same as before)
-  const getMockClassData = () => ({
-    id: classId,
-    name: className || 'Calculus AP',
-    subject: 'Mathematics',
-    grade: '12',
-    section: 'A',
-    room: 'Room 204',
-    schedule: 'Mon, Wed, Fri - 9:00 AM',
-    totalStudents: 28,
-    description: 'Advanced calculus covering limits, derivatives, and integrals.',
-  });
-
-  const getMockStudents = () => [
-    {
-      id: 1,
-      name: 'Emma Thompson',
-      email: 'emma.t@school.edu',
-      rollNumber: '001',
-      averageGrade: 91.2,
-      attendancePercentage: 96,
-      status: 'active',
-    },
-    {
-      id: 2,
-      name: 'James Wilson',
-      email: 'james.w@school.edu',
-      rollNumber: '002',
-      averageGrade: 85.8,
-      attendancePercentage: 89,
-      status: 'active',
-    },
-    {
-      id: 3,
-      name: 'Sofia Rodriguez',
-      email: 'sofia.r@school.edu',
-      rollNumber: '003',
-      averageGrade: 88.5,
-      attendancePercentage: 94,
-      status: 'active',
-    },
-  ];
-
-  const getMockAssignments = () => [
-    {
-      id: 1,
-      title: 'Limits and Continuity Quiz',
-      type: 'quiz',
-      totalPoints: 100,
-      dueDate: '2025-08-10T23:59:00Z',
-      submissionsCount: 26,
-      gradedCount: 18,
-      status: 'active',
-    },
-    {
-      id: 2,
-      title: 'Derivatives Project',
-      type: 'project',
-      totalPoints: 150,
-      dueDate: '2025-08-15T23:59:00Z',
-      submissionsCount: 22,
-      gradedCount: 8,
-      status: 'active',
-    },
-  ];
-
-  const getMockAttendanceStats = () => ({
-    totalClasses: 45,
-    averageAttendance: 92.5,
-    presentToday: 26,
-    absentToday: 2,
-  });
-
   // Replace the handleTabChange function:
-  const handleTabChange = useCallback((tabKey) => {
-    if (tabKey === activeTab) return;
+  const handleTabChange = useCallback(
+    (tabKey) => {
+      if (tabKey === activeTab) return;
 
-    const tabIndex = tabs.findIndex(tab => tab.key === tabKey);
+      const tabIndex = tabs.findIndex((tab) => tab.key === tabKey);
 
-    if (tabScrollRef.current && tabIndex >= 0) {
-      const tabPosition = tabs.slice(0, tabIndex).reduce((acc, tab) => acc + tab.width, 0);
-      const scrollPosition = Math.max(0, tabPosition - (screenWidth / 2) + (tabs[tabIndex].width / 2));
+      if (tabScrollRef.current && tabIndex >= 0) {
+        const tabPosition = tabs
+          .slice(0, tabIndex)
+          .reduce((acc, tab) => acc + tab.width, 0);
+        const scrollPosition = Math.max(
+          0,
+          tabPosition - screenWidth / 2 + tabs[tabIndex].width / 2,
+        );
 
-      tabScrollRef.current.scrollTo({
-        x: scrollPosition,
-        animated: true,
-      });
-    }
+        tabScrollRef.current.scrollTo({
+          x: scrollPosition,
+          animated: true,
+        });
+      }
 
-    setActiveTab(tabKey);
-  }, [activeTab, tabs]);
+      setActiveTab(tabKey);
+    },
+    [activeTab, tabs],
+  );
 
   // ✅ Navigation Handlers (same as before)
   const navigateToAttendance = useCallback(() => {
@@ -251,52 +191,72 @@ const ClassDetails = ({ navigation, route }) => {
     });
   }, [navigation, classId, classData]);
 
-  const navigateToAssignmentDetails = useCallback((assignment) => {
-    navigation.navigate('AssignmentDetails', {
-      assignmentId: assignment.id,
-      assignment: assignment,
-      classId: classId,
-    });
-  }, [navigation, classId]);
+  const navigateToAssignmentDetails = useCallback(
+    (assignment) => {
+      navigation.navigate('AssignmentDetails', {
+        assignmentId: assignment.id,
+        assignment: assignment,
+        classId: classId,
+      });
+    },
+    [navigation, classId],
+  );
 
-  const navigateToStudentProfile = useCallback((student) => {
-    navigation.navigate('StudentProfile', {
-      studentId: student.id,
-      studentName: student.name,
-      classId: classId,
-    });
-  }, [navigation, classId]);
+  const navigateToStudentProfile = useCallback(
+    (student) => {
+      navigation.navigate('StudentProfile', {
+        studentId: student.id,
+        studentName: student.name,
+        classId: classId,
+      });
+    },
+    [navigation, classId],
+  );
 
   // ✅ Professional Student Management (same as before)
+  // Add student using API
   const addStudent = useCallback(async () => {
-    if (!newStudentData.name.trim() || !newStudentData.email.trim() || !newStudentData.rollNumber.trim()) {
+    if (
+      !newStudentData.fullName.trim() ||
+      !newStudentData.email.trim() ||
+      !newStudentData.rollNumber.trim()
+    ) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
 
     try {
-      // TODO: API call to add student
-      // await apiService.teacher.addStudentToClass(classId, newStudentData);
-
-      // Mock success
-      const newStudent = {
-        id: Date.now(),
-        ...newStudentData,
-        averageGrade: 0,
-        attendancePercentage: 100,
-        status: 'active',
+      const payload = {
+        fullName: newStudentData.fullName,
+        email: newStudentData.email,
+        rollNumber: newStudentData.rollNumber,
       };
-
-      setStudents(prev => [...prev, newStudent]);
-      setNewStudentData({ name: '', email: '', rollNumber: '' });
-      setShowAddStudentModal(false);
-      Alert.alert('Success', 'Student added successfully!');
-
+      const res = await teacherService.addStudentToClass(classId, payload);
+      const student = res?.data;
+      if (student) {
+        setStudents((prev) => [
+          ...prev,
+          {
+            id: student._id || student.id,
+            name: student.fullName || student.name,
+            email: student.email,
+            rollNumber: student.rollNumber || '',
+            averageGrade: student.averageGrade || 0,
+            attendancePercentage: student.attendancePercentage || 100,
+            status: student.status || 'active',
+          },
+        ]);
+        setNewStudentData({ fullName: '', email: '', rollNumber: '' });
+        setShowAddStudentModal(false);
+        Alert.alert('Success', 'Student added successfully!');
+      } else {
+        throw new Error('No student returned');
+      }
     } catch (error) {
       console.error('❌ Error adding student:', error);
       Alert.alert('Error', 'Failed to add student');
     }
-  }, [newStudentData]);
+  }, [newStudentData, classId]);
 
   // ✅ Utility Functions (same as before)
   const formatDate = useCallback((dateString) => {
@@ -308,7 +268,12 @@ const ClassDetails = ({ navigation, route }) => {
 
   const getGradeColor = useCallback((grade) => {
     if (grade >= 90) return TEACHER_COLORS.gradeA || TEACHER_COLORS.success;
-    if (grade >= 80) return TEACHER_COLORS.gradeB || COLORS.teacherPalette.secondary?.main || TEACHER_COLORS.primary;
+    if (grade >= 80)
+      return (
+        TEACHER_COLORS.gradeB ||
+        COLORS.teacherPalette.secondary?.main ||
+        TEACHER_COLORS.primary
+      );
     if (grade >= 70) return TEACHER_COLORS.gradeC || TEACHER_COLORS.warning;
     if (grade >= 60) return TEACHER_COLORS.gradeD || TEACHER_COLORS.warning;
     return TEACHER_COLORS.gradeF || TEACHER_COLORS.error;
@@ -332,14 +297,18 @@ const ClassDetails = ({ navigation, route }) => {
   }, []);
 
   const getSubjectColor = useCallback((subject) => {
-    if (!subject) return TEACHER_COLORS.primary;
-    return COLORS.teacherPalette?.subjects?.[subject.toLowerCase()] || TEACHER_COLORS.primary;
+    if (!subject || typeof subject !== 'string') return TEACHER_COLORS.primary;
+    return (
+      COLORS.teacherPalette?.subjects?.[subject.toLowerCase()] ||
+      TEACHER_COLORS.primary
+    );
   }, []);
 
   // ✅ Professional Filter Logic
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.rollNumber.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.rollNumber.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // ✅ Professional Header Component
@@ -355,7 +324,7 @@ const ClassDetails = ({ navigation, route }) => {
 
   // Scrollable Tab Bar Component
   const EnhancedTabBar = () => {
-    const activeTabData = tabs.find(tab => tab.key === activeTab);
+    const activeTabData = tabs.find((tab) => tab.key === activeTab);
     const indicatorWidth = activeTabData?.width || 100;
 
     return (
@@ -382,17 +351,22 @@ const ClassDetails = ({ navigation, route }) => {
                   style={[
                     styles.enhancedTab,
                     { width: tab.width },
-                    isActive && [styles.enhancedActiveTab, { borderBottomColor: tab.color }],
+                    isActive && [
+                      styles.enhancedActiveTab,
+                      { borderBottomColor: tab.color },
+                    ],
                   ]}
                   onPress={() => handleTabChange(tab.key)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.tabItemContent}>
                     {/* ✅ Tab Icon */}
-                    <View style={[
-                      styles.tabIconContainer,
-                      isActive && { backgroundColor: `${tab.color}20` }
-                    ]}>
+                    <View
+                      style={[
+                        styles.tabIconContainer,
+                        isActive && { backgroundColor: `${tab.color}20` },
+                      ]}
+                    >
                       <Ionicons
                         name={isActive ? tab.activeIcon : tab.icon}
                         size={isActive ? 20 : 18}
@@ -401,22 +375,30 @@ const ClassDetails = ({ navigation, route }) => {
                     </View>
 
                     {/* ✅ Tab Label */}
-                    <Text style={[
-                      styles.enhancedTabText,
-                      {
-                        color: tabColor,
-                        fontWeight: isActive ? '700' : '500',
-                      }
-                    ]}>
+                    <Text
+                      style={[
+                        styles.enhancedTabText,
+                        {
+                          color: tabColor,
+                          fontWeight: isActive ? '700' : '500',
+                        },
+                      ]}
+                    >
                       {tab.label}
                     </Text>
 
                     {/* ✅ Tab Badge */}
                     {tab.badge > 0 && (
-                      <View style={[
-                        styles.enhancedTabBadge,
-                        { backgroundColor: isActive ? tab.color : TEACHER_COLORS.error }
-                      ]}>
+                      <View
+                        style={[
+                          styles.enhancedTabBadge,
+                          {
+                            backgroundColor: isActive
+                              ? tab.color
+                              : TEACHER_COLORS.error,
+                          },
+                        ]}
+                      >
                         <Text style={styles.enhancedTabBadgeText}>
                           {tab.badge > 99 ? '99+' : tab.badge}
                         </Text>
@@ -431,23 +413,6 @@ const ClassDetails = ({ navigation, route }) => {
           {/* ✅ Tab Bar Border */}
           <View style={styles.tabBarBorder} />
         </View>
-
-        {/* ✅ Quick Action Chip */}
-        {classData?.subject && (
-          <View style={styles.quickActionContainer}>
-            <TouchableOpacity
-              style={[
-                styles.quickActionChip,
-                { backgroundColor: getSubjectColor(classData.subject) }
-              ]}
-              onPress={navigateToCreateAssignment}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="add" size={16} color={TEACHER_COLORS.textWhite} />
-              <Text style={styles.quickActionText}>New</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
     );
   };
@@ -456,7 +421,7 @@ const ClassDetails = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       loadClassDetails();
-    }, [classId])
+    }, [classId]),
   );
 
   const onRefresh = useCallback(() => {
@@ -493,7 +458,11 @@ const ClassDetails = ({ navigation, route }) => {
           primaryColor={TEACHER_COLORS.primary}
         />
         <View style={styles.loadingContainer}>
-          <Ionicons name="school-outline" size={64} color={TEACHER_COLORS.textMuted} />
+          <Ionicons
+            name="school-outline"
+            size={64}
+            color={TEACHER_COLORS.textMuted}
+          />
           <Text style={styles.errorText}>Class not found</Text>
           <TouchableOpacity
             style={styles.retryButton}
@@ -540,22 +509,34 @@ const ClassDetails = ({ navigation, route }) => {
             {/* ✅ Professional Class Info */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="information-circle-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="information-circle-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Class Information</Text>
               </View>
 
               <View style={styles.classCard}>
                 <LinearGradient
-                  colors={[getSubjectColor(classData.subject), `${getSubjectColor(classData.subject)}DD`]}
+                  colors={[
+                    getSubjectColor(classData.subject),
+                    `${getSubjectColor(classData.subject)}DD`,
+                  ]}
                   style={styles.classCardHeader}
                 >
                   <View style={styles.classIcon}>
-                    <Ionicons name="school" size={28} color={TEACHER_COLORS.textWhite} />
+                    <Ionicons
+                      name="school"
+                      size={28}
+                      color={TEACHER_COLORS.textWhite}
+                    />
                   </View>
                   <View style={styles.classHeaderInfo}>
                     <Text style={styles.classTitle}>{classData.name}</Text>
                     <Text style={styles.classSubtitle}>
-                      {classData.subject} • Grade {classData.grade}{classData.section}
+                      {classData.subject} • Grade {classData.grade}
+                      {classData.section}
                     </Text>
                   </View>
                 </LinearGradient>
@@ -563,26 +544,51 @@ const ClassDetails = ({ navigation, route }) => {
                 <View style={styles.classCardContent}>
                   <View style={styles.infoGrid}>
                     <View style={styles.infoItem}>
-                      <Ionicons name="location-outline" size={16} color={TEACHER_COLORS.primary} />
+                      <Ionicons
+                        name="location-outline"
+                        size={16}
+                        color={TEACHER_COLORS.primary}
+                      />
                       <Text style={styles.infoLabel}>Room:</Text>
                       <Text style={styles.infoValue}>{classData.room}</Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="time-outline" size={16} color={TEACHER_COLORS.textMuted} />
+                      <Ionicons
+                        name="time-outline"
+                        size={16}
+                        color={TEACHER_COLORS.textMuted}
+                      />
                       <Text style={styles.infoLabel}>Schedule:</Text>
-                      <Text style={styles.infoValue}>{classData.schedule}</Text>
+                      <Text style={styles.infoValue}>
+                        {classData.schedule &&
+                        Array.isArray(classData.schedule.days)
+                          ? `${classData.schedule.days.join(', ')} ${
+                              classData.schedule.time || ''
+                            }`
+                          : typeof classData.schedule === 'string'
+                          ? classData.schedule
+                          : '-'}
+                      </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="people-outline" size={16} color={TEACHER_COLORS.success} />
+                      <Ionicons
+                        name="people-outline"
+                        size={16}
+                        color={TEACHER_COLORS.success}
+                      />
                       <Text style={styles.infoLabel}>Students:</Text>
-                      <Text style={styles.infoValue}>{classData.totalStudents}</Text>
+                      <Text style={styles.infoValue}>
+                        {classData.totalStudents}
+                      </Text>
                     </View>
                   </View>
 
                   {classData.description && (
                     <View style={styles.descriptionContainer}>
                       <Text style={styles.descriptionTitle}>Description</Text>
-                      <Text style={styles.description}>{classData.description}</Text>
+                      <Text style={styles.description}>
+                        {classData.description}
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -592,28 +598,62 @@ const ClassDetails = ({ navigation, route }) => {
             {/* ✅ Professional Quick Stats */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="bar-chart-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="bar-chart-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Quick Stats</Text>
               </View>
 
               <View style={styles.statsGrid}>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.primary }]}>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.primary },
+                  ]}
+                >
                   <Text style={styles.statValue}>{students.length}</Text>
                   <Text style={styles.statLabel}>Students</Text>
                 </View>
-                <View style={[styles.statCard, { borderLeftColor: COLORS.teacherPalette?.subjects?.science || TEACHER_COLORS.secondary }]}>
+                <View
+                  style={[
+                    styles.statCard,
+                    {
+                      borderLeftColor:
+                        COLORS.teacherPalette?.subjects?.science ||
+                        TEACHER_COLORS.secondary,
+                    },
+                  ]}
+                >
                   <Text style={styles.statValue}>{assignments.length}</Text>
                   <Text style={styles.statLabel}>Assignments</Text>
                 </View>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.success }]}>
-                  <Text style={styles.statValue}>{attendanceStats.averageAttendance}%</Text>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.success },
+                  ]}
+                >
+                  <Text style={styles.statValue}>
+                    {attendanceStats.averageAttendance}%
+                  </Text>
                   <Text style={styles.statLabel}>Attendance</Text>
                 </View>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.warning }]}>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.warning },
+                  ]}
+                >
                   <Text style={styles.statValue}>
                     {students.length > 0
-                      ? Math.round(students.reduce((sum, s) => sum + s.averageGrade, 0) / students.length)
-                      : 0}%
+                      ? Math.round(
+                          students.reduce((sum, s) => sum + s.averageGrade, 0) /
+                            students.length,
+                        )
+                      : 0}
+                    %
                   </Text>
                   <Text style={styles.statLabel}>Avg Grade</Text>
                 </View>
@@ -623,44 +663,80 @@ const ClassDetails = ({ navigation, route }) => {
             {/* ✅ Professional Quick Actions */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="flash-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="flash-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Quick Actions</Text>
               </View>
 
               <View style={styles.actionsGrid}>
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.success }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: TEACHER_COLORS.success },
+                  ]}
                   onPress={navigateToAttendance}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="calendar" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="calendar"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>Take Attendance</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: COLORS.teacherPalette?.subjects?.science || TEACHER_COLORS.secondary }]}
+                  style={[
+                    styles.actionButton,
+                    {
+                      backgroundColor:
+                        COLORS.teacherPalette?.subjects?.science ||
+                        TEACHER_COLORS.secondary,
+                    },
+                  ]}
                   onPress={navigateToCreateAssignment}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="add-circle" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="add-circle"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>New Assignment</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.primary }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: TEACHER_COLORS.primary },
+                  ]}
                   onPress={() => handleTabChange('students')}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="people" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="people"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>View Students</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.warning }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: TEACHER_COLORS.warning },
+                  ]}
                   onPress={() => handleTabChange('assignments')}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="create" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="create"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>Manage Work</Text>
                 </TouchableOpacity>
               </View>
@@ -675,7 +751,11 @@ const ClassDetails = ({ navigation, route }) => {
             <View style={styles.section}>
               <View style={styles.searchContainer}>
                 <View style={styles.searchBox}>
-                  <Ionicons name="search-outline" size={20} color={TEACHER_COLORS.textMuted} />
+                  <Ionicons
+                    name="search-outline"
+                    size={20}
+                    color={TEACHER_COLORS.textMuted}
+                  />
                   <TextInput
                     style={styles.searchInput}
                     placeholder="Search students..."
@@ -686,16 +766,27 @@ const ClassDetails = ({ navigation, route }) => {
                   />
                   {searchQuery.length > 0 && (
                     <TouchableOpacity onPress={() => setSearchQuery('')}>
-                      <Ionicons name="close-circle" size={20} color={TEACHER_COLORS.textMuted} />
+                      <Ionicons
+                        name="close-circle"
+                        size={20}
+                        color={TEACHER_COLORS.textMuted}
+                      />
                     </TouchableOpacity>
                   )}
                 </View>
                 <TouchableOpacity
-                  style={[styles.addButton, { backgroundColor: TEACHER_COLORS.primary }]}
+                  style={[
+                    styles.addButton,
+                    { backgroundColor: TEACHER_COLORS.primary },
+                  ]}
                   onPress={() => setShowAddStudentModal(true)}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="add" size={20} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="add"
+                    size={20}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -703,14 +794,20 @@ const ClassDetails = ({ navigation, route }) => {
             {/* Students List */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="people-outline" size={24} color={TEACHER_COLORS.primary} />
-                <Text style={styles.sectionTitle}>Students ({filteredStudents.length})</Text>
+                <Ionicons
+                  name="people-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
+                <Text style={styles.sectionTitle}>
+                  Students ({filteredStudents.length})
+                </Text>
               </View>
 
               {filteredStudents.length === 0 ? (
                 <View style={styles.emptyState}>
                   <Ionicons
-                    name={searchQuery ? "search-outline" : "people-outline"}
+                    name={searchQuery ? 'search-outline' : 'people-outline'}
                     size={48}
                     color={TEACHER_COLORS.textMuted}
                   />
@@ -720,40 +817,107 @@ const ClassDetails = ({ navigation, route }) => {
                 </View>
               ) : (
                 filteredStudents.map((student) => (
-                  <TouchableOpacity
-                    key={student.id}
-                    style={styles.studentCard}
-                    onPress={() => navigateToStudentProfile(student)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.studentInfo}>
-                      <Text style={styles.studentName}>{student.name}</Text>
-                      <Text style={styles.studentMeta}>
-                        Roll: {student.rollNumber} • {student.email}
-                      </Text>
-                    </View>
-                    <View style={styles.studentStats}>
-                      <View style={styles.studentStat}>
-                        <Text style={[
-                          styles.studentStatValue,
-                          { color: getGradeColor(student.averageGrade) }
-                        ]}>
-                          {student.averageGrade.toFixed(0)}%
+                  <View key={student.id} style={styles.studentCard}>
+                    <TouchableOpacity
+                      style={{ flex: 1 }}
+                      onPress={() => navigateToStudentProfile(student)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.studentInfo}>
+                        <Text style={styles.studentName}>{student.name}</Text>
+                        <Text style={styles.studentMeta}>
+                          Roll: {student.rollNumber} • {student.email}
                         </Text>
-                        <Text style={styles.studentStatLabel}>Grade</Text>
                       </View>
-                      <View style={styles.studentStat}>
-                        <Text style={[
-                          styles.studentStatValue,
-                          { color: getAttendanceColor(student.attendancePercentage) }
-                        ]}>
-                          {student.attendancePercentage}%
-                        </Text>
-                        <Text style={styles.studentStatLabel}>Attendance</Text>
+                      <View style={styles.studentStats}>
+                        <View style={styles.studentStat}>
+                          <Text
+                            style={[
+                              styles.studentStatValue,
+                              { color: getGradeColor(student.averageGrade) },
+                            ]}
+                          >
+                            {student.averageGrade.toFixed(0)}%
+                          </Text>
+                          <Text style={styles.studentStatLabel}>Grade</Text>
+                        </View>
+                        <View style={styles.studentStat}>
+                          <Text
+                            style={[
+                              styles.studentStatValue,
+                              {
+                                color: getAttendanceColor(
+                                  student.attendancePercentage,
+                                ),
+                              },
+                            ]}
+                          >
+                            {student.attendancePercentage}%
+                          </Text>
+                          <Text style={styles.studentStatLabel}>
+                            Attendance
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={20} color={TEACHER_COLORS.textMuted} />
-                  </TouchableOpacity>
+                    </TouchableOpacity>
+                    {/* View Button */}
+                    <TouchableOpacity
+                      style={{ marginHorizontal: 8 }}
+                      onPress={() => navigateToStudentProfile(student)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="eye-outline"
+                        size={22}
+                        color={TEACHER_COLORS.primary}
+                      />
+                    </TouchableOpacity>
+                    {/* Delete Button */}
+                    <TouchableOpacity
+                      style={{ marginHorizontal: 4 }}
+                      onPress={async () => {
+                        Alert.alert(
+                          'Remove Student',
+                          `Are you sure you want to remove ${student.name} from this class?`,
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Remove',
+                              style: 'destructive',
+                              onPress: async () => {
+                                try {
+                                  await teacherService.removeStudentFromClass(
+                                    classId,
+                                    student.id,
+                                  );
+                                  setStudents((prev) =>
+                                    prev.filter((s) => s.id !== student.id),
+                                  );
+                                  Alert.alert(
+                                    'Removed',
+                                    'Student removed from class.',
+                                  );
+                                } catch (err) {
+                                  Alert.alert(
+                                    'Error',
+                                    'Failed to remove student.',
+                                  );
+                                }
+                              },
+                            },
+                          ],
+                          { cancelable: true },
+                        );
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={22}
+                        color={TEACHER_COLORS.error}
+                      />
+                    </TouchableOpacity>
+                  </View>
                 ))
               )}
             </View>
@@ -765,28 +929,49 @@ const ClassDetails = ({ navigation, route }) => {
           <View>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="document-text-outline" size={24} color={TEACHER_COLORS.primary} />
-                <Text style={styles.sectionTitle}>Assignments ({assignments.length})</Text>
+                <Ionicons
+                  name="document-text-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
+                <Text style={styles.sectionTitle}>
+                  Assignments ({assignments.length})
+                </Text>
                 <TouchableOpacity
-                  style={[styles.createButton, { backgroundColor: TEACHER_COLORS.primary }]}
+                  style={[
+                    styles.createButton,
+                    { backgroundColor: TEACHER_COLORS.primary },
+                  ]}
                   onPress={navigateToCreateAssignment}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="add" size={16} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="add"
+                    size={16}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.createButtonText}>Create</Text>
                 </TouchableOpacity>
               </View>
 
               {assignments.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <Ionicons name="document-text-outline" size={48} color={TEACHER_COLORS.textMuted} />
-                  <Text style={styles.emptyStateText}>No assignments created</Text>
+                  <Ionicons
+                    name="document-text-outline"
+                    size={48}
+                    color={TEACHER_COLORS.textMuted}
+                  />
+                  <Text style={styles.emptyStateText}>
+                    No assignments created
+                  </Text>
                   <TouchableOpacity
                     style={styles.emptyStateButton}
                     onPress={navigateToCreateAssignment}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.emptyStateButtonText}>Create Assignment</Text>
+                    <Text style={styles.emptyStateButtonText}>
+                      Create Assignment
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -805,24 +990,34 @@ const ClassDetails = ({ navigation, route }) => {
                             size={16}
                             color={TEACHER_COLORS.primary}
                           />
-                          <Text style={styles.assignmentTitle}>{assignment.title}</Text>
+                          <Text style={styles.assignmentTitle}>
+                            {assignment.title}
+                          </Text>
                         </View>
                         <Text style={styles.assignmentDue}>
                           Due: {formatDate(assignment.dueDate)}
                         </Text>
                       </View>
-                      <Text style={styles.assignmentPoints}>{assignment.totalPoints} pts</Text>
+                      <Text style={styles.assignmentPoints}>
+                        {assignment.totalPoints} pts
+                      </Text>
                     </View>
 
                     <View style={styles.assignmentProgress}>
                       <View style={styles.progressInfo}>
                         <Text style={styles.progressText}>
-                          Progress: {assignment.gradedCount}/{assignment.submissionsCount}
+                          Progress: {assignment.gradedCount}/
+                          {assignment.submissionsCount}
                         </Text>
                         <Text style={styles.progressPercentage}>
                           {assignment.submissionsCount > 0
-                            ? Math.round((assignment.gradedCount / assignment.submissionsCount) * 100)
-                            : 0}%
+                            ? Math.round(
+                                (assignment.gradedCount /
+                                  assignment.submissionsCount) *
+                                  100,
+                              )
+                            : 0}
+                          %
                         </Text>
                       </View>
                       <View style={styles.progressBar}>
@@ -830,12 +1025,19 @@ const ClassDetails = ({ navigation, route }) => {
                           style={[
                             styles.progressFill,
                             {
-                              width: assignment.submissionsCount > 0
-                                ? `${(assignment.gradedCount / assignment.submissionsCount) * 100}%`
-                                : '0%',
-                              backgroundColor: assignment.gradedCount === assignment.submissionsCount
-                                ? TEACHER_COLORS.success
-                                : TEACHER_COLORS.primary,
+                              width:
+                                assignment.submissionsCount > 0
+                                  ? `${
+                                      (assignment.gradedCount /
+                                        assignment.submissionsCount) *
+                                      100
+                                    }%`
+                                  : '0%',
+                              backgroundColor:
+                                assignment.gradedCount ===
+                                assignment.submissionsCount
+                                  ? TEACHER_COLORS.success
+                                  : TEACHER_COLORS.primary,
                             },
                           ]}
                         />
@@ -853,35 +1055,74 @@ const ClassDetails = ({ navigation, route }) => {
           <View>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="calendar-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="calendar-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Attendance Overview</Text>
               </View>
 
               <View style={styles.attendanceStats}>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.success }]}>
-                  <Text style={styles.statValue}>{attendanceStats.averageAttendance}%</Text>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.success },
+                  ]}
+                >
+                  <Text style={styles.statValue}>
+                    {attendanceStats.averageAttendance}%
+                  </Text>
                   <Text style={styles.statLabel}>Average</Text>
                 </View>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.primary }]}>
-                  <Text style={styles.statValue}>{attendanceStats.totalClasses}</Text>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.primary },
+                  ]}
+                >
+                  <Text style={styles.statValue}>
+                    {attendanceStats.totalClasses}
+                  </Text>
                   <Text style={styles.statLabel}>Total Classes</Text>
                 </View>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.success }]}>
-                  <Text style={styles.statValue}>{attendanceStats.presentToday}</Text>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.success },
+                  ]}
+                >
+                  <Text style={styles.statValue}>
+                    {attendanceStats.presentToday}
+                  </Text>
                   <Text style={styles.statLabel}>Present Today</Text>
                 </View>
-                <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.error }]}>
-                  <Text style={styles.statValue}>{attendanceStats.absentToday}</Text>
+                <View
+                  style={[
+                    styles.statCard,
+                    { borderLeftColor: TEACHER_COLORS.error },
+                  ]}
+                >
+                  <Text style={styles.statValue}>
+                    {attendanceStats.absentToday}
+                  </Text>
                   <Text style={styles.statLabel}>Absent Today</Text>
                 </View>
               </View>
 
               <TouchableOpacity
-                style={[styles.attendanceButton, { backgroundColor: TEACHER_COLORS.primary }]}
+                style={[
+                  styles.attendanceButton,
+                  { backgroundColor: TEACHER_COLORS.primary },
+                ]}
                 onPress={navigateToAttendance}
                 activeOpacity={0.8}
               >
-                <Ionicons name="calendar" size={20} color={TEACHER_COLORS.textWhite} />
+                <Ionicons
+                  name="calendar"
+                  size={20}
+                  color={TEACHER_COLORS.textWhite}
+                />
                 <Text style={styles.attendanceButtonText}>Take Attendance</Text>
               </TouchableOpacity>
             </View>
@@ -907,20 +1148,24 @@ const ClassDetails = ({ navigation, route }) => {
                 onPress={() => setShowAddStudentModal(false)}
                 activeOpacity={0.8}
               >
-                <Ionicons name="close" size={24} color={TEACHER_COLORS.textMuted} />
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={TEACHER_COLORS.textMuted}
+                />
               </TouchableOpacity>
             </View>
 
             <View style={styles.modalBody}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Student Name *</Text>
+                <Text style={styles.inputLabel}>Full Name *</Text>
                 <TextInput
                   style={styles.textInput}
-                  value={newStudentData.name}
+                  value={newStudentData.fullName}
                   onChangeText={(value) =>
-                    setNewStudentData(prev => ({ ...prev, name: value }))
+                    setNewStudentData((prev) => ({ ...prev, fullName: value }))
                   }
-                  placeholder="Enter student name"
+                  placeholder="Enter full name"
                   placeholderTextColor={TEACHER_COLORS.textMuted}
                 />
               </View>
@@ -931,7 +1176,7 @@ const ClassDetails = ({ navigation, route }) => {
                   style={styles.textInput}
                   value={newStudentData.email}
                   onChangeText={(value) =>
-                    setNewStudentData(prev => ({ ...prev, email: value }))
+                    setNewStudentData((prev) => ({ ...prev, email: value }))
                   }
                   placeholder="student@school.edu"
                   placeholderTextColor={TEACHER_COLORS.textMuted}
@@ -946,7 +1191,10 @@ const ClassDetails = ({ navigation, route }) => {
                   style={styles.textInput}
                   value={newStudentData.rollNumber}
                   onChangeText={(value) =>
-                    setNewStudentData(prev => ({ ...prev, rollNumber: value }))
+                    setNewStudentData((prev) => ({
+                      ...prev,
+                      rollNumber: value,
+                    }))
                   }
                   placeholder="e.g., 001"
                   placeholderTextColor={TEACHER_COLORS.textMuted}
@@ -954,7 +1202,10 @@ const ClassDetails = ({ navigation, route }) => {
               </View>
 
               <TouchableOpacity
-                style={[styles.addStudentButton, { backgroundColor: TEACHER_COLORS.primary }]}
+                style={[
+                  styles.addStudentButton,
+                  { backgroundColor: TEACHER_COLORS.primary },
+                ]}
                 onPress={addStudent}
                 activeOpacity={0.8}
               >
@@ -1577,4 +1828,3 @@ const styles = StyleSheet.create({
 });
 
 export default ClassDetails;
-

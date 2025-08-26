@@ -1,8 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SuperAdminTabNavigator from './SuperAdminTabNavigator';
-import SchoolDetailScreen from '../screens/SuperAdmin/SchoolsScreen';
 import PermissionSettingsScreen from '../screens/SuperAdmin/SettingsScreen';
+import AddSchoolScreen from '../screens/SuperAdmin/AddSchoolScreen';
+ import SchoolDetailsScreen from '../../screens/SuperAdmin/SchoolDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,14 +26,19 @@ const SuperAdminNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="SchoolDetails"
-        component={SchoolDetailScreen}
-        options={{ title: 'School Details' }}
-      />
-      <Stack.Screen
         name="PermissionSettings"
         component={PermissionSettingsScreen}
         options={{ title: 'Permission Settings' }}
+      />
+      <Stack.Screen
+        name="AddSchool"
+        component={AddSchoolScreen}
+        options={{ title: 'Add School', headerShown: false }}
+      />
+      <Stack.Screen
+        name="SchoolDetails"
+        component={SchoolDetailsScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

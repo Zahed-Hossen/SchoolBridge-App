@@ -8,9 +8,14 @@ import TeacherTabNavigator from './TeacherTabNavigator';
 import ClassDetails from '../../screens/Teacher/Class/ClassDetails';
 import AssignmentDetails from '../../screens/Teacher/Assignment/AssignmentDetails';
 import CreateAssignment from '../../screens/Teacher/Assignment/CreateAssignment';
+
 import CreateClass from '../../screens/Teacher/Class/CreateClass';
 import LandingScreen from '../../screens/Common/LandingScreen';
 import LoginScreen from '../../screens/Common/LoginScreen';
+
+// ✅ Import AttendanceTracker Screen
+import AttendanceTracker from '../../screens/Teacher/AttendanceTracker';
+import StudentProfile from '../../screens/Teacher/Student/StudentProfile';
 
 const Stack = createNativeStackNavigator();
 
@@ -62,6 +67,19 @@ const TeacherNavigator = () => {
       <Stack.Screen
         name="CreateClass"
         component={CreateClass}
+        options={{ headerShown: false }}
+      />
+      {/* ✅ Attendance Tracker Screen */}
+      <Stack.Screen
+        name="AttendanceTracker"
+        component={AttendanceTracker}
+        options={{ headerShown: false }}
+      />
+
+      {/* ✅ Student Profile Screen */}
+      <Stack.Screen
+        name="StudentProfile"
+        component={StudentProfile}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

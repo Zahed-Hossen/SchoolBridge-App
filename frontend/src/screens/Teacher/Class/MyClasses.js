@@ -12,148 +12,114 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScrollableTabBar from '../../../components/navigation/ScrollableTabBar';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import SimpleHeader from '../../../components/navigation/SimpleHeader';
+import teacherService from '../../../api/services/teacherService';
+import { useAuth } from '../../../context/AuthContext';
 // ✅ Import Professional Theme System
 import {
   COLORS,
   TEACHER_COLORS,
   TEACHER_THEME,
   SPACING,
-  BORDER_RADIUS
+  BORDER_RADIUS,
 } from '../../../constants/theme';
 
 const MyClasses = ({ navigation }) => {
-  // ✅ Professional State Management
+  const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [error, setError] = useState(null);
 
-  // ✅ API Integration (Commented for Backend Development)
+  // Fetch classes from API
   const loadClasses = async (isRefresh = false) => {
+    console.log('[MyClasses] user from useAuth:', user);
+    const teacherId = user?._id || user?.id;
+    if (!user || !teacherId) {
+      setError('User not found. Please log in again.');
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     try {
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
-
-      // 🔄 TODO: Replace with actual API calls
-      /*
-      const response = await fetch('/api/teacher/classes', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setClasses(data.classes);
-      */
-
-      // ✅ Minimal Mock Data (for development)
-      setTimeout(() => {
-        setClasses(getMockClasses());
-        setLoading(false);
-        setRefreshing(false);
-      }, 800);
-
-    } catch (error) {
-      console.error('❌ Error loading classes:', error);
-      Alert.alert('Error', 'Failed to load classes');
+      setError(null);
+      const response = await teacherService.getTeacherClasses(teacherId);
+      // The API returns { count, data, success }
+      setClasses(Array.isArray(response?.data) ? response.data : []);
+    } catch (err) {
+      setError(err.message || 'Failed to load classes');
+    } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // ✅ Minimal Mock Data (reduced to essentials)
-  const getMockClasses = () => [
-    {
-      id: 1,
-      name: 'Calculus AP',
-      subject: 'Mathematics',
-      grade: '12',
-      section: 'A',
-      totalStudents: 28,
-      presentStudents: 26,
-      schedule: 'Mon, Wed, Fri - 9:00 AM',
-      room: 'Room 204',
-      nextClass: 'Today, 9:00 AM',
-      pendingAssignments: 3,
-      averageGrade: 87.5,
-      attendanceRate: 92.8,
-    },
-    {
-      id: 2,
-      name: 'Algebra II',
-      subject: 'Mathematics',
-      grade: '11',
-      section: 'B',
-      totalStudents: 24,
-      presentStudents: 22,
-      schedule: 'Tue, Thu - 2:00 PM',
-      room: 'Room 201',
-      nextClass: 'Tomorrow, 2:00 PM',
-      pendingAssignments: 1,
-      averageGrade: 82.3,
-      attendanceRate: 89.5,
-    },
-    {
-      id: 3,
-      name: 'Statistics',
-      subject: 'Mathematics',
-      grade: '12',
-      section: 'C',
-      totalStudents: 22,
-      presentStudents: 21,
-      schedule: 'Mon, Fri - 11:00 AM',
-      room: 'Room 205',
-      nextClass: 'Friday, 11:00 AM',
-      pendingAssignments: 2,
-      averageGrade: 91.2,
-      attendanceRate: 95.4,
-    },
-  ];
-
   // ✅ Professional Filter Logic
-  const filteredClasses = classes.filter(classItem => {
-    const matchesSearch = classItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         classItem.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         classItem.grade.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredClasses = classes.filter((classItem) => {
+    // Defensive: skip if classItem is null/undefined
+    if (!classItem) return false;
+    const name = (classItem.name || '').toLowerCase();
+    const subject = (classItem.subject || '').toLowerCase();
+    const grade = (classItem.grade || '').toLowerCase();
+    const matchesSearch =
+      name.includes(searchQuery.toLowerCase()) ||
+      subject.includes(searchQuery.toLowerCase()) ||
+      grade.includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
 
     if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'morning') return classItem.schedule.toLowerCase().includes('am');
-    if (selectedFilter === 'afternoon') return classItem.schedule.toLowerCase().includes('pm');
-    if (selectedFilter === 'pending') return classItem.pendingAssignments > 0;
+    if (selectedFilter === 'morning')
+      return (classItem.schedule || '').toLowerCase().includes('am');
+    if (selectedFilter === 'afternoon')
+      return (classItem.schedule || '').toLowerCase().includes('pm');
+    if (selectedFilter === 'pending')
+      return (classItem.pendingAssignments || 0) > 0;
 
     return true;
   });
 
   // ✅ Professional Navigation Handlers
-  const navigateToClass = useCallback((classItem) => {
-    navigation.navigate('ClassDetails', {
-      classId: classItem.id,
-      className: classItem.name,
-      classData: classItem,
-    });
-  }, [navigation]);
+  const navigateToClass = useCallback(
+    (classItem) => {
+      navigation.navigate('ClassDetails', {
+        classId: classItem.id,
+        className: classItem.name,
+        classData: classItem,
+      });
+    },
+    [navigation],
+  );
 
-  const navigateToAttendance = useCallback((classItem) => {
-    navigation.navigate('AttendanceTracker', {
-      classId: classItem.id,
-      className: classItem.name,
-    });
-  }, [navigation]);
+  const navigateToAttendance = useCallback(
+    (classItem) => {
+      navigation.navigate('AttendanceTracker', {
+        classId: classItem.id,
+        className: classItem.name,
+      });
+    },
+    [navigation],
+  );
 
-  const navigateToCreateAssignment = useCallback((classItem) => {
-    navigation.navigate('CreateAssignment', {
-      classId: classItem.id,
-      className: classItem.name,
-    });
-  }, [navigation]);
+  const navigateToCreateAssignment = useCallback(
+    (classItem) => {
+      navigation.navigate('CreateAssignment', {
+        classId: classItem.id,
+        className: classItem.name,
+      });
+    },
+    [navigation],
+  );
 
   // ✅ Professional Utility Functions
   const getAttendanceColor = useCallback((percentage) => {
@@ -182,7 +148,10 @@ const MyClasses = ({ navigation }) => {
   }, []);
 
   const getSubjectColor = useCallback((subject) => {
-    return COLORS.teacherPalette.subjects[subject.toLowerCase()] || TEACHER_COLORS.primary;
+    return (
+      COLORS.teacherPalette.subjects[subject.toLowerCase()] ||
+      TEACHER_COLORS.primary
+    );
   }, []);
 
   // ✅ Professional Header Component
@@ -200,12 +169,12 @@ const MyClasses = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       loadClasses();
-    }, [])
+    }, [user]),
   );
 
   const onRefresh = useCallback(() => {
     loadClasses(true);
-  }, []);
+  }, [user]);
 
   // ✅ Professional Loading State
   if (loading) {
@@ -226,6 +195,31 @@ const MyClasses = ({ navigation }) => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <SimpleHeader
+          title="My Classes"
+          subtitle="Error"
+          navigation={navigation}
+          primaryColor={TEACHER_COLORS.primary}
+          rightComponent={<HeaderRightComponent />}
+        />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>{error}</Text>
+          <TouchableOpacity
+            onPress={() => loadClasses()}
+            style={{ marginTop: 16 }}
+          >
+            <Text style={{ color: TEACHER_COLORS.primary, fontWeight: 'bold' }}>
+              Retry
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* ✅ Professional Header */}
@@ -241,7 +235,11 @@ const MyClasses = ({ navigation }) => {
       <View style={styles.searchContainer}>
         {/* Search Bar */}
         <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={20} color={TEACHER_COLORS.textMuted} />
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color={TEACHER_COLORS.textMuted}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Search classes, subjects, or grades..."
@@ -252,7 +250,11 @@ const MyClasses = ({ navigation }) => {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color={TEACHER_COLORS.textMuted} />
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={TEACHER_COLORS.textMuted}
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -267,7 +269,11 @@ const MyClasses = ({ navigation }) => {
           {[
             { key: 'all', label: 'All Classes', icon: 'list-outline' },
             { key: 'morning', label: 'Morning', icon: 'sunny-outline' },
-            { key: 'afternoon', label: 'Afternoon', icon: 'partly-sunny-outline' },
+            {
+              key: 'afternoon',
+              label: 'Afternoon',
+              icon: 'partly-sunny-outline',
+            },
             { key: 'pending', label: 'Pending Work', icon: 'time-outline' },
           ].map((filter) => (
             <TouchableOpacity
@@ -275,12 +281,14 @@ const MyClasses = ({ navigation }) => {
               style={[
                 styles.filterChip,
                 {
-                  backgroundColor: selectedFilter === filter.key ?
-                    TEACHER_COLORS.primary :
-                    TEACHER_COLORS.surface,
-                  borderColor: selectedFilter === filter.key ?
-                    TEACHER_COLORS.primary :
-                    COLORS.teacherPalette.neutral.lighter,
+                  backgroundColor:
+                    selectedFilter === filter.key
+                      ? TEACHER_COLORS.primary
+                      : TEACHER_COLORS.surface,
+                  borderColor:
+                    selectedFilter === filter.key
+                      ? TEACHER_COLORS.primary
+                      : COLORS.teacherPalette.neutral.lighter,
                 },
               ]}
               onPress={() => setSelectedFilter(filter.key)}
@@ -290,17 +298,20 @@ const MyClasses = ({ navigation }) => {
                 <Ionicons
                   name={filter.icon}
                   size={16}
-                  color={selectedFilter === filter.key ?
-                    TEACHER_COLORS.textWhite :
-                    TEACHER_COLORS.textMuted}
+                  color={
+                    selectedFilter === filter.key
+                      ? TEACHER_COLORS.textWhite
+                      : TEACHER_COLORS.textMuted
+                  }
                 />
                 <Text
                   style={[
                     styles.filterText,
                     {
-                      color: selectedFilter === filter.key ?
-                        TEACHER_COLORS.textWhite :
-                        TEACHER_COLORS.text,
+                      color:
+                        selectedFilter === filter.key
+                          ? TEACHER_COLORS.textWhite
+                          : TEACHER_COLORS.text,
                     },
                   ]}
                 >
@@ -325,6 +336,10 @@ const MyClasses = ({ navigation }) => {
             progressBackgroundColor={TEACHER_COLORS.surface}
           />
         }
+        contentContainerStyle={{
+          paddingBottom:
+            (ScrollableTabBar.TAB_BAR_HEIGHT || 68) + (insets.bottom || 0) + 16,
+        }}
       >
         {/* ✅ Professional Quick Create Button */}
         <TouchableOpacity
@@ -333,13 +348,23 @@ const MyClasses = ({ navigation }) => {
           activeOpacity={0.8}
         >
           <View style={styles.createClassIcon}>
-            <Ionicons name="add-circle-outline" size={28} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="add-circle-outline"
+              size={28}
+              color={TEACHER_COLORS.primary}
+            />
           </View>
           <View style={styles.createClassContent}>
             <Text style={styles.createClassTitle}>Create New Class</Text>
-            <Text style={styles.createClassSubtitle}>Set up a new class with students and schedule</Text>
+            <Text style={styles.createClassSubtitle}>
+              Set up a new class with students and schedule
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={TEACHER_COLORS.textMuted} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={TEACHER_COLORS.textMuted}
+          />
         </TouchableOpacity>
 
         {/* ✅ Professional Classes List */}
@@ -347,7 +372,7 @@ const MyClasses = ({ navigation }) => {
           <View style={styles.emptyState}>
             <View style={styles.emptyStateIcon}>
               <Ionicons
-                name={searchQuery ? "search-outline" : "school-outline"}
+                name={searchQuery ? 'search-outline' : 'school-outline'}
                 size={48}
                 color={TEACHER_COLORS.textMuted}
               />
@@ -358,8 +383,7 @@ const MyClasses = ({ navigation }) => {
             <Text style={styles.emptyStateText}>
               {searchQuery
                 ? 'Try adjusting your search or filter'
-                : 'Create your first class to get started'
-              }
+                : 'Create your first class to get started'}
             </Text>
             {!searchQuery && (
               <TouchableOpacity
@@ -382,7 +406,10 @@ const MyClasses = ({ navigation }) => {
               >
                 {/* ✅ Class Header */}
                 <LinearGradient
-                  colors={[getSubjectColor(classItem.subject), `${getSubjectColor(classItem.subject)}DD`]}
+                  colors={[
+                    getSubjectColor(classItem.subject),
+                    `${getSubjectColor(classItem.subject)}DD`,
+                  ]}
                   style={styles.classCardHeader}
                 >
                   <View style={styles.classHeaderContent}>
@@ -396,7 +423,8 @@ const MyClasses = ({ navigation }) => {
                     <View style={styles.classHeaderInfo}>
                       <Text style={styles.className}>{classItem.name}</Text>
                       <Text style={styles.classSubject}>
-                        {classItem.subject} • Grade {classItem.grade}{classItem.section}
+                        {classItem.subject} • Grade {classItem.grade}
+                        {classItem.section}
                       </Text>
                     </View>
                     <TouchableOpacity
@@ -404,7 +432,11 @@ const MyClasses = ({ navigation }) => {
                       onPress={() => navigateToAttendance(classItem)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="calendar-outline" size={18} color={TEACHER_COLORS.textWhite} />
+                      <Ionicons
+                        name="calendar-outline"
+                        size={18}
+                        color={TEACHER_COLORS.textWhite}
+                      />
                     </TouchableOpacity>
                   </View>
                 </LinearGradient>
@@ -414,17 +446,37 @@ const MyClasses = ({ navigation }) => {
                   {/* Class Info */}
                   <View style={styles.classInfoSection}>
                     <View style={styles.classInfoItem}>
-                      <Ionicons name="people-outline" size={16} color={TEACHER_COLORS.primary} />
+                      <Ionicons
+                        name="people-outline"
+                        size={16}
+                        color={TEACHER_COLORS.primary}
+                      />
                       <Text style={styles.classInfoText}>
-                        {classItem.presentStudents}/{classItem.totalStudents} present
+                        {classItem.presentStudents}/{classItem.totalStudents}{' '}
+                        present
                       </Text>
                     </View>
                     <View style={styles.classInfoItem}>
-                      <Ionicons name="time-outline" size={16} color={TEACHER_COLORS.textMuted} />
-                      <Text style={styles.classInfoText}>{classItem.schedule}</Text>
+                      <Ionicons
+                        name="time-outline"
+                        size={16}
+                        color={TEACHER_COLORS.textMuted}
+                      />
+                      <Text style={styles.classInfoText}>
+                        {classItem.schedule &&
+                        Array.isArray(classItem.schedule.days)
+                          ? `${classItem.schedule.days.join(', ')} ${
+                              classItem.schedule.time || ''
+                            }`
+                          : '-'}
+                      </Text>
                     </View>
                     <View style={styles.classInfoItem}>
-                      <Ionicons name="location-outline" size={16} color={TEACHER_COLORS.textMuted} />
+                      <Ionicons
+                        name="location-outline"
+                        size={16}
+                        color={TEACHER_COLORS.textMuted}
+                      />
                       <Text style={styles.classInfoText}>{classItem.room}</Text>
                     </View>
                   </View>
@@ -432,23 +484,59 @@ const MyClasses = ({ navigation }) => {
                   {/* Class Stats */}
                   <View style={styles.classStatsGrid}>
                     <View style={styles.classStatCard}>
-                      <Text style={[styles.classStatValue, { color: getAttendanceColor(classItem.attendanceRate) }]}>
-                        {classItem.attendanceRate.toFixed(0)}%
+                      <Text
+                        style={[
+                          styles.classStatValue,
+                          {
+                            color: getAttendanceColor(
+                              typeof classItem.attendanceRate === 'number'
+                                ? classItem.attendanceRate
+                                : 0,
+                            ),
+                          },
+                        ]}
+                      >
+                        {typeof classItem.attendanceRate === 'number'
+                          ? `${classItem.attendanceRate.toFixed(0)}%`
+                          : '-'}
                       </Text>
                       <Text style={styles.classStatLabel}>Attendance</Text>
                     </View>
                     <View style={styles.classStatCard}>
-                      <Text style={[styles.classStatValue, { color: getGradeColor(classItem.averageGrade) }]}>
-                        {classItem.averageGrade.toFixed(0)}%
+                      <Text
+                        style={[
+                          styles.classStatValue,
+                          {
+                            color: getGradeColor(
+                              typeof classItem.averageGrade === 'number'
+                                ? classItem.averageGrade
+                                : 0,
+                            ),
+                          },
+                        ]}
+                      >
+                        {typeof classItem.averageGrade === 'number'
+                          ? `${classItem.averageGrade.toFixed(0)}%`
+                          : '-'}
                       </Text>
                       <Text style={styles.classStatLabel}>Avg Grade</Text>
                     </View>
                     <View style={styles.classStatCard}>
-                      <Text style={[
-                        styles.classStatValue,
-                        { color: classItem.pendingAssignments > 0 ? TEACHER_COLORS.warning : TEACHER_COLORS.success }
-                      ]}>
-                        {classItem.pendingAssignments}
+                      <Text
+                        style={[
+                          styles.classStatValue,
+                          {
+                            color:
+                              typeof classItem.pendingAssignments ===
+                                'number' && classItem.pendingAssignments > 0
+                                ? TEACHER_COLORS.warning
+                                : TEACHER_COLORS.success,
+                          },
+                        ]}
+                      >
+                        {typeof classItem.pendingAssignments === 'number'
+                          ? classItem.pendingAssignments
+                          : 0}
                       </Text>
                       <Text style={styles.classStatLabel}>Pending</Text>
                     </View>
@@ -457,12 +545,20 @@ const MyClasses = ({ navigation }) => {
                   {/* Next Class Info */}
                   <View style={styles.nextClassContainer}>
                     <View style={styles.nextClassInfo}>
-                      <Ionicons name="clock-outline" size={14} color={TEACHER_COLORS.primary} />
-                      <Text style={styles.nextClassText}>Next: {classItem.nextClass}</Text>
+                      <Ionicons
+                        name="clock-outline"
+                        size={14}
+                        color={TEACHER_COLORS.primary}
+                      />
+                      <Text style={styles.nextClassText}>
+                        Next: {classItem.nextClass}
+                      </Text>
                     </View>
                     {classItem.pendingAssignments > 0 && (
                       <View style={styles.pendingBadge}>
-                        <Text style={styles.pendingBadgeText}>{classItem.pendingAssignments} pending</Text>
+                        <Text style={styles.pendingBadgeText}>
+                          {classItem.pendingAssignments} pending
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -470,27 +566,51 @@ const MyClasses = ({ navigation }) => {
                   {/* Quick Actions */}
                   <View style={styles.classActions}>
                     <TouchableOpacity
-                      style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.success }]}
+                      style={[
+                        styles.actionButton,
+                        { backgroundColor: TEACHER_COLORS.success },
+                      ]}
                       onPress={() => navigateToAttendance(classItem)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="calendar" size={16} color={TEACHER_COLORS.textWhite} />
+                      <Ionicons
+                        name="calendar"
+                        size={16}
+                        color={TEACHER_COLORS.textWhite}
+                      />
                       <Text style={styles.actionButtonText}>Attendance</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.actionButton, { backgroundColor: COLORS.teacherPalette.subjects.science }]}
+                      style={[
+                        styles.actionButton,
+                        {
+                          backgroundColor:
+                            COLORS.teacherPalette.subjects.science,
+                        },
+                      ]}
                       onPress={() => navigateToCreateAssignment(classItem)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="add" size={16} color={TEACHER_COLORS.textWhite} />
+                      <Ionicons
+                        name="add"
+                        size={16}
+                        color={TEACHER_COLORS.textWhite}
+                      />
                       <Text style={styles.actionButtonText}>Assignment</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.primary }]}
+                      style={[
+                        styles.actionButton,
+                        { backgroundColor: TEACHER_COLORS.primary },
+                      ]}
                       onPress={() => navigateToClass(classItem)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="eye" size={16} color={TEACHER_COLORS.textWhite} />
+                      <Ionicons
+                        name="eye"
+                        size={16}
+                        color={TEACHER_COLORS.textWhite}
+                      />
                       <Text style={styles.actionButtonText}>View Details</Text>
                     </TouchableOpacity>
                   </View>
@@ -500,7 +620,7 @@ const MyClasses = ({ navigation }) => {
           </View>
         )}
 
-        <View style={styles.bottomPadding} />
+        {/* No need for static bottomPadding view anymore */}
       </ScrollView>
     </View>
   );

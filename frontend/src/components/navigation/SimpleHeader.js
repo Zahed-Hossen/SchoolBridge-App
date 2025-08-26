@@ -19,7 +19,7 @@ import {
   TEACHER_THEME,
   SPACING,
   BORDER_RADIUS,
-  getRoleColors
+  getRoleColors,
 } from '../../constants/theme';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -33,7 +33,7 @@ const SimpleHeader = ({
   rightAction,
   showShadow = true,
   style,
-  userRole = 'Teacher', 
+  userRole = 'Teacher',
 }) => {
   const insets = useSafeAreaInsets();
   const headerHeight = 65 + insets.top;
@@ -45,7 +45,7 @@ const SimpleHeader = ({
   const handleBackPress = () => {
     if (onBackPress) {
       onBackPress();
-    } else {
+    } else if (navigation && typeof navigation.goBack === 'function') {
       navigation.goBack();
     }
   };
@@ -88,7 +88,11 @@ const SimpleHeader = ({
           activeOpacity={0.7}
         >
           <View style={styles.backButtonInner}>
-            <Ionicons name="arrow-back" size={24} color={TEACHER_COLORS.textWhite} />
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={TEACHER_COLORS.textWhite}
+            />
           </View>
         </TouchableOpacity>
 
@@ -107,9 +111,7 @@ const SimpleHeader = ({
         {/* ✅ Professional Right Action Section */}
         <View style={styles.rightSection}>
           {rightAction ? (
-            <View style={styles.rightActionButton}>
-              {rightAction}
-            </View>
+            <View style={styles.rightActionButton}>{rightAction}</View>
           ) : (
             <View style={styles.placeholder} />
           )}

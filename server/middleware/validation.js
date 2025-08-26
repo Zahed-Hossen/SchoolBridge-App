@@ -24,7 +24,7 @@ export const userValidation = {
       .withMessage('Signup type must be either "platform" or "visitor"'),
     body('email')
       .isEmail()
-      .normalizeEmail()
+      // .normalizeEmail() // Allow aliases for non-Google signups
       .withMessage('Please provide a valid email address'),
     body('password')
       .isLength({ min: 6 })
@@ -41,24 +41,27 @@ export const userValidation = {
       .if(body('signupType').equals('platform'))
       .notEmpty()
       .withMessage('Role is required for platform users')
-      .isIn(['Student', 'Teacher', 'Parent', 'Admin', 'PlatformUser', 'SuperAdmin'])
+      .isIn([
+        'Student',
+        'Teacher',
+        'Parent',
+        'Admin',
+        'PlatformUser',
+        'SuperAdmin',
+      ])
       .withMessage('Please select a valid role'),
 
-    // 705 ENHANCED: More flexible phone validation
     body('phone')
       .optional()
       .custom((value) => {
-        if (!value) return true; // Optional field
+        if (!value) return true;
 
-        // Remove all non-digits for validation
         const cleanPhone = value.replace(/\D/g, '');
 
-        // Check length (adjust for your needs)
         if (cleanPhone.length < 10 || cleanPhone.length > 15) {
           throw new Error('Phone number must be between 10-15 digits');
         }
 
-        // Additional format checks (customize as needed)
         const validFormats = [
           /^\+?[1-9]\d{1,14}$/, // E.164 international format
           /^[0-9]{10,11}$/, // Local format (10-11 digits)
@@ -83,7 +86,7 @@ export const userValidation = {
   login: [
     body('email')
       .isEmail()
-      .normalizeEmail()
+      // .normalizeEmail() // Allow aliases for non-Google logins
       .withMessage('Please provide a valid email address'),
     body('password').notEmpty().withMessage('Password is required'),
     body('role')
@@ -102,7 +105,7 @@ export const userValidation = {
   googleAuth: [
     body('user.email')
       .isEmail()
-      .normalizeEmail()
+      .normalizeEmail() // Always normalize for Google OAuth
       .withMessage('Valid email is required'),
     body('user.googleId').notEmpty().withMessage('Google ID is required'),
     body('user.fullName')
@@ -143,5 +146,18 @@ export const userValidation = {
       .trim()
       .isLength({ min: 1, max: 50 })
       .withMessage('Last name must be between 1 and 50 characters'),
+  ],
+
+  activate: [
+    body('token').notEmpty().withMessage('Activation token is required'),
+    body('fullName')
+      .trim()
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Full name must be between 2-100 characters'),
+    body('password')
+      .isLength({ min: 6 })
+      .withMessage('Password must be at least 6 characters')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+      .withMessage('Password must contain uppercase, lowercase, and number'),
   ],
 };

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
-  ScrollView,
   StyleSheet,
   TextInput,
   Text,
@@ -11,29 +10,59 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import SchoolCard from '../../components/SuperAdmin/SchoolCard';
 import { BASE_THEME } from '../../constants/theme';
-
+import { apiCall } from '../../api/client';
 import SimpleHeader from '../../components/navigation/SimpleHeader';
 
 const SchoolsScreen = ({ navigation }) => {
   const styles = getStyles();
   const [searchQuery, setSearchQuery] = useState('');
+  const [schools, setSchools] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const schools = [
-    {
-      id: 'sch-001',
-      name: 'Green Valley School',
-      location: 'Dhaka',
-      users: 420,
-      status: 'Active',
-    },
-    // Add more schools...
-  ];
+  // Fetch schools function for refresh
+  const fetchSchools = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await apiCall('GET', '/schools');
+      if (data && data.schools) {
+        setSchools(data.schools);
+      } else {
+        setSchools([]);
+      }
+    } catch (err) {
+      setError('Failed to load schools');
+      setSchools([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredSchools = schools.filter(
+  useEffect(() => {
+    fetchSchools();
+  }, []);
+
+  // Map backend school data to SchoolCard props
+  const mappedSchools = schools.map((school) => {
+    let status = 'Active';
+    if (school.isActive === false) status = 'Suspended';
+    if (typeof school.isActive === 'undefined') status = 'Active';
+    return {
+      ...school,
+      location: school.address?.city || 'N/A',
+      users: typeof school.usersCount === 'number' ? school.usersCount : 0,
+      status,
+    };
+  });
+
+  const filteredSchools = mappedSchools.filter(
     (school) =>
       school.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      school.location.toLowerCase().includes(searchQuery.toLowerCase()),
+      (school.location || '').toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const showFiltered = searchQuery.length > 0;
 
   return (
     <View style={styles.container}>
@@ -45,6 +74,19 @@ const SchoolsScreen = ({ navigation }) => {
           navigation={navigation}
           primaryColor="#2563EB"
           style={{ alignItems: 'center', justifyContent: 'center' }}
+          rightAction={
+            <TouchableOpacity
+              onPress={() =>
+                navigation
+                  .getParent()
+                  ?.navigate('AddSchool', { onSchoolAdded: fetchSchools })
+              }
+              style={{ padding: 2 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="add" size={28} color="purple" />
+            </TouchableOpacity>
+          }
         />
       </View>
       <View style={{ paddingTop: 80 }}>
@@ -63,45 +105,51 @@ const SchoolsScreen = ({ navigation }) => {
           />
         </View>
 
-        <FlatList
-          data={filteredSchools}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          ListHeaderComponent={
-            <Text style={styles.resultsText}>
-              {filteredSchools.length}{' '}
-              {filteredSchools.length === 1 ? 'school' : 'schools'} found
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <SchoolCard
-              school={item}
-              onPress={() =>
-                navigation.navigate('SchoolDetails', { school: item })
-              }
-            />
-          )}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons
-                name="school"
-                size={48}
-                color={BASE_THEME.colors.text.secondary}
+        {/* Schools List: show all if no search, filtered if searching */}
+        {loading ? (
+          <View style={styles.emptyContainer}>
+            <Text>Loading schools...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.emptyContainer}>
+            <Text style={{ color: 'red' }}>{error}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={showFiltered ? filteredSchools : mappedSchools}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={
+              <Text style={styles.resultsText}>
+                {showFiltered
+                  ? `${filteredSchools.length} result${
+                      filteredSchools.length === 1 ? '' : 's'
+                    } found`
+                  : `${mappedSchools.length} school${
+                      mappedSchools.length === 1 ? '' : 's'
+                    } in database`}
+              </Text>
+            }
+            renderItem={({ item }) => (
+              <SchoolCard
+                school={item}
+                onPress={() =>
+                  navigation.navigate('SchoolDetails', { school: item })
+                }
               />
-              <Text style={styles.emptyText}>No schools found</Text>
-            </View>
-          }
-        />
-
-        <TouchableOpacity
-          style={[
-            styles.addButton,
-            { backgroundColor: BASE_THEME.colors.primary },
-          ]}
-          onPress={() => navigation.navigate('AddSchool')}
-        >
-          <Ionicons name="add" size={24} color="white" />
-        </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Ionicons
+                  name="school"
+                  size={48}
+                  color={BASE_THEME.colors.text.secondary}
+                />
+                <Text style={styles.emptyText}>No schools found</Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </View>
   );
@@ -156,17 +204,6 @@ const getStyles = () =>
       marginTop: BASE_THEME.spacing.md,
       color: BASE_THEME.colors.text.secondary,
       fontSize: BASE_THEME.fonts.sizes.body2,
-    },
-    addButton: {
-      position: 'absolute',
-      bottom: BASE_THEME.spacing.lg,
-      right: BASE_THEME.spacing.lg,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      justifyContent: 'center',
-      alignItems: 'center',
-      elevation: 4,
     },
   });
 

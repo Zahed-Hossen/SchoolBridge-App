@@ -1,4 +1,4 @@
-// ✅ Application constants
+// Application constants
 export const ROLES = {
   STUDENT: 'Student',
   TEACHER: 'Teacher',

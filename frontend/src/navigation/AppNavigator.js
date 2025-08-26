@@ -33,7 +33,8 @@ import ContactScreen from '../screens/Common/ContactScreen';
 import SupportScreen from '../screens/Common/SupportScreen';
 import PrivacyScreen from '../screens/Common/PrivacyScreen';
 import PricingScreen from '../screens/Common/PricingScreen';
-import ConnectionTest from '../components/ConnectionTest';
+// import ConnectionTest from '../components/ConnectionTest';
+import ActivationScreen from '../screens/Common/ActivationScreen';
 
 const Stack = createNativeStackNavigator();
 const RootStack = createStackNavigator();
@@ -62,7 +63,7 @@ const AppNavigator = () => {
     return null;
   }
 
-  if (!isAuthenticated ) {
+  if (!isAuthenticated) {
     return (
       <Stack.Navigator>
         <Stack.Screen
@@ -81,9 +82,9 @@ const AppNavigator = () => {
                 title="Log In"
                 showBackButton={true}
                 onBackPress={() => navigation.replace('Landing')}
-                primaryColor="#43cea2"
+                // primaryColor="#43cea2"
                 gradientColors={['#43cea2', '#185a9d']}
-                backButtonStyle={{ backgroundColor: '#43cea2' }}
+                backButtonStyle={{ backgroundColor: '#2b8692ff' }}
                 titleStyle={{
                   textAlign: '',
                   color: '#fff',
@@ -106,9 +107,9 @@ const AppNavigator = () => {
                 title="Sign Up"
                 showBackButton={true}
                 onBackPress={() => navigation.replace('Landing')}
-                primaryColor="#43cea2"
+                // primaryColor="#43cea2"
                 gradientColors={['#43cea2', '#185a9d']}
-                backButtonStyle={{ backgroundColor: '#43cea2' }}
+                backButtonStyle={{ backgroundColor: '#1a818fff' }}
                 titleStyle={{
                   textAlign: '',
                   color: '#fff',
@@ -119,6 +120,11 @@ const AppNavigator = () => {
               />
             ),
           })}
+        />
+        <Stack.Screen
+          name="Activation"
+          component={ActivationScreen}
+          options={{ headerShown: false, title: 'Activate Account' }}
         />
         <Stack.Screen name="AboutUs" component={RedirectToSignUp} />
         <Stack.Screen name="Features" component={RedirectToSignUp} />
@@ -382,402 +388,3 @@ export default AppNavigator;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Redirect component for unauthenticated access to marketing/public screens
-// import React, { useEffect } from 'react';
-// import { View } from 'react-native';
-
-// function RedirectToSignUp({ navigation }) {
-//   useEffect(() => {
-//     navigation.replace('SignUp');
-//   }, [navigation]);
-//   return <View />;
-// }
-
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-// import { useAuth } from '../context/AuthContext';
-// import { useRole } from '../context/RoleContext';
-
-// // Import your navigators
-// import LandingScreen from '../screens/Common/LandingScreen';
-// import LoginScreen from '../screens/Common/LoginScreen';
-// import SignUpScreen from '../screens/Common/SignUpScreen';
-// import ScreenHeader from '../components/navigation/ScreenHeader';
-// import StudentTabNavigator from './student/StudentNavigator';
-// import TeacherTabNavigator from './teacher/TeacherNavigator';
-// import ParentTabNavigator from './parent/ParentNavigator';
-// import AdminTabNavigator from './admin/AdminTabNavigator';
-// import SuperAdminTabNavigator from './superadmin/SuperAdminTabNavigator';
-// import RoleSelectionScreen from '../screens/Common/RoleSelectionScreen';
-// import AboutUsScreen from '../screens/Common/AboutUsScreen';
-// import FeaturesScreen from '../screens/Common/FeaturesScreen';
-// import ContactScreen from '../screens/Common/ContactScreen';
-// import SupportScreen from '../screens/Common/SupportScreen';
-// import PrivacyScreen from '../screens/Common/PrivacyScreen';
-// import PricingScreen from '../screens/Common/PricingScreen';
-// import ConnectionTest from '../components/ConnectionTest';
-
-// const Stack = createNativeStackNavigator();
-
-// const AppNavigator = () => {
-//   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
-//   const { currentRole, isLoading: roleLoading, setRole } = useRole();
-
-//   console.log('🎭 AppNavigator - Auth Status:', {
-//     isAuthenticated,
-//     currentRole,
-//     hasUser: !!user,
-//     authLoading,
-//     roleLoading,
-//     userRole: user?.role,
-//   });
-
-//   useEffect(() => {
-//     if (isAuthenticated && user?.role && !currentRole && setRole) {
-//       console.log('🔄 Auto-setting role from user object:', user.role);
-//       setRole(user.role);
-//     }
-//   }, [isAuthenticated, user?.role, currentRole, setRole]);
-
-//   if (authLoading || roleLoading) {
-//     return null;
-//   }
-
-//   if (!isAuthenticated) {
-//     return (
-//       <Stack.Navigator>
-//         <Stack.Screen
-//           name="Landing"
-//           component={LandingScreen}
-//           options={{ headerShown: false }}
-//         />
-//         <Stack.Screen
-//           name="Login"
-//           component={LoginScreen}
-//           options={({ navigation }) => ({
-//             header: (props) => (
-//               <ScreenHeader
-//                 {...props}
-//                 title="Log In"
-//                 showBackButton={true}
-//                 onBackPress={() => navigation.replace('Landing')}
-//                 titleStyle={{
-//                   textAlign: '',
-//                   color: '#fff',
-//                   fontSize: 22,
-//                   fontWeight: 'bold',
-//                   letterSpacing: 1,
-//                 }}
-//                 backButtonStyle={{ backgroundColor: '#031c2cff' }}
-//               />
-//             ),
-//           })}
-//         />
-//         <Stack.Screen
-//           name="SignUp"
-//           component={SignUpScreen}
-//           options={({ navigation }) => ({
-//             header: (props) => (
-//               <ScreenHeader
-//                 {...props}
-//                 title="Sign Up"
-//                 showBackButton={true}
-//                 onBackPress={() => navigation.replace('Landing')}
-//                 titleStyle={{
-//                   textAlign: '',
-//                   color: '#fff',
-//                   fontSize: 22,
-//                   fontWeight: 'bold',
-//                   letterSpacing: 1,
-//                 }}
-//                 backButtonStyle={{ backgroundColor: '#031c2cff' }}
-//               />
-//             ),
-//           })}
-//         />
-//         <Stack.Screen name="AboutUs" component={RedirectToSignUp} />
-//         <Stack.Screen name="Features" component={RedirectToSignUp} />
-//         <Stack.Screen name="Pricing" component={RedirectToSignUp} />
-//         <Stack.Screen name="Contact" component={RedirectToSignUp} />
-//         <Stack.Screen name="Support" component={RedirectToSignUp} />
-//         <Stack.Screen name="Privacy" component={RedirectToSignUp} />
-//         <Stack.Screen name="ConnectionTest" component={RedirectToSignUp} />
-//       </Stack.Navigator>
-//     );
-//   }
-
-//   // Authenticated user with role - show role-based navigation
-//   if (isAuthenticated && (currentRole || user?.role)) {
-//     const userRole = currentRole || user?.role;
-//     console.log('✅ Showing role-based navigation for:', userRole);
-
-//     const normalizedRole = userRole?.toLowerCase().trim();
-//     console.log(
-//       '🔄 Normalized role:',
-//       normalizedRole,
-//       'from original:',
-//       userRole,
-//     );
-
-//     switch (normalizedRole) {
-//       case 'student':
-//         console.log('📚 Loading Student Navigator');
-//         return <StudentTabNavigator />;
-
-//       case 'teacher':
-//         console.log('👩‍🏫 Loading Teacher Navigator');
-//         return <TeacherTabNavigator />;
-
-//       case 'parent':
-//         console.log('👨‍👩‍👧‍👦 Loading Parent Navigator');
-//         return <ParentTabNavigator />;
-
-//       case 'admin':
-//       case 'administrator':
-//       case 'schooladmin':
-//       case 'school_admin':
-//         console.log('🏫 Loading SchoolAdmin Screen');
-//         return <AdminTabNavigator />;
-
-//       case 'superadmin':
-//       case 'super_admin':
-//         console.log('🦸‍♂️ Loading SuperAdmin Navigator');
-//         return <SuperAdminTabNavigator />;
-
-//       case 'visitor':
-//         console.log('👤 Loading Visitor Navigation');
-//         return (
-//           <Stack.Navigator initialRouteName="Landing">
-//             <Stack.Screen
-//               name="Landing"
-//               component={LandingScreen}
-//               options={{ headerShown: false }}
-//             />
-//             <Stack.Screen
-//               name="Login"
-//               component={LoginScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Log In"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     titleStyle={{
-//                       textAlign: '',
-//                       color: '#fff',
-//                       fontSize: 22,
-//                       fontWeight: 'bold',
-//                       letterSpacing: 1,
-//                     }}
-//                     backButtonStyle={{ backgroundColor: '#208799fa' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="SignUp"
-//               component={SignUpScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Sign Up"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     titleStyle={{
-//                       textAlign: '',
-//                       color: '#fff',
-//                       fontSize: 22,
-//                       fontWeight: 'bold',
-//                       letterSpacing: 1,
-//                     }}
-//                     backButtonStyle={{ backgroundColor: '#208799fa' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="AboutUs"
-//               component={AboutUsScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="About Us"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#6d41b6ff', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="Features"
-//               component={FeaturesScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Features"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#7b2ff2', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="Pricing"
-//               component={PricingScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Pricing & Plans"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#7b2ff2', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="Contact"
-//               component={ContactScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Contact Us"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#7b2ff2', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="Support"
-//               component={SupportScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Support"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#7b2ff2', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="Privacy"
-//               component={PrivacyScreen}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Privacy Policy"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#7b2ff2', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//             <Stack.Screen
-//               name="ConnectionTest"
-//               component={ConnectionTest}
-//               options={({ navigation }) => ({
-//                 header: (props) => (
-//                   <ScreenHeader
-//                     {...props}
-//                     title="Connection Test"
-//                     showBackButton={true}
-//                     onBackPress={() => navigation.goBack()}
-//                     primaryColor="#7b2ff2"
-//                     gradientColors={['#7b2ff2', '#f357a8']}
-//                     backButtonStyle={{ backgroundColor: '#7b2ff2' }}
-//                   />
-//                 ),
-//               })}
-//             />
-//           </Stack.Navigator>
-//         );
-//       default:
-//         console.warn(
-//           '⚠️ Unknown role:',
-//           userRole,
-//           'normalized:',
-//           normalizedRole,
-//           '- falling back to role selection',
-//         );
-//         return (
-//           <Stack.Navigator screenOptions={{ headerShown: false }}>
-//             <Stack.Screen
-//               name="RoleSelection"
-//               component={RoleSelectionScreen}
-//               initialParams={{
-//                 error: `Unknown role: ${userRole}`,
-//                 showError: true,
-//                 user: user,
-//               }}
-//             />
-//           </Stack.Navigator>
-//         );
-//     }
-//   }
-
-//   // Authenticated user without role - show role selection
-//   console.log('👤 Authenticated user needs role selection');
-//   return (
-//     <Stack.Navigator screenOptions={{ headerShown: false }}>
-//       <Stack.Screen
-//         name="RoleSelection"
-//         component={RoleSelectionScreen}
-//         options={{
-//           title: 'Select Your Role',
-//           headerShown: true,
-//           headerLeft: () => null,
-//           gestureEnabled: false,
-//         }}
-//         initialParams={{
-//           user: user,
-//         }}
-//       />
-//     </Stack.Navigator>
-//   );
-// };
-
-// export default AppNavigator;

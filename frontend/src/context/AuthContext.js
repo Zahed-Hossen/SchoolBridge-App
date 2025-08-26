@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GoogleOAuthService from '../services/GoogleOAuthService';
-import { authService } from '../api/services/authService';
+import authService from '../api/services/authService';
 
 const AuthContext = createContext({
   user: null,
@@ -15,6 +15,11 @@ const AuthContext = createContext({
   completeOAuthSetup: () => {},
   clearAuthData: () => {},
   checkAuthStatus: () => {},
+  activateAccount: () => {},
+  validateInvitation: () => {},
+  resendVerificationEmail: () => {},
+  forgotPassword: () => {},
+  resetPassword: () => {},
 });
 
 export const useAuth = () => {
@@ -30,6 +35,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
+  const [pendingInvitation, setPendingInvitation] = useState(null);
 
   // Check authentication status on app start
   useEffect(() => {
@@ -148,6 +154,53 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Activate user account with invitation
+  const activateAccount = async (activationData) => {
+    try {
+      setIsLoading(true);
+
+      // If there's an invitation token, include it in the activation
+      const payload = { ...activationData };
+      if (pendingInvitation?.token) {
+        payload.invitationToken = pendingInvitation.token;
+      }
+
+      const response = await fetch(
+        `${
+          process.env.API_URL || 'http://localhost:5000/api'
+        }/auth/activate-account`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to activate account');
+      }
+
+      // Clear pending invitation after successful activation
+      if (pendingInvitation) {
+        setPendingInvitation(null);
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Activation error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to activate account',
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const login = async (email, password, role) => {
     setIsLoading(true);
     console.log('📝 Starting login process...');
@@ -155,54 +208,55 @@ export const AuthProvider = ({ children }) => {
     console.log('📋 Login data:', { email, role });
 
     try {
-      // ✅ FIXED: Use the auth.login method from your apiService
       const response = await authService.login({
         email,
         password,
         role,
       });
 
-      console.log('📨 Login response:', response);
-
-      // ✅ Your API service already handles token storage, so check the response
-      if (response.success && response.data) {
+      console.log('📨 Login response (raw):', response);
+      if (typeof response !== 'object') {
+        console.error('❌ Login response is not an object:', response);
+      }
+      if (response && response.success && response.data) {
         const { user, accessToken, refreshToken } = response.data;
-
-        console.log('✅ Login successful for:', user.email);
+        console.log('✅ Login successful for:', user?.email);
         console.log('🔑 Tokens received:', {
           hasAccessToken: !!accessToken,
           hasRefreshToken: !!refreshToken,
         });
-
-        // ✅ Update state (tokens already stored by apiService)
         setUser(user);
         setRole(user.role);
         setIsAuthenticated(true);
-
         console.log('✅ Login completed successfully');
         console.log('👤 User set:', user.fullName);
         console.log('🎭 Role set:', user.role);
-
         return {
           success: true,
           user,
           message: 'Login successful',
         };
       } else {
-        // ✅ Handle API error responses
+        // Debug: print all keys and values in response
+        if (response && typeof response === 'object') {
+          console.log(
+            '❌ Login failed - response keys:',
+            Object.keys(response),
+          );
+          for (const [k, v] of Object.entries(response)) {
+            console.log(`❌ Login failed - response[${k}]:`, v);
+          }
+        }
         const errorMessage =
-          response.message || response.error || 'Login failed';
+          (response && (response.message || response.error)) || 'Login failed';
         console.log('❌ Login failed:', errorMessage);
-
         return {
           success: false,
           error: errorMessage,
         };
       }
     } catch (error) {
-      console.error('❌ Login error:', error);
-
-      // ✅ Your apiService already provides user-friendly error messages
+      console.error('❌ Login error (exception):', error);
       return {
         success: false,
         error: error.message || 'Login failed',
@@ -309,6 +363,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
+
   // ✅ Add new method to complete OAuth setup after role selection
   const completeOAuthSetup = async (userRole) => {
     try {
@@ -451,11 +506,142 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Validate an invitation token
+  const validateInvitation = async (token) => {
+    try {
+      const response = await fetch(
+        `${
+          process.env.API_URL || 'http://localhost:5000/api'
+        }/invitations/validate-token/${token}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setPendingInvitation(data.data);
+        return { success: true, data: data.data };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Invalid or expired invitation',
+        };
+      }
+    } catch (error) {
+      console.error('Error validating invitation:', error);
+      return { success: false, message: 'Failed to validate invitation' };
+    }
+  };
+
+  // Resend verification email
+  const resendVerificationEmail = async (email) => {
+    try {
+      const response = await fetch(
+        `${
+          process.env.API_URL || 'http://localhost:5000/api'
+        }/auth/resend-verification`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to resend verification email');
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to resend verification email',
+      };
+    }
+  };
+
+  // Forgot password
+  const forgotPassword = async (email) => {
+    try {
+      const response = await fetch(
+        `${
+          process.env.API_URL || 'http://localhost:5000/api'
+        }/auth/forgot-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || 'Failed to process forgot password request',
+        );
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to process forgot password request',
+      };
+    }
+  };
+
+  // Reset password
+  const resetPassword = async (token, newPassword) => {
+    try {
+      const response = await fetch(
+        `${
+          process.env.API_URL || 'http://localhost:5000/api'
+        }/auth/reset-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token, newPassword }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to reset password');
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to reset password',
+      };
+    }
+  };
+
   const value = {
+    user,
     isAuthenticated,
     isLoading,
-    user,
     role,
+    pendingInvitation,
     login,
     signup,
     logout,
@@ -463,6 +649,11 @@ export const AuthProvider = ({ children }) => {
     completeOAuthSetup,
     clearAuthData,
     checkAuthStatus,
+    activateAccount,
+    validateInvitation,
+    resendVerificationEmail,
+    forgotPassword,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

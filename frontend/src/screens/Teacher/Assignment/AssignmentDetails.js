@@ -21,7 +21,7 @@ import {
   TEACHER_COLORS,
   TEACHER_THEME,
   SPACING,
-  BORDER_RADIUS
+  BORDER_RADIUS,
 } from '../../../constants/theme';
 
 const AssignmentDetails = ({ navigation, route }) => {
@@ -58,13 +58,13 @@ const AssignmentDetails = ({ navigation, route }) => {
 
       // ✅ Minimal Mock Data (for development)
       setTimeout(() => {
-        const assignmentData = passedAssignment || createAssignmentFromId(assignmentId);
+        const assignmentData =
+          passedAssignment || createAssignmentFromId(assignmentId);
         setAssignment(assignmentData);
         setSubmissions(getMockSubmissions());
         setLoading(false);
         setRefreshing(false);
       }, 800);
-
     } catch (error) {
       console.error('❌ Error loading assignment:', error);
       Alert.alert('Error', 'Failed to load assignment details');
@@ -79,7 +79,8 @@ const AssignmentDetails = ({ navigation, route }) => {
       1: {
         id: 1,
         title: 'Quadratic Functions Quiz',
-        description: 'Complete exercises on quadratic equations and graphing. Show all work for partial credit.',
+        description:
+          'Complete exercises on quadratic equations and graphing. Show all work for partial credit.',
         type: 'Quiz',
         totalPoints: 100,
         dueDate: '2025-08-10T23:59:00Z',
@@ -90,12 +91,14 @@ const AssignmentDetails = ({ navigation, route }) => {
         gradedCount: 18,
         averageGrade: 82.5,
         status: 'active',
-        instructions: 'Answer all questions. Use graphing calculator where needed.',
+        instructions:
+          'Answer all questions. Use graphing calculator where needed.',
       },
       2: {
         id: 2,
         title: 'Physics Lab Report',
-        description: 'Complete lab report on Newton\'s laws experiment conducted in class.',
+        description:
+          "Complete lab report on Newton's laws experiment conducted in class.",
         type: 'Lab Report',
         totalPoints: 150,
         dueDate: '2025-08-15T23:59:00Z',
@@ -106,26 +109,29 @@ const AssignmentDetails = ({ navigation, route }) => {
         gradedCount: 8,
         averageGrade: 88.2,
         status: 'active',
-        instructions: 'Include hypothesis, methodology, results, and conclusion.',
+        instructions:
+          'Include hypothesis, methodology, results, and conclusion.',
       },
     };
 
-    return assignments[id] || {
-      id: id,
-      title: 'Assignment Not Found',
-      description: 'This assignment could not be loaded.',
-      type: 'Unknown',
-      totalPoints: 0,
-      dueDate: new Date().toISOString(),
-      createdDate: new Date().toISOString(),
-      className: 'Unknown Class',
-      classId: 'unknown',
-      submissionsCount: 0,
-      gradedCount: 0,
-      averageGrade: 0,
-      status: 'unknown',
-      instructions: '',
-    };
+    return (
+      assignments[id] || {
+        id: id,
+        title: 'Assignment Not Found',
+        description: 'This assignment could not be loaded.',
+        type: 'Unknown',
+        totalPoints: 0,
+        dueDate: new Date().toISOString(),
+        createdDate: new Date().toISOString(),
+        className: 'Unknown Class',
+        classId: 'unknown',
+        submissionsCount: 0,
+        gradedCount: 0,
+        averageGrade: 0,
+        status: 'unknown',
+        instructions: '',
+      }
+    );
   };
 
   // ✅ Minimal mock submissions
@@ -185,18 +191,24 @@ const AssignmentDetails = ({ navigation, route }) => {
     });
   }, [assignment, navigation]);
 
-  const navigateToGradeSubmission = useCallback((submission) => {
-    if (submission.status === 'not_submitted') {
-      Alert.alert('No Submission', 'This student has not submitted their assignment yet.');
-      return;
-    }
+  const navigateToGradeSubmission = useCallback(
+    (submission) => {
+      if (submission.status === 'not_submitted') {
+        Alert.alert(
+          'No Submission',
+          'This student has not submitted their assignment yet.',
+        );
+        return;
+      }
 
-    navigation.navigate('GradeSubmission', {
-      submissionId: submission.id,
-      submission: submission,
-      assignment: assignment,
-    });
-  }, [assignment, navigation]);
+      navigation.navigate('GradeSubmission', {
+        submissionId: submission.id,
+        submission: submission,
+        assignment: assignment,
+      });
+    },
+    [assignment, navigation],
+  );
 
   const deleteAssignment = useCallback(() => {
     Alert.alert(
@@ -213,14 +225,14 @@ const AssignmentDetails = ({ navigation, route }) => {
               // await apiService.teacher.deleteAssignment(assignment.id);
 
               Alert.alert('Success', 'Assignment deleted successfully.', [
-                { text: 'OK', onPress: () => navigation.goBack() }
+                { text: 'OK', onPress: () => navigation.goBack() },
               ]);
             } catch (error) {
               Alert.alert('Error', 'Failed to delete assignment');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   }, [assignment, navigation]);
 
@@ -241,19 +253,27 @@ const AssignmentDetails = ({ navigation, route }) => {
 
   const getStatusColor = useCallback((status) => {
     switch (status) {
-      case 'graded': return TEACHER_COLORS.success;
-      case 'submitted': return TEACHER_COLORS.warning;
-      case 'not_submitted': return TEACHER_COLORS.error;
-      default: return TEACHER_COLORS.textMuted;
+      case 'graded':
+        return TEACHER_COLORS.success;
+      case 'submitted':
+        return TEACHER_COLORS.warning;
+      case 'not_submitted':
+        return TEACHER_COLORS.error;
+      default:
+        return TEACHER_COLORS.textMuted;
     }
   }, []);
 
   const getStatusIcon = useCallback((status) => {
     switch (status) {
-      case 'graded': return 'checkmark-circle';
-      case 'submitted': return 'time';
-      case 'not_submitted': return 'close-circle';
-      default: return 'help-circle';
+      case 'graded':
+        return 'checkmark-circle';
+      case 'submitted':
+        return 'time';
+      case 'not_submitted':
+        return 'close-circle';
+      default:
+        return 'help-circle';
     }
   }, []);
 
@@ -276,7 +296,7 @@ const AssignmentDetails = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       loadAssignmentData();
-    }, [assignmentId])
+    }, [assignmentId]),
   );
 
   // ✅ Professional Loading State
@@ -307,7 +327,11 @@ const AssignmentDetails = ({ navigation, route }) => {
           primaryColor={TEACHER_COLORS.primary}
         />
         <View style={styles.loadingContainer}>
-          <Ionicons name="document-text-outline" size={64} color={TEACHER_COLORS.textMuted} />
+          <Ionicons
+            name="document-text-outline"
+            size={64}
+            color={TEACHER_COLORS.textMuted}
+          />
           <Text style={styles.errorText}>Assignment not found</Text>
           <TouchableOpacity
             style={styles.retryButton}
@@ -325,7 +349,9 @@ const AssignmentDetails = ({ navigation, route }) => {
       {/* ✅ Professional Header */}
       <SimpleHeader
         title={assignment.title}
-        subtitle={`${assignment.className} • Due: ${formatDate(assignment.dueDate)}`}
+        subtitle={`${assignment.className} • Due: ${formatDate(
+          assignment.dueDate,
+        )}`}
         navigation={navigation}
         primaryColor={TEACHER_COLORS.primary}
       />
@@ -333,16 +359,22 @@ const AssignmentDetails = ({ navigation, route }) => {
       {/* ✅ Professional Tab Navigation */}
       <View style={styles.tabContainer}>
         {[
-          { key: 'overview', label: 'Overview', icon: 'information-circle-outline' },
-          { key: 'submissions', label: 'Submissions', icon: 'document-outline', badge: submissions.filter(s => s.status === 'submitted').length },
+          {
+            key: 'overview',
+            label: 'Overview',
+            icon: 'information-circle-outline',
+          },
+          {
+            key: 'submissions',
+            label: 'Submissions',
+            icon: 'document-outline',
+            badge: submissions.filter((s) => s.status === 'submitted').length,
+          },
           { key: 'analytics', label: 'Analytics', icon: 'bar-chart-outline' },
         ].map((tab) => (
           <TouchableOpacity
             key={tab.key}
-            style={[
-              styles.tab,
-              activeTab === tab.key && styles.activeTab
-            ]}
+            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
             onPress={() => setActiveTab(tab.key)}
             activeOpacity={0.8}
           >
@@ -350,12 +382,18 @@ const AssignmentDetails = ({ navigation, route }) => {
               <Ionicons
                 name={tab.icon}
                 size={18}
-                color={activeTab === tab.key ? TEACHER_COLORS.textWhite : TEACHER_COLORS.textMuted}
+                color={
+                  activeTab === tab.key
+                    ? TEACHER_COLORS.textWhite
+                    : TEACHER_COLORS.textMuted
+                }
               />
-              <Text style={[
-                styles.tabText,
-                activeTab === tab.key && styles.activeTabText
-              ]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab.key && styles.activeTabText,
+                ]}
+              >
                 {tab.label}
               </Text>
               {tab.badge > 0 && (
@@ -387,7 +425,11 @@ const AssignmentDetails = ({ navigation, route }) => {
             {/* ✅ Professional Assignment Info */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="information-circle-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="information-circle-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Assignment Details</Text>
               </View>
 
@@ -397,14 +439,22 @@ const AssignmentDetails = ({ navigation, route }) => {
                   style={styles.assignmentHeader}
                 >
                   <View style={styles.assignmentIcon}>
-                    <Ionicons name="document-text" size={28} color={TEACHER_COLORS.textWhite} />
+                    <Ionicons
+                      name="document-text"
+                      size={28}
+                      color={TEACHER_COLORS.textWhite}
+                    />
                   </View>
                   <View style={styles.assignmentTitleSection}>
-                    <Text style={styles.assignmentTitle}>{assignment.title}</Text>
+                    <Text style={styles.assignmentTitle}>
+                      {assignment.title}
+                    </Text>
                     <Text style={styles.assignmentType}>{assignment.type}</Text>
                   </View>
                   <View style={styles.assignmentPoints}>
-                    <Text style={styles.pointsValue}>{assignment.totalPoints}</Text>
+                    <Text style={styles.pointsValue}>
+                      {assignment.totalPoints}
+                    </Text>
                     <Text style={styles.pointsLabel}>points</Text>
                   </View>
                 </LinearGradient>
@@ -412,25 +462,56 @@ const AssignmentDetails = ({ navigation, route }) => {
                 <View style={styles.assignmentContent}>
                   <View style={styles.infoGrid}>
                     <View style={styles.infoItem}>
-                      <Ionicons name="calendar-outline" size={16} color={TEACHER_COLORS.primary} />
+                      <Ionicons
+                        name="calendar-outline"
+                        size={16}
+                        color={TEACHER_COLORS.primary}
+                      />
                       <Text style={styles.infoLabel}>Due Date:</Text>
-                      <Text style={styles.infoValue}>{formatDate(assignment.dueDate)}</Text>
+                      <Text style={styles.infoValue}>
+                        {formatDate(assignment.dueDate)}
+                      </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="school-outline" size={16} color={COLORS.teacherPalette.subjects.mathematics} />
+                      <Ionicons
+                        name="school-outline"
+                        size={16}
+                        color={COLORS.teacherPalette.subjects.mathematics}
+                      />
                       <Text style={styles.infoLabel}>Class:</Text>
-                      <Text style={styles.infoValue}>{assignment.className}</Text>
+                      <Text style={styles.infoValue}>
+                        {assignment.className}
+                      </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="time-outline" size={16} color={TEACHER_COLORS.textMuted} />
+                      <Ionicons
+                        name="time-outline"
+                        size={16}
+                        color={TEACHER_COLORS.textMuted}
+                      />
                       <Text style={styles.infoLabel}>Created:</Text>
-                      <Text style={styles.infoValue}>{formatDate(assignment.createdDate)}</Text>
+                      <Text style={styles.infoValue}>
+                        {formatDate(assignment.createdDate)}
+                      </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="checkmark-circle-outline" size={16} color={TEACHER_COLORS.success} />
+                      <Ionicons
+                        name="checkmark-circle-outline"
+                        size={16}
+                        color={TEACHER_COLORS.success}
+                      />
                       <Text style={styles.infoLabel}>Status:</Text>
-                      <Text style={[styles.infoValue, { color: TEACHER_COLORS.success, fontWeight: '600' }]}>
-                        {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+                      <Text
+                        style={[
+                          styles.infoValue,
+                          { color: TEACHER_COLORS.success, fontWeight: '600' },
+                        ]}
+                      >
+                        {assignment.status &&
+                        typeof assignment.status === 'string'
+                          ? assignment.status.charAt(0).toUpperCase() +
+                            assignment.status.slice(1)
+                          : 'Unknown'}
                       </Text>
                     </View>
                   </View>
@@ -438,14 +519,18 @@ const AssignmentDetails = ({ navigation, route }) => {
                   {assignment.description && (
                     <View style={styles.descriptionContainer}>
                       <Text style={styles.descriptionTitle}>Description</Text>
-                      <Text style={styles.description}>{assignment.description}</Text>
+                      <Text style={styles.description}>
+                        {assignment.description}
+                      </Text>
                     </View>
                   )}
 
                   {assignment.instructions && (
                     <View style={styles.instructionsContainer}>
                       <Text style={styles.instructionsTitle}>Instructions</Text>
-                      <Text style={styles.instructions}>{assignment.instructions}</Text>
+                      <Text style={styles.instructions}>
+                        {assignment.instructions}
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -455,32 +540,68 @@ const AssignmentDetails = ({ navigation, route }) => {
             {/* ✅ Professional Quick Stats */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="bar-chart-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="bar-chart-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Submission Overview</Text>
               </View>
 
               <View style={styles.statsContainer}>
                 <View style={styles.primaryStatCard}>
                   <LinearGradient
-                    colors={[TEACHER_COLORS.primary, TEACHER_COLORS.primaryLight]}
+                    colors={[
+                      TEACHER_COLORS.primary,
+                      TEACHER_COLORS.primaryLight,
+                    ]}
                     style={styles.primaryStatGradient}
                   >
-                    <Text style={styles.primaryStatValue}>{assignment.submissionsCount}</Text>
+                    <Text style={styles.primaryStatValue}>
+                      {assignment.submissionsCount}
+                    </Text>
                     <Text style={styles.primaryStatLabel}>Total Students</Text>
                   </LinearGradient>
                 </View>
 
                 <View style={styles.statsGrid}>
-                  <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.success }]}>
-                    <Text style={styles.statValue}>{assignment.gradedCount}</Text>
+                  <View
+                    style={[
+                      styles.statCard,
+                      { borderLeftColor: TEACHER_COLORS.success },
+                    ]}
+                  >
+                    <Text style={styles.statValue}>
+                      {assignment.gradedCount}
+                    </Text>
                     <Text style={styles.statLabel}>Graded</Text>
                   </View>
-                  <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.warning }]}>
-                    <Text style={styles.statValue}>{submissions.filter(s => s.status === 'submitted').length}</Text>
+                  <View
+                    style={[
+                      styles.statCard,
+                      { borderLeftColor: TEACHER_COLORS.warning },
+                    ]}
+                  >
+                    <Text style={styles.statValue}>
+                      {
+                        submissions.filter((s) => s.status === 'submitted')
+                          .length
+                      }
+                    </Text>
                     <Text style={styles.statLabel}>Pending</Text>
                   </View>
-                  <View style={[styles.statCard, { borderLeftColor: TEACHER_COLORS.error }]}>
-                    <Text style={styles.statValue}>{submissions.filter(s => s.status === 'not_submitted').length}</Text>
+                  <View
+                    style={[
+                      styles.statCard,
+                      { borderLeftColor: TEACHER_COLORS.error },
+                    ]}
+                  >
+                    <Text style={styles.statValue}>
+                      {
+                        submissions.filter((s) => s.status === 'not_submitted')
+                          .length
+                      }
+                    </Text>
                     <Text style={styles.statLabel}>Missing</Text>
                   </View>
                 </View>
@@ -488,7 +609,9 @@ const AssignmentDetails = ({ navigation, route }) => {
                 <View style={styles.progressContainer}>
                   <View style={styles.progressHeader}>
                     <Text style={styles.progressLabel}>Grading Progress</Text>
-                    <Text style={styles.progressValue}>{getProgressPercentage().toFixed(0)}%</Text>
+                    <Text style={styles.progressValue}>
+                      {getProgressPercentage().toFixed(0)}%
+                    </Text>
                   </View>
                   <View style={styles.progressBar}>
                     <View
@@ -497,19 +620,25 @@ const AssignmentDetails = ({ navigation, route }) => {
                         {
                           width: `${getProgressPercentage()}%`,
                           backgroundColor: TEACHER_COLORS.success,
-                        }
+                        },
                       ]}
                     />
                   </View>
                   <Text style={styles.progressText}>
-                    {assignment.gradedCount} of {assignment.submissionsCount} submissions graded
+                    {assignment.gradedCount} of {assignment.submissionsCount}{' '}
+                    submissions graded
                   </Text>
                 </View>
 
                 {assignment.averageGrade > 0 && (
                   <View style={styles.averageContainer}>
                     <Text style={styles.averageLabel}>Class Average</Text>
-                    <Text style={[styles.averageValue, { color: getGradeColor(assignment.averageGrade, 100) }]}>
+                    <Text
+                      style={[
+                        styles.averageValue,
+                        { color: getGradeColor(assignment.averageGrade, 100) },
+                      ]}
+                    >
                       {assignment.averageGrade.toFixed(1)}%
                     </Text>
                   </View>
@@ -520,49 +649,87 @@ const AssignmentDetails = ({ navigation, route }) => {
             {/* ✅ Professional Quick Actions */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="flash-outline" size={24} color={TEACHER_COLORS.primary} />
+                <Ionicons
+                  name="flash-outline"
+                  size={24}
+                  color={TEACHER_COLORS.primary}
+                />
                 <Text style={styles.sectionTitle}>Quick Actions</Text>
               </View>
 
               <View style={styles.actionsGrid}>
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: COLORS.teacherPalette.subjects.science }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: COLORS.teacherPalette.subjects.science },
+                  ]}
                   onPress={() => setActiveTab('submissions')}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="document-outline" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="document-outline"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>View Submissions</Text>
-                  <Text style={styles.actionButtonSubtext}>Review student work</Text>
+                  <Text style={styles.actionButtonSubtext}>
+                    Review student work
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.success }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: TEACHER_COLORS.success },
+                  ]}
                   onPress={navigateToEditAssignment}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="create-outline" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="create-outline"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>Edit Assignment</Text>
                   <Text style={styles.actionButtonSubtext}>Modify details</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.warning }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: TEACHER_COLORS.warning },
+                  ]}
                   onPress={publishAssignment}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="send-outline" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="send-outline"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>Publish Update</Text>
-                  <Text style={styles.actionButtonSubtext}>Notify students</Text>
+                  <Text style={styles.actionButtonSubtext}>
+                    Notify students
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: TEACHER_COLORS.error }]}
+                  style={[
+                    styles.actionButton,
+                    { backgroundColor: TEACHER_COLORS.error },
+                  ]}
                   onPress={deleteAssignment}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="trash-outline" size={24} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="trash-outline"
+                    size={24}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                   <Text style={styles.actionButtonText}>Delete</Text>
-                  <Text style={styles.actionButtonSubtext}>Remove assignment</Text>
+                  <Text style={styles.actionButtonSubtext}>
+                    Remove assignment
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -573,8 +740,14 @@ const AssignmentDetails = ({ navigation, route }) => {
         {activeTab === 'submissions' && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="document-outline" size={24} color={TEACHER_COLORS.primary} />
-              <Text style={styles.sectionTitle}>Student Submissions ({submissions.length})</Text>
+              <Ionicons
+                name="document-outline"
+                size={24}
+                color={TEACHER_COLORS.primary}
+              />
+              <Text style={styles.sectionTitle}>
+                Student Submissions ({submissions.length})
+              </Text>
             </View>
 
             {submissions.map((submission) => (
@@ -586,13 +759,20 @@ const AssignmentDetails = ({ navigation, route }) => {
               >
                 <View style={styles.submissionHeader}>
                   <View style={styles.submissionStudentInfo}>
-                    <Text style={styles.studentName}>{submission.studentName}</Text>
+                    <Text style={styles.studentName}>
+                      {submission.studentName}
+                    </Text>
                     {submission.submittedAt ? (
                       <Text style={styles.submissionDate}>
                         Submitted: {formatDate(submission.submittedAt)}
                       </Text>
                     ) : (
-                      <Text style={[styles.submissionDate, { color: TEACHER_COLORS.error }]}>
+                      <Text
+                        style={[
+                          styles.submissionDate,
+                          { color: TEACHER_COLORS.error },
+                        ]}
+                      >
                         Not submitted
                       </Text>
                     )}
@@ -604,23 +784,37 @@ const AssignmentDetails = ({ navigation, route }) => {
                   </View>
 
                   <View style={styles.submissionStatus}>
-                    <View style={[
-                      styles.statusBadge,
-                      { backgroundColor: getStatusColor(submission.status) }
-                    ]}>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: getStatusColor(submission.status) },
+                      ]}
+                    >
                       <Ionicons
                         name={getStatusIcon(submission.status)}
                         size={14}
                         color={TEACHER_COLORS.textWhite}
                       />
                       <Text style={styles.statusText}>
-                        {submission.status === 'not_submitted' ? 'Missing' :
-                         submission.status === 'submitted' ? 'Pending' : 'Graded'}
+                        {submission.status === 'not_submitted'
+                          ? 'Missing'
+                          : submission.status === 'submitted'
+                          ? 'Pending'
+                          : 'Graded'}
                       </Text>
                     </View>
                     {submission.isLate && (
-                      <View style={[styles.statusBadge, { backgroundColor: TEACHER_COLORS.error }]}>
-                        <Ionicons name="warning" size={14} color={TEACHER_COLORS.textWhite} />
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          { backgroundColor: TEACHER_COLORS.error },
+                        ]}
+                      >
+                        <Ionicons
+                          name="warning"
+                          size={14}
+                          color={TEACHER_COLORS.textWhite}
+                        />
                         <Text style={styles.statusText}>Late</Text>
                       </View>
                     )}
@@ -631,23 +825,41 @@ const AssignmentDetails = ({ navigation, route }) => {
                   <View style={styles.gradeSection}>
                     {submission.grade !== null ? (
                       <View style={styles.gradeDisplay}>
-                        <Text style={[
-                          styles.gradeValue,
-                          { color: getGradeColor(submission.grade, assignment.totalPoints) }
-                        ]}>
+                        <Text
+                          style={[
+                            styles.gradeValue,
+                            {
+                              color: getGradeColor(
+                                submission.grade,
+                                assignment.totalPoints,
+                              ),
+                            },
+                          ]}
+                        >
                           {submission.grade}/{assignment.totalPoints}
                         </Text>
                         <Text style={styles.gradePercentage}>
-                          ({((submission.grade / assignment.totalPoints) * 100).toFixed(0)}%)
+                          (
+                          {(
+                            (submission.grade / assignment.totalPoints) *
+                            100
+                          ).toFixed(0)}
+                          %)
                         </Text>
                       </View>
                     ) : (
                       <Text style={styles.notGradedText}>
-                        {submission.status === 'not_submitted' ? 'No submission' : 'Not graded yet'}
+                        {submission.status === 'not_submitted'
+                          ? 'No submission'
+                          : 'Not graded yet'}
                       </Text>
                     )}
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={TEACHER_COLORS.textMuted} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={TEACHER_COLORS.textMuted}
+                  />
                 </View>
 
                 {submission.feedback && (
@@ -662,9 +874,15 @@ const AssignmentDetails = ({ navigation, route }) => {
 
             {submissions.length === 0 && (
               <View style={styles.emptyState}>
-                <Ionicons name="document-outline" size={48} color={TEACHER_COLORS.textMuted} />
+                <Ionicons
+                  name="document-outline"
+                  size={48}
+                  color={TEACHER_COLORS.textMuted}
+                />
                 <Text style={styles.emptyStateText}>No submissions yet</Text>
-                <Text style={styles.emptyStateSubtext}>Students haven't submitted their work</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Students haven't submitted their work
+                </Text>
               </View>
             )}
           </View>
@@ -674,40 +892,83 @@ const AssignmentDetails = ({ navigation, route }) => {
         {activeTab === 'analytics' && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="bar-chart-outline" size={24} color={TEACHER_COLORS.primary} />
+              <Ionicons
+                name="bar-chart-outline"
+                size={24}
+                color={TEACHER_COLORS.primary}
+              />
               <Text style={styles.sectionTitle}>Detailed Analytics</Text>
             </View>
 
             <View style={styles.analyticsGrid}>
-              <View style={[styles.analyticsCard, { borderLeftColor: TEACHER_COLORS.success }]}>
-                <Text style={styles.analyticsValue}>{submissions.filter(s => s.status === 'graded').length}</Text>
+              <View
+                style={[
+                  styles.analyticsCard,
+                  { borderLeftColor: TEACHER_COLORS.success },
+                ]}
+              >
+                <Text style={styles.analyticsValue}>
+                  {submissions.filter((s) => s.status === 'graded').length}
+                </Text>
                 <Text style={styles.analyticsLabel}>Completed</Text>
                 <Text style={styles.analyticsSubtext}>Graded submissions</Text>
               </View>
 
-              <View style={[styles.analyticsCard, { borderLeftColor: TEACHER_COLORS.warning }]}>
-                <Text style={styles.analyticsValue}>{submissions.filter(s => s.status === 'submitted').length}</Text>
+              <View
+                style={[
+                  styles.analyticsCard,
+                  { borderLeftColor: TEACHER_COLORS.warning },
+                ]}
+              >
+                <Text style={styles.analyticsValue}>
+                  {submissions.filter((s) => s.status === 'submitted').length}
+                </Text>
                 <Text style={styles.analyticsLabel}>Pending Review</Text>
                 <Text style={styles.analyticsSubtext}>Awaiting grading</Text>
               </View>
 
-              <View style={[styles.analyticsCard, { borderLeftColor: TEACHER_COLORS.error }]}>
-                <Text style={styles.analyticsValue}>{submissions.filter(s => s.status === 'not_submitted').length}</Text>
+              <View
+                style={[
+                  styles.analyticsCard,
+                  { borderLeftColor: TEACHER_COLORS.error },
+                ]}
+              >
+                <Text style={styles.analyticsValue}>
+                  {
+                    submissions.filter((s) => s.status === 'not_submitted')
+                      .length
+                  }
+                </Text>
                 <Text style={styles.analyticsLabel}>Missing</Text>
                 <Text style={styles.analyticsSubtext}>No submission</Text>
               </View>
 
-              <View style={[styles.analyticsCard, { borderLeftColor: COLORS.teacherPalette.subjects.mathematics }]}>
-                <Text style={styles.analyticsValue}>{submissions.filter(s => s.isLate).length}</Text>
+              <View
+                style={[
+                  styles.analyticsCard,
+                  {
+                    borderLeftColor: COLORS.teacherPalette.subjects.mathematics,
+                  },
+                ]}
+              >
+                <Text style={styles.analyticsValue}>
+                  {submissions.filter((s) => s.isLate).length}
+                </Text>
                 <Text style={styles.analyticsLabel}>Late Submissions</Text>
                 <Text style={styles.analyticsSubtext}>Past due date</Text>
               </View>
             </View>
 
             <View style={styles.analyticsNote}>
-              <Ionicons name="information-circle-outline" size={20} color={TEACHER_COLORS.primary} />
+              <Ionicons
+                name="information-circle-outline"
+                size={20}
+                color={TEACHER_COLORS.primary}
+              />
               <Text style={styles.analyticsNoteText}>
-                Advanced analytics including grade distribution, submission timeline, and performance trends will be available in the next update.
+                Advanced analytics including grade distribution, submission
+                timeline, and performance trends will be available in the next
+                update.
               </Text>
             </View>
           </View>

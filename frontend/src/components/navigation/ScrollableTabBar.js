@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
+
 import {
   View,
   Text,
@@ -22,9 +23,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: screenWidth } = Dimensions.get('window');
 
+// Export a constant for the default tab bar height
+export const TAB_BAR_HEIGHT = 68;
+
 const ScrollableTabBar = ({
   state,
-  descriptors,
   navigation,
   theme = {},
   config = {},
@@ -75,7 +78,7 @@ const ScrollableTabBar = ({
       minTabWidth: 75,
       spacing: 2,
       padding: 8,
-      height: 68,
+      height: TAB_BAR_HEIGHT,
       borderRadius: 12,
       iconSize: { focused: 24, unfocused: 20 },
       fontSize: { focused: 10, unfocused: 9 },
@@ -264,12 +267,23 @@ const ScrollableTabBar = ({
   );
 
   // ✅ Centralized Icon System for all roles
-  // Updated adminIcons for SuperAdminTabNavigator
-  const adminIcons = {
-    Dashboard: { focused: 'speedometer', unfocused: 'speedometer-outline' },
-    Schools: { focused: 'business', unfocused: 'business-outline' },
+  // Dedicated icon sets for each role
+  const superAdminIcons = {
+    Dashboard: { focused: 'grid', unfocused: 'grid-outline' },
+    Schools: { focused: 'school', unfocused: 'school-outline' },
+    Invitations: { focused: 'mail', unfocused: 'mail-outline' },
     RoleMatrix: { focused: 'key', unfocused: 'key-outline' },
     Logs: { focused: 'list', unfocused: 'list-outline' },
+    Settings: { focused: 'settings', unfocused: 'settings-outline' },
+  };
+  const adminIcons = {
+    Dashboard: { focused: 'speedometer', unfocused: 'speedometer-outline' },
+    Invitations: { focused: 'mail', unfocused: 'mail-outline' },
+    'User Management': { focused: 'people', unfocused: 'people-outline' },
+    Permissions: { focused: 'key', unfocused: 'key-outline' },
+    'Classes & Sections': { focused: 'layers', unfocused: 'layers-outline' },
+    Announcements: { focused: 'megaphone', unfocused: 'megaphone-outline' },
+    Reports: { focused: 'document-text', unfocused: 'document-text-outline' },
     Settings: { focused: 'settings', unfocused: 'settings-outline' },
   };
   const teacherIcons = {
@@ -301,7 +315,8 @@ const ScrollableTabBar = ({
   const getTabIcon = useCallback(
     (routeName, isFocused) => {
       let iconSet = teacherIcons;
-      if (role === 'Student') iconSet = studentIcons;
+      if (role === 'SuperAdmin') iconSet = superAdminIcons;
+      else if (role === 'Student') iconSet = studentIcons;
       else if (role === 'admin' || role === 'Admin') iconSet = adminIcons;
 
       if (customIcons[routeName]) {
@@ -796,5 +811,8 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
 });
+
+// Attach the height as a static property for easy import elsewhere
+ScrollableTabBar.TAB_BAR_HEIGHT = TAB_BAR_HEIGHT;
 
 export default React.memo(ScrollableTabBar);

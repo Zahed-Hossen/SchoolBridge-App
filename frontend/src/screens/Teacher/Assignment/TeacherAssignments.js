@@ -15,13 +15,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import SimpleHeader from '../../../components/navigation/SimpleHeader';
-// ✅ Import Professional Theme System
+import { useAuth } from '../../../context/AuthContext';
+import teacherService from '../../../api/services/teacherService';
+
 import {
   COLORS,
   TEACHER_COLORS,
   TEACHER_THEME,
   SPACING,
-  BORDER_RADIUS
+  BORDER_RADIUS,
 } from '../../../constants/theme';
 
 const TeacherAssignments = ({ navigation }) => {
@@ -31,89 +33,83 @@ const TeacherAssignments = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const { user } = useAuth();
 
-  // ✅ API Integration (Commented for Backend Development)
+  // ✅ API Integration (Real Backend)
   const loadAssignments = async (isRefresh = false) => {
+    if (!user || !user.id) {
+      setAssignments([]);
+      setLoading(false);
+      setRefreshing(false);
+      console.log('[TeacherAssignments] No user or user.id:', user);
+      return;
+    }
     try {
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
-
-      // 🔄 TODO: Replace with actual API calls
-      /*
-      const response = await fetch('/api/teacher/assignments', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setAssignments(data);
-      */
-
-      // ✅ Minimal Mock Data (for development)
-      setTimeout(() => {
-        setAssignments(getMockAssignments());
-        setLoading(false);
-        setRefreshing(false);
-      }, 800);
-
+      // Fetch assignments from /api/teachers/:teacherId/assignments
+      const response = await teacherService.getTeacherAssignments(user.id);
+      console.log('[TeacherAssignments] API response:', response);
+      // API returns { success, count, data: [assignments] }
+      let assignmentsArr = Array.isArray(response?.data) ? response.data : [];
+      console.log(
+        '[TeacherAssignments] assignmentsArr after API:',
+        assignmentsArr,
+      );
+      // Map backend fields to frontend expected fields
+      assignmentsArr = assignmentsArr.map((a) => ({
+        id: a._id,
+        title: a.title,
+        description: a.description,
+        dueDate: a.dueDate,
+        className: a.class?.name || 'Unknown',
+        classId: a.class?._id || a.class || 'Unknown',
+        type: a.type || 'assignment',
+        totalPoints: a.maxPoints || a.totalPoints || 100,
+        submissionsCount: Array.isArray(a.submissions)
+          ? a.submissions.length
+          : 0,
+        gradedCount: Array.isArray(a.submissions)
+          ? a.submissions.filter((s) => typeof s.grade === 'number').length
+          : 0,
+        averageGrade:
+          Array.isArray(a.submissions) && a.submissions.length > 0
+            ? a.submissions.reduce((sum, s) => sum + (s.grade || 0), 0) /
+                a.submissions.filter((s) => typeof s.grade === 'number')
+                  .length || 1
+            : 0,
+        status: a.isPublished ? 'active' : 'draft',
+        createdDate: a.createdAt,
+        instructions: a.instructions || '',
+      }));
+      console.log(
+        '[TeacherAssignments] assignmentsArr after mapping:',
+        assignmentsArr,
+      );
+      setAssignments(assignmentsArr);
     } catch (error) {
       console.error('❌ Error loading assignments:', error);
       Alert.alert('Error', 'Failed to load assignments');
+    } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
-
-  // ✅ Minimal Mock Data (reduced to essentials)
-  const getMockAssignments = () => [
-    {
-      id: 1,
-      title: 'Quadratic Functions Quiz',
-      type: 'quiz',
-      className: 'Calculus AP',
-      dueDate: '2025-08-10T23:59:00Z',
-      totalPoints: 100,
-      submissionsCount: 28,
-      gradedCount: 18,
-      status: 'active',
-    },
-    {
-      id: 2,
-      title: 'Physics Lab Report',
-      type: 'project',
-      className: 'Physics 11B',
-      dueDate: '2025-08-15T23:59:00Z',
-      totalPoints: 150,
-      submissionsCount: 24,
-      gradedCount: 8,
-      status: 'active',
-    },
-    {
-      id: 3,
-      title: 'Algebra Review Test',
-      type: 'test',
-      className: 'Algebra II',
-      dueDate: '2025-08-05T23:59:00Z',
-      totalPoints: 120,
-      submissionsCount: 26,
-      gradedCount: 26,
-      status: 'completed',
-    },
-  ];
 
   // ✅ Professional Navigation Handlers
   const navigateToCreateAssignment = useCallback(() => {
     navigation.navigate('CreateAssignment');
   }, [navigation]);
 
-  const navigateToAssignmentDetails = useCallback((assignment) => {
-    navigation.navigate('AssignmentDetails', {
-      assignmentId: assignment.id,
-      assignment: assignment,
-    });
-  }, [navigation]);
+  const navigateToAssignmentDetails = useCallback(
+    (assignment) => {
+      navigation.navigate('AssignmentDetails', {
+        assignmentId: assignment.id,
+        assignment: assignment,
+      });
+    },
+    [navigation],
+  );
 
   // ✅ Professional Utility Functions
   const formatDueDate = useCallback((dateString) => {
@@ -134,7 +130,8 @@ const TeacherAssignments = ({ navigation }) => {
 
     if (assignment.status === 'completed') return TEACHER_COLORS.success;
     if (dueDate < now) return TEACHER_COLORS.error;
-    if (assignment.gradedCount < assignment.submissionsCount) return TEACHER_COLORS.warning;
+    if (assignment.gradedCount < assignment.submissionsCount)
+      return TEACHER_COLORS.warning;
     return TEACHER_COLORS.primary;
   }, []);
 
@@ -161,52 +158,64 @@ const TeacherAssignments = ({ navigation }) => {
   }, []);
 
   // ✅ Professional Filter Logic
-  const filteredAssignments = assignments.filter(assignment => {
-    const matchesSearch = assignment.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         assignment.className.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredAssignments = assignments.filter((assignment) => {
+    const matchesSearch =
+      assignment.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      assignment.className.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (filterType === 'all') return matchesSearch;
-    if (filterType === 'active') return matchesSearch && assignment.status === 'active';
-    if (filterType === 'overdue') return matchesSearch && new Date(assignment.dueDate) < new Date();
-    if (filterType === 'pending') return matchesSearch && assignment.gradedCount < assignment.submissionsCount;
-    if (filterType === 'completed') return matchesSearch && assignment.status === 'completed';
+    if (filterType === 'active')
+      return matchesSearch && assignment.status === 'active';
+    if (filterType === 'overdue')
+      return matchesSearch && new Date(assignment.dueDate) < new Date();
+    if (filterType === 'pending')
+      return (
+        matchesSearch && assignment.gradedCount < assignment.submissionsCount
+      );
+    if (filterType === 'completed')
+      return matchesSearch && assignment.status === 'completed';
 
     return matchesSearch;
   });
 
   // ✅ Professional Filter Configuration
-  const getFilterData = useCallback(() => [
-    {
-      key: 'all',
-      label: 'All',
-      count: assignments.length,
-      icon: 'list-outline',
-    },
-    {
-      key: 'active',
-      label: 'Active',
-      count: assignments.filter((a) => a.status === 'active').length,
-      icon: 'play-circle-outline',
-    },
-    {
-      key: 'pending',
-      label: 'Pending',
-      count: assignments.filter((a) => a.gradedCount < a.submissionsCount).length,
-      icon: 'time-outline',
-    },
-    {
-      key: 'overdue',
-      label: 'Overdue',
-      count: assignments.filter((a) => new Date(a.dueDate) < new Date()).length,
-      icon: 'warning-outline',
-    },
-    {
-      key: 'completed',
-      label: 'Completed',
-      count: assignments.filter((a) => a.status === 'completed').length,
-      icon: 'checkmark-circle-outline',
-    },
-  ], [assignments]);
+  const getFilterData = useCallback(
+    () => [
+      {
+        key: 'all',
+        label: 'All',
+        count: assignments.length,
+        icon: 'list-outline',
+      },
+      {
+        key: 'active',
+        label: 'Active',
+        count: assignments.filter((a) => a.status === 'active').length,
+        icon: 'play-circle-outline',
+      },
+      {
+        key: 'pending',
+        label: 'Pending',
+        count: assignments.filter((a) => a.gradedCount < a.submissionsCount)
+          .length,
+        icon: 'time-outline',
+      },
+      {
+        key: 'overdue',
+        label: 'Overdue',
+        count: assignments.filter((a) => new Date(a.dueDate) < new Date())
+          .length,
+        icon: 'warning-outline',
+      },
+      {
+        key: 'completed',
+        label: 'Completed',
+        count: assignments.filter((a) => a.status === 'completed').length,
+        icon: 'checkmark-circle-outline',
+      },
+    ],
+    [assignments],
+  );
 
   // ✅ Professional Header Actions
   const HeaderRightComponent = () => (
@@ -223,7 +232,7 @@ const TeacherAssignments = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       loadAssignments();
-    }, [])
+    }, []),
   );
 
   const onRefresh = useCallback(() => {
@@ -239,7 +248,7 @@ const TeacherAssignments = ({ navigation }) => {
           subtitle="Loading..."
           navigation={navigation}
           primaryColor={TEACHER_COLORS.primary}
-          rightComponent={<HeaderRightComponent />}
+          rightAction={<HeaderRightComponent />}
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={TEACHER_COLORS.primary} />
@@ -257,13 +266,17 @@ const TeacherAssignments = ({ navigation }) => {
         subtitle={`${assignments.length} assignments`}
         navigation={navigation}
         primaryColor={TEACHER_COLORS.primary}
-        rightComponent={<HeaderRightComponent />}
+        rightAction={<HeaderRightComponent />}
       />
 
       {/* ✅ Professional Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={20} color={TEACHER_COLORS.textMuted} />
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color={TEACHER_COLORS.textMuted}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Search assignments or classes..."
@@ -274,7 +287,11 @@ const TeacherAssignments = ({ navigation }) => {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color={TEACHER_COLORS.textMuted} />
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={TEACHER_COLORS.textMuted}
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -293,12 +310,14 @@ const TeacherAssignments = ({ navigation }) => {
             style={[
               styles.filterChip,
               {
-                backgroundColor: filterType === filter.key ?
-                  TEACHER_COLORS.primary :
-                  TEACHER_COLORS.surface,
-                borderColor: filterType === filter.key ?
-                  TEACHER_COLORS.primary :
-                  COLORS.teacherPalette.neutral.lighter,
+                backgroundColor:
+                  filterType === filter.key
+                    ? TEACHER_COLORS.primary
+                    : TEACHER_COLORS.surface,
+                borderColor:
+                  filterType === filter.key
+                    ? TEACHER_COLORS.primary
+                    : COLORS.teacherPalette.neutral.lighter,
               },
             ]}
             onPress={() => setFilterType(filter.key)}
@@ -308,39 +327,48 @@ const TeacherAssignments = ({ navigation }) => {
               <Ionicons
                 name={filter.icon}
                 size={16}
-                color={filterType === filter.key ?
-                  TEACHER_COLORS.textWhite :
-                  TEACHER_COLORS.textMuted}
+                color={
+                  filterType === filter.key
+                    ? TEACHER_COLORS.textWhite
+                    : TEACHER_COLORS.textMuted
+                }
               />
               <Text
                 style={[
                   styles.filterText,
                   {
-                    color: filterType === filter.key ?
-                      TEACHER_COLORS.textWhite :
-                      TEACHER_COLORS.text,
+                    color:
+                      filterType === filter.key
+                        ? TEACHER_COLORS.textWhite
+                        : TEACHER_COLORS.text,
                   },
                 ]}
               >
                 {filter.label}
               </Text>
               {filter.count > 0 && (
-                <View style={[
-                  styles.filterBadge,
-                  {
-                    backgroundColor: filterType === filter.key ?
-                      TEACHER_COLORS.textWhite :
-                      TEACHER_COLORS.primary,
-                  }
-                ]}>
-                  <Text style={[
-                    styles.filterBadgeText,
+                <View
+                  style={[
+                    styles.filterBadge,
                     {
-                      color: filterType === filter.key ?
-                        TEACHER_COLORS.primary :
-                        TEACHER_COLORS.textWhite,
-                    }
-                  ]}>
+                      backgroundColor:
+                        filterType === filter.key
+                          ? TEACHER_COLORS.textWhite
+                          : TEACHER_COLORS.primary,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.filterBadgeText,
+                      {
+                        color:
+                          filterType === filter.key
+                            ? TEACHER_COLORS.primary
+                            : TEACHER_COLORS.textWhite,
+                      },
+                    ]}
+                  >
                     {filter.count}
                   </Text>
                 </View>
@@ -371,13 +399,23 @@ const TeacherAssignments = ({ navigation }) => {
           activeOpacity={0.8}
         >
           <View style={styles.createButtonIcon}>
-            <Ionicons name="add-circle-outline" size={28} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="add-circle-outline"
+              size={28}
+              color={TEACHER_COLORS.primary}
+            />
           </View>
           <View style={styles.createButtonContent}>
             <Text style={styles.createButtonTitle}>Create New Assignment</Text>
-            <Text style={styles.createButtonSubtitle}>Add homework, quizzes, tests & projects</Text>
+            <Text style={styles.createButtonSubtitle}>
+              Add homework, quizzes, tests & projects
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={TEACHER_COLORS.textMuted} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={TEACHER_COLORS.textMuted}
+          />
         </TouchableOpacity>
 
         {/* ✅ Professional Assignments List */}
@@ -385,7 +423,7 @@ const TeacherAssignments = ({ navigation }) => {
           <View style={styles.emptyState}>
             <View style={styles.emptyStateIcon}>
               <Ionicons
-                name={searchQuery ? "search-outline" : "document-text-outline"}
+                name={searchQuery ? 'search-outline' : 'document-text-outline'}
                 size={48}
                 color={TEACHER_COLORS.textMuted}
               />
@@ -396,8 +434,7 @@ const TeacherAssignments = ({ navigation }) => {
             <Text style={styles.emptyStateText}>
               {searchQuery
                 ? 'Try adjusting your search or filter'
-                : 'Create your first assignment to get started'
-              }
+                : 'Create your first assignment to get started'}
             </Text>
             {!searchQuery && (
               <TouchableOpacity
@@ -405,7 +442,9 @@ const TeacherAssignments = ({ navigation }) => {
                 onPress={navigateToCreateAssignment}
                 activeOpacity={0.8}
               >
-                <Text style={styles.emptyStateButtonText}>Create Assignment</Text>
+                <Text style={styles.emptyStateButtonText}>
+                  Create Assignment
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -421,10 +460,14 @@ const TeacherAssignments = ({ navigation }) => {
                 <View style={styles.assignmentCardContent}>
                   {/* ✅ Assignment Header */}
                   <View style={styles.assignmentHeader}>
-                    <View style={[
-                      styles.assignmentTypeIcon,
-                      { backgroundColor: `${getTypeColor(assignment.type)}15` }
-                    ]}>
+                    <View
+                      style={[
+                        styles.assignmentTypeIcon,
+                        {
+                          backgroundColor: `${getTypeColor(assignment.type)}15`,
+                        },
+                      ]}
+                    >
                       <Ionicons
                         name={getTypeIcon(assignment.type)}
                         size={20}
@@ -436,15 +479,20 @@ const TeacherAssignments = ({ navigation }) => {
                         {assignment.title}
                       </Text>
                       <View style={styles.assignmentMeta}>
-                        <Text style={styles.assignmentClass}>{assignment.className}</Text>
+                        <Text style={styles.assignmentClass}>
+                          {assignment.className}
+                        </Text>
                         <Text style={styles.assignmentSeparator}>•</Text>
                         <Text style={styles.assignmentType}>
-                          {assignment.type.charAt(0).toUpperCase() + assignment.type.slice(1)}
+                          {assignment.type.charAt(0).toUpperCase() +
+                            assignment.type.slice(1)}
                         </Text>
                       </View>
                     </View>
                     <View style={styles.assignmentPoints}>
-                      <Text style={styles.pointsValue}>{assignment.totalPoints}</Text>
+                      <Text style={styles.pointsValue}>
+                        {assignment.totalPoints}
+                      </Text>
                       <Text style={styles.pointsLabel}>pts</Text>
                     </View>
                   </View>
@@ -457,10 +505,12 @@ const TeacherAssignments = ({ navigation }) => {
                         size={14}
                         color={getStatusColor(assignment)}
                       />
-                      <Text style={[
-                        styles.assignmentDue,
-                        { color: getStatusColor(assignment) }
-                      ]}>
+                      <Text
+                        style={[
+                          styles.assignmentDue,
+                          { color: getStatusColor(assignment) },
+                        ]}
+                      >
                         {formatDueDate(assignment.dueDate)}
                       </Text>
                     </View>
@@ -468,12 +518,18 @@ const TeacherAssignments = ({ navigation }) => {
                     <View style={styles.progressContainer}>
                       <View style={styles.progressInfo}>
                         <Text style={styles.progressText}>
-                          Progress: {assignment.gradedCount}/{assignment.submissionsCount}
+                          Progress: {assignment.gradedCount}/
+                          {assignment.submissionsCount}
                         </Text>
                         <Text style={styles.progressPercentage}>
                           {assignment.submissionsCount > 0
-                            ? Math.round((assignment.gradedCount / assignment.submissionsCount) * 100)
-                            : 0}%
+                            ? Math.round(
+                                (assignment.gradedCount /
+                                  assignment.submissionsCount) *
+                                  100,
+                              )
+                            : 0}
+                          %
                         </Text>
                       </View>
                       <View style={styles.progressBar}>
@@ -481,9 +537,14 @@ const TeacherAssignments = ({ navigation }) => {
                           style={[
                             styles.progressFill,
                             {
-                              width: assignment.submissionsCount > 0
-                                ? `${(assignment.gradedCount / assignment.submissionsCount) * 100}%`
-                                : '0%',
+                              width:
+                                assignment.submissionsCount > 0
+                                  ? `${
+                                      (assignment.gradedCount /
+                                        assignment.submissionsCount) *
+                                      100
+                                    }%`
+                                  : '0%',
                               backgroundColor: getStatusColor(assignment),
                             },
                           ]}
@@ -496,25 +557,58 @@ const TeacherAssignments = ({ navigation }) => {
                   <View style={styles.assignmentFooter}>
                     <View style={styles.statusIndicators}>
                       {assignment.status === 'completed' && (
-                        <View style={[styles.statusBadge, { backgroundColor: TEACHER_COLORS.success }]}>
-                          <Ionicons name="checkmark" size={12} color={TEACHER_COLORS.textWhite} />
+                        <View
+                          style={[
+                            styles.statusBadge,
+                            { backgroundColor: TEACHER_COLORS.success },
+                          ]}
+                        >
+                          <Ionicons
+                            name="checkmark"
+                            size={12}
+                            color={TEACHER_COLORS.textWhite}
+                          />
                           <Text style={styles.statusBadgeText}>Completed</Text>
                         </View>
                       )}
-                      {new Date(assignment.dueDate) < new Date() && assignment.status !== 'completed' && (
-                        <View style={[styles.statusBadge, { backgroundColor: TEACHER_COLORS.error }]}>
-                          <Ionicons name="warning" size={12} color={TEACHER_COLORS.textWhite} />
-                          <Text style={styles.statusBadgeText}>Overdue</Text>
-                        </View>
-                      )}
-                      {assignment.gradedCount < assignment.submissionsCount && assignment.status === 'active' && (
-                        <View style={[styles.statusBadge, { backgroundColor: TEACHER_COLORS.warning }]}>
-                          <Ionicons name="time" size={12} color={TEACHER_COLORS.textWhite} />
-                          <Text style={styles.statusBadgeText}>Pending</Text>
-                        </View>
-                      )}
+                      {new Date(assignment.dueDate) < new Date() &&
+                        assignment.status !== 'completed' && (
+                          <View
+                            style={[
+                              styles.statusBadge,
+                              { backgroundColor: TEACHER_COLORS.error },
+                            ]}
+                          >
+                            <Ionicons
+                              name="warning"
+                              size={12}
+                              color={TEACHER_COLORS.textWhite}
+                            />
+                            <Text style={styles.statusBadgeText}>Overdue</Text>
+                          </View>
+                        )}
+                      {assignment.gradedCount < assignment.submissionsCount &&
+                        assignment.status === 'active' && (
+                          <View
+                            style={[
+                              styles.statusBadge,
+                              { backgroundColor: TEACHER_COLORS.warning },
+                            ]}
+                          >
+                            <Ionicons
+                              name="time"
+                              size={12}
+                              color={TEACHER_COLORS.textWhite}
+                            />
+                            <Text style={styles.statusBadgeText}>Pending</Text>
+                          </View>
+                        )}
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color={TEACHER_COLORS.textMuted} />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={TEACHER_COLORS.textMuted}
+                    />
                   </View>
                 </View>
               </TouchableOpacity>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import teacherService from '../../api/services/teacherService';
 import {
   View,
   Text,
@@ -22,10 +24,11 @@ import {
   TEACHER_COLORS,
   TEACHER_THEME,
   SPACING,
-  BORDER_RADIUS
+  BORDER_RADIUS,
 } from '../../constants/theme';
 
 const TeacherDashboard = ({ navigation }) => {
+  const { user, isLoading: authLoading } = useAuth();
   // ✅ Professional State Management
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,72 +39,87 @@ const TeacherDashboard = ({ navigation }) => {
     notifications: [],
   });
 
-  // ✅ API Integration (Commented for Backend Development)
+  // ✅ API Integration: Fetch dashboard data from backend
   const fetchDashboardData = async () => {
+    if (!user || !user._id) return;
     try {
       setLoading(true);
+      // Fetch all classes for this teacher
+      const classes = await teacherService.getTeacherClasses(user._id);
+      // Calculate stats
+      const totalClasses = Array.isArray(classes) ? classes.length : 0;
+      let totalStudents = 0;
+      let pendingGrading = 0;
+      let todayAttendance = 0;
+      let recentClasses = [];
+      let upcomingAssignments = [];
 
-      // 🔄 TODO: Replace with actual API calls
-      /*
-      const response = await fetch('/api/teacher/dashboard', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json',
+      if (Array.isArray(classes) && classes.length > 0) {
+        // For each class, fetch students and assignments (if needed)
+        // For performance, only fetch for a few recent classes
+        recentClasses = classes.slice(0, 2).map((cls) => ({
+          id: cls._id,
+          name: cls.name,
+          subject: cls.subject,
+          students: Array.isArray(cls.students) ? cls.students.length : 0,
+          nextClass: cls.schedule?.nextClassTime || '',
+          room: cls.room || '',
+        }));
+
+        // Aggregate stats
+        for (const cls of classes) {
+          if (Array.isArray(cls.students)) {
+            totalStudents += cls.students.length;
+          }
+          // If assignments are available in class object, count pending grading
+          if (Array.isArray(cls.assignments)) {
+            pendingGrading += cls.assignments.filter(
+              (a) => a.status === 'pending',
+            ).length;
+            // Collect upcoming assignments (due in future)
+            const now = new Date();
+            const upcoming = cls.assignments.filter(
+              (a) => new Date(a.dueDate) > now,
+            );
+            upcomingAssignments.push(
+              ...upcoming.map((a) => ({
+                id: a._id,
+                title: a.title,
+                dueDate: a.dueDate,
+                submissions: a.submissionsCount || 0,
+                totalStudents: Array.isArray(cls.students)
+                  ? cls.students.length
+                  : 0,
+              })),
+            );
+          }
+          // Attendance: if attendance stats are available, average them
+          if (typeof cls.todayAttendance === 'number') {
+            todayAttendance += cls.todayAttendance;
+          }
+        }
+        if (
+          classes.length > 0 &&
+          typeof classes[0].todayAttendance === 'number'
+        ) {
+          todayAttendance = todayAttendance / classes.length;
+        }
+      }
+
+      setDashboardData({
+        stats: {
+          totalClasses,
+          totalStudents,
+          pendingGrading,
+          todayAttendance: todayAttendance
+            ? Number(todayAttendance.toFixed(1))
+            : 0,
         },
+        recentClasses,
+        upcomingAssignments,
+        notifications: [],
       });
-      const data = await response.json();
-      setDashboardData(data);
-      */
-
-      // ✅ Minimal Mock Data (for development)
-      setTimeout(() => {
-        setDashboardData({
-          stats: {
-            totalClasses: 4,
-            totalStudents: 89,
-            pendingGrading: 12,
-            todayAttendance: 94.2,
-          },
-          recentClasses: [
-            {
-              id: 1,
-              name: 'Calculus AP',
-              subject: 'Mathematics',
-              students: 28,
-              nextClass: 'Today, 10:00 AM',
-              room: 'Room 204',
-            },
-            {
-              id: 2,
-              name: 'Algebra II',
-              subject: 'Mathematics',
-              students: 24,
-              nextClass: 'Tomorrow, 2:00 PM',
-              room: 'Room 201',
-            },
-          ],
-          upcomingAssignments: [
-            {
-              id: 1,
-              title: 'Quadratic Functions Quiz',
-              dueDate: '2025-08-08',
-              submissions: 18,
-              totalStudents: 28,
-            },
-          ],
-          notifications: [
-            {
-              id: 1,
-              type: 'assignment',
-              message: 'New assignment submissions ready for review',
-              count: 5,
-            },
-          ],
-        });
-        setLoading(false);
-      }, 800);
-
+      setLoading(false);
     } catch (error) {
       console.error('Dashboard data fetch error:', error);
       Alert.alert('Error', 'Failed to load dashboard data');
@@ -113,7 +131,7 @@ const TeacherDashboard = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       fetchDashboardData();
-    }, [])
+    }, []),
   );
 
   // ✅ Professional Refresh Handler
@@ -124,29 +142,41 @@ const TeacherDashboard = ({ navigation }) => {
   }, []);
 
   // ✅ Professional Quick Actions
-  const handleQuickAction = useCallback((action) => {
-    const actions = {
-      assignments: () => navigation.navigate('TeacherAssignments'),
-      grading: () => navigation.navigate('GradingDashboard'),
-      classes: () => navigation.navigate('MyClasses'),
-      attendance: () => navigation.navigate('AttendanceTracker'),
-      analytics: () => navigation.navigate('Analytics'),
-      schedule: () => navigation.navigate('Schedule'),
-    };
+  const handleQuickAction = useCallback(
+    (action) => {
+      const actions = {
+        assignments: () => navigation.navigate('TeacherAssignments'),
+        grading: () => navigation.navigate('GradingDashboard'),
+        classes: () => navigation.navigate('MyClasses'),
+        attendance: () => navigation.navigate('AttendanceTracker'),
+        analytics: () => navigation.navigate('Analytics'),
+        schedule: () => navigation.navigate('Schedule'),
+      };
 
-    if (actions[action]) {
-      actions[action]();
-    } else {
-      console.log(`Action: ${action}`);
-    }
-  }, [navigation]);
+      if (actions[action]) {
+        actions[action]();
+      } else {
+        console.log(`Action: ${action}`);
+      }
+    },
+    [navigation],
+  );
 
   // ✅ Professional Loading State
   if (loading && !dashboardData.stats) {
     return (
       <View style={styles.container}>
-        <StatusBar backgroundColor={TEACHER_COLORS.primary} barStyle="light-content" translucent={false} />
-        <AppHeader title="SchoolBridge" subtitle="Welcome back" navigation={navigation} userRole="Teacher" />
+        <StatusBar
+          backgroundColor={TEACHER_COLORS.primary}
+          barStyle="light-content"
+          translucent={false}
+        />
+        <AppHeader
+          title="SchoolBridge"
+          subtitle="Welcome back"
+          navigation={navigation}
+          userRole="Teacher"
+        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={TEACHER_COLORS.primary} />
           <Text style={styles.loadingText}>Loading your dashboard...</Text>
@@ -189,7 +219,11 @@ const TeacherDashboard = ({ navigation }) => {
         {/* ✅ Professional Stats Overview */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="analytics-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="analytics-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Today's Overview</Text>
           </View>
 
@@ -204,32 +238,54 @@ const TeacherDashboard = ({ navigation }) => {
                 style={styles.statGradient}
               >
                 <View style={styles.statIcon}>
-                  <Ionicons name="school" size={28} color={TEACHER_COLORS.textWhite} />
+                  <Ionicons
+                    name="school"
+                    size={28}
+                    color={TEACHER_COLORS.textWhite}
+                  />
                 </View>
-                <Text style={styles.primaryStatValue}>{dashboardData.stats?.totalClasses || 0}</Text>
+                <Text style={styles.primaryStatValue}>
+                  {dashboardData.stats?.totalClasses || 0}
+                </Text>
                 <Text style={styles.primaryStatLabel}>Active Classes</Text>
               </LinearGradient>
             </TouchableOpacity>
 
             <View style={styles.statsGrid}>
               <TouchableOpacity
-                style={[styles.statCard, styles.secondaryStatCard, { borderLeftColor: TEACHER_COLORS.success }]}
+                style={[
+                  styles.statCard,
+                  styles.secondaryStatCard,
+                  { borderLeftColor: TEACHER_COLORS.success },
+                ]}
                 onPress={() => handleQuickAction('attendance')}
                 activeOpacity={0.8}
               >
-                <Text style={styles.statValue}>{dashboardData.stats?.totalStudents || 0}</Text>
+                <Text style={styles.statValue}>
+                  {dashboardData.stats?.totalStudents || 0}
+                </Text>
                 <Text style={styles.statLabel}>Total Students</Text>
                 <View style={styles.statTrend}>
-                  <Ionicons name="trending-up" size={16} color={TEACHER_COLORS.success} />
+                  <Ionicons
+                    name="trending-up"
+                    size={16}
+                    color={TEACHER_COLORS.success}
+                  />
                 </View>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.statCard, styles.secondaryStatCard, { borderLeftColor: TEACHER_COLORS.warning }]}
+                style={[
+                  styles.statCard,
+                  styles.secondaryStatCard,
+                  { borderLeftColor: TEACHER_COLORS.warning },
+                ]}
                 onPress={() => handleQuickAction('grading')}
                 activeOpacity={0.8}
               >
-                <Text style={styles.statValue}>{dashboardData.stats?.pendingGrading || 0}</Text>
+                <Text style={styles.statValue}>
+                  {dashboardData.stats?.pendingGrading || 0}
+                </Text>
                 <Text style={styles.statLabel}>Pending Grading</Text>
                 {(dashboardData.stats?.pendingGrading || 0) > 0 && (
                   <View style={styles.urgentBadge}>
@@ -239,14 +295,24 @@ const TeacherDashboard = ({ navigation }) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.statCard, styles.secondaryStatCard, { borderLeftColor: COLORS.teacherPalette.subjects.science }]}
+                style={[
+                  styles.statCard,
+                  styles.secondaryStatCard,
+                  { borderLeftColor: COLORS.teacherPalette.subjects.science },
+                ]}
                 onPress={() => handleQuickAction('analytics')}
                 activeOpacity={0.8}
               >
-                <Text style={styles.statValue}>{dashboardData.stats?.todayAttendance || 0}%</Text>
+                <Text style={styles.statValue}>
+                  {dashboardData.stats?.todayAttendance || 0}%
+                </Text>
                 <Text style={styles.statLabel}>Attendance Rate</Text>
                 <View style={styles.statTrend}>
-                  <Ionicons name="checkmark-circle" size={16} color={TEACHER_COLORS.success} />
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={16}
+                    color={TEACHER_COLORS.success}
+                  />
                 </View>
               </TouchableOpacity>
             </View>
@@ -256,7 +322,11 @@ const TeacherDashboard = ({ navigation }) => {
         {/* ✅ Professional Quick Actions */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="flash-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="flash-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Quick Actions</Text>
           </View>
 
@@ -267,28 +337,28 @@ const TeacherDashboard = ({ navigation }) => {
                 icon: 'document-text-outline',
                 label: 'Assignments',
                 color: COLORS.teacherPalette.subjects.science,
-                description: 'Create & manage'
+                description: 'Create & manage',
               },
               {
                 action: 'grading',
                 icon: 'star-outline',
                 label: 'Grading',
                 color: TEACHER_COLORS.warning,
-                description: 'Review submissions'
+                description: 'Review submissions',
               },
               {
                 action: 'attendance',
                 icon: 'people-outline',
                 label: 'Attendance',
                 color: TEACHER_COLORS.success,
-                description: 'Track presence'
+                description: 'Track presence',
               },
               {
                 action: 'analytics',
                 icon: 'bar-chart-outline',
                 label: 'Analytics',
                 color: COLORS.teacherPalette.subjects.mathematics,
-                description: 'View insights'
+                description: 'View insights',
               },
             ].map((item, index) => (
               <TouchableOpacity
@@ -297,11 +367,18 @@ const TeacherDashboard = ({ navigation }) => {
                 onPress={() => handleQuickAction(item.action)}
                 activeOpacity={0.8}
               >
-                <View style={[styles.quickActionIcon, { backgroundColor: `${item.color}15` }]}>
+                <View
+                  style={[
+                    styles.quickActionIcon,
+                    { backgroundColor: `${item.color}15` },
+                  ]}
+                >
                   <Ionicons name={item.icon} size={28} color={item.color} />
                 </View>
                 <Text style={styles.quickActionLabel}>{item.label}</Text>
-                <Text style={styles.quickActionDescription}>{item.description}</Text>
+                <Text style={styles.quickActionDescription}>
+                  {item.description}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -310,7 +387,11 @@ const TeacherDashboard = ({ navigation }) => {
         {/* ✅ Professional Recent Classes */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="time-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="time-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Today's Classes</Text>
             <TouchableOpacity onPress={() => handleQuickAction('classes')}>
               <Text style={styles.viewAllText}>View All</Text>
@@ -334,24 +415,44 @@ const TeacherDashboard = ({ navigation }) => {
                   <View style={styles.classHeader}>
                     <Text style={styles.className}>{classItem.name}</Text>
                     <View style={styles.classStudentCount}>
-                      <Ionicons name="people" size={14} color={TEACHER_COLORS.textMuted} />
-                      <Text style={styles.studentCount}>{classItem.students}</Text>
+                      <Ionicons
+                        name="people"
+                        size={14}
+                        color={TEACHER_COLORS.textMuted}
+                      />
+                      <Text style={styles.studentCount}>
+                        {classItem.students}
+                      </Text>
                     </View>
                   </View>
                   <Text style={styles.classSubject}>{classItem.subject}</Text>
                   <View style={styles.classDetails}>
                     <View style={styles.classTime}>
-                      <Ionicons name="time" size={14} color={TEACHER_COLORS.primary} />
-                      <Text style={styles.classSchedule}>{classItem.nextClass}</Text>
+                      <Ionicons
+                        name="time"
+                        size={14}
+                        color={TEACHER_COLORS.primary}
+                      />
+                      <Text style={styles.classSchedule}>
+                        {classItem.nextClass}
+                      </Text>
                     </View>
                     <View style={styles.classRoom}>
-                      <Ionicons name="location" size={14} color={TEACHER_COLORS.textMuted} />
+                      <Ionicons
+                        name="location"
+                        size={14}
+                        color={TEACHER_COLORS.textMuted}
+                      />
                       <Text style={styles.roomText}>{classItem.room}</Text>
                     </View>
                   </View>
                 </View>
                 <View style={styles.classAction}>
-                  <Ionicons name="chevron-forward" size={20} color={TEACHER_COLORS.textMuted} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={TEACHER_COLORS.textMuted}
+                  />
                 </View>
               </View>
             </TouchableOpacity>
@@ -362,9 +463,15 @@ const TeacherDashboard = ({ navigation }) => {
         {dashboardData.upcomingAssignments?.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="calendar-outline" size={24} color={TEACHER_COLORS.primary} />
+              <Ionicons
+                name="calendar-outline"
+                size={24}
+                color={TEACHER_COLORS.primary}
+              />
               <Text style={styles.sectionTitle}>Upcoming Deadlines</Text>
-              <TouchableOpacity onPress={() => handleQuickAction('assignments')}>
+              <TouchableOpacity
+                onPress={() => handleQuickAction('assignments')}
+              >
                 <Text style={styles.viewAllText}>View All</Text>
               </TouchableOpacity>
             </View>
@@ -373,24 +480,35 @@ const TeacherDashboard = ({ navigation }) => {
               <TouchableOpacity
                 key={assignment.id}
                 style={styles.assignmentCard}
-                onPress={() => navigation.navigate('AssignmentDetails', { assignmentId: assignment.id })}
+                onPress={() =>
+                  navigation.navigate('AssignmentDetails', {
+                    assignmentId: assignment.id,
+                  })
+                }
                 activeOpacity={0.8}
               >
                 <View style={styles.assignmentInfo}>
                   <Text style={styles.assignmentTitle}>{assignment.title}</Text>
-                  <Text style={styles.assignmentDue}>Due: {new Date(assignment.dueDate).toLocaleDateString()}</Text>
+                  <Text style={styles.assignmentDue}>
+                    Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                  </Text>
                   <View style={styles.submissionProgress}>
                     <Text style={styles.submissionText}>
-                      {assignment.submissions}/{assignment.totalStudents} submitted
+                      {assignment.submissions}/{assignment.totalStudents}{' '}
+                      submitted
                     </Text>
                     <View style={styles.progressBar}>
                       <View
                         style={[
                           styles.progressFill,
                           {
-                            width: `${(assignment.submissions / assignment.totalStudents) * 100}%`,
-                            backgroundColor: TEACHER_COLORS.success
-                          }
+                            width: `${
+                              (assignment.submissions /
+                                assignment.totalStudents) *
+                              100
+                            }%`,
+                            backgroundColor: TEACHER_COLORS.success,
+                          },
                         ]}
                       />
                     </View>
@@ -401,8 +519,8 @@ const TeacherDashboard = ({ navigation }) => {
           </View>
         )}
 
-        {/* Bottom padding for tab bar */}
-        <View style={styles.bottomPadding} />
+        {/* Bottom padding for tab bar (increased for visibility) */}
+        <View style={{ height: SPACING.xl * 2.5 }} />
       </ScrollView>
     </View>
   );

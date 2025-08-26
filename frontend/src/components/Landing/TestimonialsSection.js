@@ -11,19 +11,19 @@ import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const testimonials = [
   {
-    name: 'Sarah L.',
+    name: 'Samaira Shen',
     role: 'Teacher',
     text: 'SchoolBridge has transformed how I manage my class. Its intuitive and saves me so much time!',
     image: require('../../../assets/sarahL.png'),
   },
   {
-    name: 'Mark P.',
+    name: 'Anwar Sheikh',
     role: 'Parent',
     text: 'As a parent, I appreciate the seamless communication with teachers and administrators. Highly recommended!',
     image: require('../../../assets/MarkP.avif'),
   },
   {
-    name: 'Emily R.',
+    name: 'Jewel Ansari',
     role: 'Administrator',
     text: 'SchoolBridge has streamlined our school management processes like never before. A true game-changer!',
     image: require('../../../assets/EmilyR.avif'),

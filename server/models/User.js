@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
         return this.provider === PROVIDERS.EMAIL;
       },
       minlength: [6, 'Password must be at least 6 characters long'],
-      select: false,
+      select: false, //never fetch password in the response (frontend)
     },
 
     fullName: {
@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
         ROLES.VISITOR,
         ROLES.PLATFORM_USER,
       ],
-      default: ROLES.VISITOR, // Default to Visitor for visitors
+      default: ROLES.VISITOR,
       required: true,
     },
 
@@ -80,7 +80,7 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       unique: true,
-      sparse: true,
+      sparse: true, //no problem if empty
     },
 
     provider: {
@@ -104,10 +104,10 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    // ✅ Token management
+    // Token management
     tokenVersion: {
       type: Number,
-      default: 0,
+      default: 0, //for token versioning (to invalidate old tokens)
     },
 
     refreshTokens: [
@@ -155,6 +155,13 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    // School reference
+    school_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'School',
+      default: null,
+    },
+
     // Settings
     preferences: {
       language: {
@@ -173,8 +180,9 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true,
+    timestamps: true, //automatically add createdAt and updatedAt fields
     toJSON: {
+      //when we convert the document to JSON (e.g., when sending a response)
       transform: function (doc, ret) {
         delete ret.password;
         delete ret.refreshTokens;
@@ -186,7 +194,7 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// ✅ Pre-save middleware for password hashing
+// Pre-save middleware for password hashing
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password') || !this.password) {
     return next();
@@ -201,7 +209,7 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// ✅ Pre-save middleware to generate fullName from firstName/lastName
+// Pre-save middleware to generate fullName from firstName/lastName
 userSchema.pre('save', function (next) {
   if (this.firstName && this.lastName && !this.fullName) {
     this.fullName = `${this.firstName} ${this.lastName}`;
@@ -231,7 +239,7 @@ userSchema.methods.incrementTokenVersion = function () {
   return this.save();
 };
 
-// ✅ Static methods
+// Static methods
 userSchema.statics.findByEmail = function (email) {
   return this.findOne({ email: email.toLowerCase() }).select('+password');
 };

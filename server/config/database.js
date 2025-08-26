@@ -6,17 +6,14 @@ dotenv.config();
 const connectDB = async () => {
   try {
     console.log('🔗 Connecting to MongoDB...');
-
-    // ✅ FIXED: Remove deprecated options and ensure correct database
     const connectionOptions = {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 10000, //10s
+      socketTimeoutMS: 45000, //45s
       maxPoolSize: 10,
       retryWrites: true,
       w: 'majority',
       appName: 'SchoolBridge-Cluster0',
-      // ✅ FORCE DATABASE NAME
-      dbName: process.env.DB_NAME || 'schoolbridge',
+      dbName: process.env.DB_NAME || 'schoolbridge', // Force DATABASE NAME
     };
 
     let mongoURI = process.env.MONGODB_URI;
@@ -25,13 +22,12 @@ const connectDB = async () => {
       throw new Error('MONGODB_URI not found in environment variables');
     }
 
-    // ✅ Ensure database name is in the URI
+    // Ensure database name is in the URI
     if (!mongoURI.includes('/schoolbridge?') && !mongoURI.includes('dbName=')) {
-      // Add database to URI if not present
       mongoURI = mongoURI.replace('mongodb.net/', 'mongodb.net/schoolbridge');
     }
 
-    // ✅ Log connection attempt (hide password)
+    // Log connection attempt (hide password)
     const safeURI = mongoURI.replace(/\/\/.*:.*@/, '//****:****@');
     console.log('🔗 Attempting connection to:', safeURI);
 

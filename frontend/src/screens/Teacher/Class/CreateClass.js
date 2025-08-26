@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,47 +15,129 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import SimpleHeader from '../../../components/navigation/SimpleHeader';
+import teacherService from '../../../api/services/teacherService';
+import { useAuth } from '../../../context/AuthContext';
 // ✅ Import Professional Theme System
 import {
   COLORS,
   TEACHER_COLORS,
   TEACHER_THEME,
   SPACING,
-  BORDER_RADIUS
+  BORDER_RADIUS,
 } from '../../../constants/theme';
 
-const CreateClass = ({ navigation }) => {
+const CreateClass = ({ navigation, route }) => {
+  const { user } = useAuth();
+  // If editing, classData will be passed via route.params
+  const editing = !!route?.params?.classData;
+  const classData = route?.params?.classData || null;
   // ✅ Professional State Management
   const [formData, setFormData] = useState({
-    name: '',
-    subject: '',
-    grade: '',
-    section: '',
-    room: '',
-    description: '',
+    name: classData?.name || '',
+    subject: classData?.subject || '',
+    grade: classData?.grade || '',
+    section: classData?.section || '',
+    room: classData?.room || '',
+    description: classData?.description || '',
     schedule: {
-      days: [],
-      time: '',
+      days: classData?.schedule?.days || [],
+      time: classData?.schedule?.time || '',
     },
-    maxStudents: '30',
+    maxStudents: classData?.maxStudents ? String(classData.maxStudents) : '30',
   });
 
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState('');
-  const [selectedDays, setSelectedDays] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(
+    classData?.subject ? subjectsKeyFromLabel(classData.subject) : '',
+  );
+  const [selectedGrade, setSelectedGrade] = useState(classData?.grade || '');
+  const [selectedDays, setSelectedDays] = useState(
+    classData?.schedule?.days || [],
+  );
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState(null);
+
+  // Helper to get subject key from label
+  function subjectsKeyFromLabel(label) {
+    const subj = subjects.find((s) => s.label === label);
+    return subj ? subj.key : '';
+  }
+
+  // If editing, update form state on mount
+  useEffect(() => {
+    if (editing && classData) {
+      setFormData({
+        name: classData.name || '',
+        subject: classData.subject || '',
+        grade: classData.grade || '',
+        section: classData.section || '',
+        room: classData.room || '',
+        description: classData.description || '',
+        schedule: {
+          days: classData.schedule?.days || [],
+          time: classData.schedule?.time || '',
+        },
+        maxStudents: classData.maxStudents
+          ? String(classData.maxStudents)
+          : '30',
+      });
+      setSelectedSubject(subjectsKeyFromLabel(classData.subject));
+      setSelectedGrade(classData.grade || '');
+      setSelectedDays(classData.schedule?.days || []);
+    }
+    // eslint-disable-next-line
+  }, [editing, classData]);
 
   // ✅ Subject Options with Colors
   const subjects = [
-    { key: 'mathematics', label: 'Mathematics', icon: 'calculator', color: COLORS.teacherPalette.subjects.mathematics },
-    { key: 'science', label: 'Science', icon: 'flask', color: COLORS.teacherPalette.subjects.science },
-    { key: 'english', label: 'English', icon: 'book', color: COLORS.teacherPalette.subjects.english },
-    { key: 'history', label: 'History', icon: 'library', color: COLORS.teacherPalette.subjects.history },
-    { key: 'arts', label: 'Arts', icon: 'color-palette', color: COLORS.teacherPalette.subjects.arts },
-    { key: 'sports', label: 'Physical Education', icon: 'fitness', color: COLORS.teacherPalette.subjects.sports },
-    { key: 'music', label: 'Music', icon: 'musical-notes', color: COLORS.teacherPalette.subjects.music },
-    { key: 'computer', label: 'Computer Science', icon: 'desktop', color: COLORS.teacherPalette.subjects.computer },
+    {
+      key: 'mathematics',
+      label: 'Mathematics',
+      icon: 'calculator',
+      color: COLORS.teacherPalette.subjects.mathematics,
+    },
+    {
+      key: 'science',
+      label: 'Science',
+      icon: 'flask',
+      color: COLORS.teacherPalette.subjects.science,
+    },
+    {
+      key: 'english',
+      label: 'English',
+      icon: 'book',
+      color: COLORS.teacherPalette.subjects.english,
+    },
+    {
+      key: 'history',
+      label: 'History',
+      icon: 'library',
+      color: COLORS.teacherPalette.subjects.history,
+    },
+    {
+      key: 'arts',
+      label: 'Arts',
+      icon: 'color-palette',
+      color: COLORS.teacherPalette.subjects.arts,
+    },
+    {
+      key: 'sports',
+      label: 'Physical Education',
+      icon: 'fitness',
+      color: COLORS.teacherPalette.subjects.sports,
+    },
+    {
+      key: 'music',
+      label: 'Music',
+      icon: 'musical-notes',
+      color: COLORS.teacherPalette.subjects.music,
+    },
+    {
+      key: 'computer',
+      label: 'Computer Science',
+      icon: 'desktop',
+      color: COLORS.teacherPalette.subjects.computer,
+    },
   ];
 
   // ✅ Grade Options
@@ -129,112 +211,159 @@ const CreateClass = ({ navigation }) => {
   }, [formData, selectedSubject, selectedGrade, selectedDays]);
 
   // ✅ Form Handlers
-  const updateFormData = useCallback((field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
+  const updateFormData = useCallback(
+    (field, value) => {
+      setFormData((prev) => ({
         ...prev,
-        [field]: null,
+        [field]: value,
       }));
-    }
-  }, [errors]);
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: null,
+        }));
+      }
+    },
+    [errors],
+  );
 
-  const handleSubjectSelect = useCallback((subject) => {
-    setSelectedSubject(subject.key);
-    updateFormData('subject', subject.label);
-    setErrors(prev => ({ ...prev, subject: null }));
-  }, [updateFormData]);
+  const handleSubjectSelect = useCallback(
+    (subject) => {
+      setSelectedSubject(subject.key);
+      updateFormData('subject', subject.label);
+      setErrors((prev) => ({ ...prev, subject: null }));
+    },
+    [updateFormData],
+  );
 
-  const handleGradeSelect = useCallback((grade) => {
-    setSelectedGrade(grade.key);
-    updateFormData('grade', grade.key);
-    setErrors(prev => ({ ...prev, grade: null }));
-  }, [updateFormData]);
+  const handleGradeSelect = useCallback(
+    (grade) => {
+      setSelectedGrade(grade.key);
+      updateFormData('grade', grade.key);
+      setErrors((prev) => ({ ...prev, grade: null }));
+    },
+    [updateFormData],
+  );
 
-  const handleDayToggle = useCallback((day) => {
-    const newSelectedDays = selectedDays.includes(day.key)
-      ? selectedDays.filter(d => d !== day.key)
-      : [...selectedDays, day.key];
+  const handleDayToggle = useCallback(
+    (day) => {
+      const newSelectedDays = selectedDays.includes(day.key)
+        ? selectedDays.filter((d) => d !== day.key)
+        : [...selectedDays, day.key];
 
-    setSelectedDays(newSelectedDays);
-    setFormData(prev => ({
-      ...prev,
-      schedule: {
-        ...prev.schedule,
-        days: newSelectedDays,
-      },
-    }));
-    setErrors(prev => ({ ...prev, days: null }));
-  }, [selectedDays]);
+      setSelectedDays(newSelectedDays);
+      setFormData((prev) => ({
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          days: newSelectedDays,
+        },
+      }));
+      setErrors((prev) => ({ ...prev, days: null }));
+    },
+    [selectedDays],
+  );
 
-  // ✅ Create Class Handler
-  const handleCreateClass = useCallback(async () => {
+  // ✅ Create or Update Class Handler
+  const handleSaveClass = useCallback(async () => {
+    setApiError(null);
     if (!validateForm()) {
-      Alert.alert('Validation Error', 'Please fix the errors before submitting');
+      Alert.alert(
+        'Validation Error',
+        'Please fix the errors before submitting',
+      );
       return;
     }
-
     try {
       setLoading(true);
-
-      // 🔄 TODO: Replace with actual API call
-      /*
-      const response = await fetch('/api/teacher/classes', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json',
+      const teacherId = user?._id || user?.id;
+      const payload = {
+        ...formData,
+        subject:
+          subjects.find((s) => s.key === selectedSubject)?.label ||
+          formData.subject,
+        grade: selectedGrade,
+        schedule: {
+          days: selectedDays,
+          time: formData.schedule.time,
         },
-        body: JSON.stringify({
-          ...formData,
-          subject: selectedSubject,
-          grade: selectedGrade,
-          schedule: {
-            days: selectedDays,
-            time: formData.schedule.time,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create class');
+        maxStudents: parseInt(formData.maxStudents, 10),
+        teacher: teacherId,
+      };
+      if (editing) {
+        // Update existing class
+        await teacherService.updateClass(
+          classData._id || classData.id,
+          payload,
+        );
+        Alert.alert('Success!', 'Class updated successfully', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      } else {
+        // Create new class
+        await teacherService.createClass(payload);
+        Alert.alert('Success!', 'Class created successfully', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
       }
-
-      const newClass = await response.json();
-      */
-
-      // ✅ Mock success simulation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      Alert.alert(
-        'Success!',
-        'Class created successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.goBack();
-              // TODO: Refresh classes list or navigate to new class
-            },
-          },
-        ]
-      );
-
     } catch (error) {
-      console.error('❌ Error creating class:', error);
-      Alert.alert('Error', 'Failed to create class. Please try again.');
+      setApiError(error.message || 'Failed to save class.');
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to save class. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
-  }, [formData, selectedSubject, selectedGrade, selectedDays, validateForm, navigation]);
+  }, [
+    formData,
+    selectedSubject,
+    selectedGrade,
+    selectedDays,
+    validateForm,
+    navigation,
+    editing,
+    classData,
+    user,
+  ]);
+
+  // ✅ Delete Class Handler (edit mode only)
+  const handleDeleteClass = useCallback(async () => {
+    if (!editing || !classData) return;
+    Alert.alert(
+      'Delete Class',
+      'Are you sure you want to delete this class? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await teacherService.deleteClass(classData._id || classData.id);
+              Alert.alert('Deleted', 'Class deleted successfully', [
+                { text: 'OK', onPress: () => navigation.goBack() },
+              ]);
+            } catch (error) {
+              setApiError(error.message || 'Failed to delete class.');
+              Alert.alert(
+                'Error',
+                error.message || 'Failed to delete class. Please try again.',
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [editing, classData, navigation]);
 
   // ✅ Get selected subject data
   const getSelectedSubject = useCallback(() => {
-    return subjects.find(s => s.key === selectedSubject);
+    return subjects.find((s) => s.key === selectedSubject);
   }, [selectedSubject, subjects]);
 
   return (
@@ -244,8 +373,10 @@ const CreateClass = ({ navigation }) => {
     >
       {/* ✅ Professional Header */}
       <SimpleHeader
-        title="Create New Class"
-        subtitle="Set up your class details"
+        title={editing ? 'Edit Class' : 'Create New Class'}
+        subtitle={
+          editing ? 'Update your class details' : 'Set up your class details'
+        }
         navigation={navigation}
         primaryColor={TEACHER_COLORS.primary}
       />
@@ -258,7 +389,11 @@ const CreateClass = ({ navigation }) => {
         {/* ✅ Class Basic Information */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="information-circle-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="information-circle-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Basic Information</Text>
           </View>
 
@@ -266,10 +401,7 @@ const CreateClass = ({ navigation }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Class Name *</Text>
             <TextInput
-              style={[
-                styles.textInput,
-                errors.name && styles.inputError
-              ]}
+              style={[styles.textInput, errors.name && styles.inputError]}
               value={formData.name}
               onChangeText={(value) => updateFormData('name', value)}
               placeholder="e.g., Advanced Calculus, Biology 101"
@@ -282,27 +414,25 @@ const CreateClass = ({ navigation }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Section *</Text>
             <TextInput
-              style={[
-                styles.textInput,
-                errors.section && styles.inputError
-              ]}
+              style={[styles.textInput, errors.section && styles.inputError]}
               value={formData.section}
-              onChangeText={(value) => updateFormData('section', value.toUpperCase())}
+              onChangeText={(value) =>
+                updateFormData('section', value.toUpperCase())
+              }
               placeholder="e.g., A, B, C"
               placeholderTextColor={TEACHER_COLORS.textMuted}
               maxLength={2}
             />
-            {errors.section && <Text style={styles.errorText}>{errors.section}</Text>}
+            {errors.section && (
+              <Text style={styles.errorText}>{errors.section}</Text>
+            )}
           </View>
 
           {/* Room */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Room Number *</Text>
             <TextInput
-              style={[
-                styles.textInput,
-                errors.room && styles.inputError
-              ]}
+              style={[styles.textInput, errors.room && styles.inputError]}
               value={formData.room}
               onChangeText={(value) => updateFormData('room', value)}
               placeholder="e.g., Room 204, Lab A"
@@ -329,7 +459,11 @@ const CreateClass = ({ navigation }) => {
         {/* ✅ Subject Selection */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="school-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="school-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Subject *</Text>
           </View>
 
@@ -341,46 +475,71 @@ const CreateClass = ({ navigation }) => {
                   styles.subjectCard,
                   selectedSubject === subject.key && [
                     styles.subjectCardSelected,
-                    { borderColor: subject.color }
-                  ]
+                    { borderColor: subject.color },
+                  ],
                 ]}
                 onPress={() => handleSubjectSelect(subject)}
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={selectedSubject === subject.key
-                    ? [subject.color, `${subject.color}DD`]
-                    : ['transparent', 'transparent']
+                  colors={
+                    selectedSubject === subject.key
+                      ? [subject.color, `${subject.color}DD`]
+                      : ['transparent', 'transparent']
                   }
                   style={styles.subjectCardGradient}
                 >
-                  <View style={[
-                    styles.subjectIcon,
-                    { backgroundColor: selectedSubject === subject.key ? 'rgba(255,255,255,0.2)' : subject.color }
-                  ]}>
+                  <View
+                    style={[
+                      styles.subjectIcon,
+                      {
+                        backgroundColor:
+                          selectedSubject === subject.key
+                            ? 'rgba(255,255,255,0.2)'
+                            : subject.color,
+                      },
+                    ]}
+                  >
                     <Ionicons
                       name={subject.icon}
                       size={24}
-                      color={selectedSubject === subject.key ? TEACHER_COLORS.textWhite : TEACHER_COLORS.textWhite}
+                      color={
+                        selectedSubject === subject.key
+                          ? TEACHER_COLORS.textWhite
+                          : TEACHER_COLORS.textWhite
+                      }
                     />
                   </View>
-                  <Text style={[
-                    styles.subjectText,
-                    { color: selectedSubject === subject.key ? TEACHER_COLORS.textWhite : TEACHER_COLORS.text }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.subjectText,
+                      {
+                        color:
+                          selectedSubject === subject.key
+                            ? TEACHER_COLORS.textWhite
+                            : TEACHER_COLORS.text,
+                      },
+                    ]}
+                  >
                     {subject.label}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
             ))}
           </View>
-          {errors.subject && <Text style={styles.errorText}>{errors.subject}</Text>}
+          {errors.subject && (
+            <Text style={styles.errorText}>{errors.subject}</Text>
+          )}
         </View>
 
         {/* ✅ Grade Selection */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="library-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="library-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Grade Level *</Text>
           </View>
 
@@ -390,15 +549,17 @@ const CreateClass = ({ navigation }) => {
                 key={grade.key}
                 style={[
                   styles.gradeChip,
-                  selectedGrade === grade.key && styles.gradeChipSelected
+                  selectedGrade === grade.key && styles.gradeChipSelected,
                 ]}
                 onPress={() => handleGradeSelect(grade)}
                 activeOpacity={0.8}
               >
-                <Text style={[
-                  styles.gradeText,
-                  selectedGrade === grade.key && styles.gradeTextSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.gradeText,
+                    selectedGrade === grade.key && styles.gradeTextSelected,
+                  ]}
+                >
                   {grade.label}
                 </Text>
               </TouchableOpacity>
@@ -410,7 +571,11 @@ const CreateClass = ({ navigation }) => {
         {/* ✅ Schedule */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="calendar-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="calendar-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Schedule *</Text>
           </View>
 
@@ -423,15 +588,17 @@ const CreateClass = ({ navigation }) => {
                   key={day.key}
                   style={[
                     styles.dayChip,
-                    selectedDays.includes(day.key) && styles.dayChipSelected
+                    selectedDays.includes(day.key) && styles.dayChipSelected,
                   ]}
                   onPress={() => handleDayToggle(day)}
                   activeOpacity={0.8}
                 >
-                  <Text style={[
-                    styles.dayText,
-                    selectedDays.includes(day.key) && styles.dayTextSelected
-                  ]}>
+                  <Text
+                    style={[
+                      styles.dayText,
+                      selectedDays.includes(day.key) && styles.dayTextSelected,
+                    ]}
+                  >
                     {day.label}
                   </Text>
                 </TouchableOpacity>
@@ -444,15 +611,14 @@ const CreateClass = ({ navigation }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Class Time *</Text>
             <TextInput
-              style={[
-                styles.textInput,
-                errors.time && styles.inputError
-              ]}
+              style={[styles.textInput, errors.time && styles.inputError]}
               value={formData.schedule.time}
-              onChangeText={(value) => setFormData(prev => ({
-                ...prev,
-                schedule: { ...prev.schedule, time: value }
-              }))}
+              onChangeText={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  schedule: { ...prev.schedule, time: value },
+                }))
+              }
               placeholder="e.g., 9:00 AM - 10:30 AM"
               placeholderTextColor={TEACHER_COLORS.textMuted}
             />
@@ -463,7 +629,11 @@ const CreateClass = ({ navigation }) => {
         {/* ✅ Class Settings */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="settings-outline" size={24} color={TEACHER_COLORS.primary} />
+            <Ionicons
+              name="settings-outline"
+              size={24}
+              color={TEACHER_COLORS.primary}
+            />
             <Text style={styles.sectionTitle}>Class Settings</Text>
           </View>
 
@@ -472,7 +642,7 @@ const CreateClass = ({ navigation }) => {
             <TextInput
               style={[
                 styles.textInput,
-                errors.maxStudents && styles.inputError
+                errors.maxStudents && styles.inputError,
               ]}
               value={formData.maxStudents}
               onChangeText={(value) => updateFormData('maxStudents', value)}
@@ -481,7 +651,9 @@ const CreateClass = ({ navigation }) => {
               keyboardType="numeric"
               maxLength={3}
             />
-            {errors.maxStudents && <Text style={styles.errorText}>{errors.maxStudents}</Text>}
+            {errors.maxStudents && (
+              <Text style={styles.errorText}>{errors.maxStudents}</Text>
+            )}
           </View>
         </View>
 
@@ -489,13 +661,20 @@ const CreateClass = ({ navigation }) => {
         {selectedSubject && selectedGrade && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="eye-outline" size={24} color={TEACHER_COLORS.primary} />
+              <Ionicons
+                name="eye-outline"
+                size={24}
+                color={TEACHER_COLORS.primary}
+              />
               <Text style={styles.sectionTitle}>Preview</Text>
             </View>
 
             <View style={styles.previewCard}>
               <LinearGradient
-                colors={[getSelectedSubject()?.color || TEACHER_COLORS.primary, `${getSelectedSubject()?.color || TEACHER_COLORS.primary}DD`]}
+                colors={[
+                  getSelectedSubject()?.color || TEACHER_COLORS.primary,
+                  `${getSelectedSubject()?.color || TEACHER_COLORS.primary}DD`,
+                ]}
                 style={styles.previewHeader}
               >
                 <View style={styles.previewIcon}>
@@ -510,28 +689,51 @@ const CreateClass = ({ navigation }) => {
                     {formData.name || 'Class Name'}
                   </Text>
                   <Text style={styles.previewSubtitle}>
-                    {formData.subject} • Grade {selectedGrade}{formData.section && formData.section}
+                    {formData.subject} • Grade {selectedGrade}
+                    {formData.section && formData.section}
                   </Text>
                 </View>
               </LinearGradient>
 
               <View style={styles.previewContent}>
                 <View style={styles.previewDetail}>
-                  <Ionicons name="location-outline" size={16} color={TEACHER_COLORS.textMuted} />
-                  <Text style={styles.previewDetailText}>{formData.room || 'Room TBD'}</Text>
-                </View>
-                <View style={styles.previewDetail}>
-                  <Ionicons name="time-outline" size={16} color={TEACHER_COLORS.textMuted} />
+                  <Ionicons
+                    name="location-outline"
+                    size={16}
+                    color={TEACHER_COLORS.textMuted}
+                  />
                   <Text style={styles.previewDetailText}>
-                    {selectedDays.length > 0
-                      ? `${selectedDays.map(d => daysOfWeek.find(day => day.key === d)?.label).join(', ')} - ${formData.schedule.time || 'Time TBD'}`
-                      : 'Schedule TBD'
-                    }
+                    {formData.room || 'Room TBD'}
                   </Text>
                 </View>
                 <View style={styles.previewDetail}>
-                  <Ionicons name="people-outline" size={16} color={TEACHER_COLORS.textMuted} />
-                  <Text style={styles.previewDetailText}>Max {formData.maxStudents} students</Text>
+                  <Ionicons
+                    name="time-outline"
+                    size={16}
+                    color={TEACHER_COLORS.textMuted}
+                  />
+                  <Text style={styles.previewDetailText}>
+                    {selectedDays.length > 0
+                      ? `${selectedDays
+                          .map(
+                            (d) =>
+                              daysOfWeek.find((day) => day.key === d)?.label,
+                          )
+                          .join(', ')} - ${
+                          formData.schedule.time || 'Time TBD'
+                        }`
+                      : 'Schedule TBD'}
+                  </Text>
+                </View>
+                <View style={styles.previewDetail}>
+                  <Ionicons
+                    name="people-outline"
+                    size={16}
+                    color={TEACHER_COLORS.textMuted}
+                  />
+                  <Text style={styles.previewDetailText}>
+                    Max {formData.maxStudents} students
+                  </Text>
                 </View>
               </View>
             </View>
@@ -546,10 +748,13 @@ const CreateClass = ({ navigation }) => {
         <TouchableOpacity
           style={[
             styles.createButton,
-            { backgroundColor: getSelectedSubject()?.color || TEACHER_COLORS.primary },
-            loading && styles.createButtonDisabled
+            {
+              backgroundColor:
+                getSelectedSubject()?.color || TEACHER_COLORS.primary,
+            },
+            loading && styles.createButtonDisabled,
           ]}
-          onPress={handleCreateClass}
+          onPress={handleSaveClass}
           activeOpacity={0.8}
           disabled={loading}
         >
@@ -557,11 +762,39 @@ const CreateClass = ({ navigation }) => {
             <ActivityIndicator color={TEACHER_COLORS.textWhite} />
           ) : (
             <View style={styles.createButtonContent}>
-              <Ionicons name="checkmark-circle" size={20} color={TEACHER_COLORS.textWhite} />
-              <Text style={styles.createButtonText}>Create Class</Text>
+              <Ionicons
+                name={editing ? 'save' : 'checkmark-circle'}
+                size={20}
+                color={TEACHER_COLORS.textWhite}
+              />
+              <Text style={styles.createButtonText}>
+                {editing ? 'Update Class' : 'Create Class'}
+              </Text>
             </View>
           )}
         </TouchableOpacity>
+
+        {/* Delete Button (edit mode only) */}
+        {editing && (
+          <TouchableOpacity
+            style={[
+              styles.createButton,
+              { backgroundColor: TEACHER_COLORS.error, marginTop: 12 },
+            ]}
+            onPress={handleDeleteClass}
+            activeOpacity={0.8}
+            disabled={loading}
+          >
+            <View style={styles.createButtonContent}>
+              <Ionicons
+                name="trash"
+                size={20}
+                color={TEACHER_COLORS.textWhite}
+              />
+              <Text style={styles.createButtonText}>Delete Class</Text>
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
     </KeyboardAvoidingView>
   );

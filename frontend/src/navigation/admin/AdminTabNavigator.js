@@ -5,6 +5,7 @@ import { useRole } from '../../context/RoleContext';
 import { useTenant } from '../../context/TenantContext';
 import ScrollableTabBar from '../../components/navigation/ScrollableTabBar';
 import SchoolAdminScreen from '../../screens/Admin/SchoolAdminScreen';
+import AdminInvitationsScreen from '../../screens/Admin/AdminInvitationsScreen';
 import PlaceholderScreen from '../../components/PlaceholderScreen';
 
 const Tab = createBottomTabNavigator();
@@ -34,6 +35,7 @@ const AdminTabNavigator = () => {
       }}
     >
       <Tab.Screen name="Dashboard" component={SchoolAdminScreen} />
+      <Tab.Screen name="Invitations" component={AdminInvitationsScreen} />
       <Tab.Screen name="User Management">
         {() => <PlaceholderScreen title="User Management" />}
       </Tab.Screen>
