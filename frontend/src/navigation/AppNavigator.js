@@ -33,7 +33,7 @@ import ContactScreen from '../screens/Common/ContactScreen';
 import SupportScreen from '../screens/Common/SupportScreen';
 import PrivacyScreen from '../screens/Common/PrivacyScreen';
 import PricingScreen from '../screens/Common/PricingScreen';
-// import ConnectionTest from '../components/ConnectionTest';
+import ConnectionTest from '../components/ConnectionTest';
 import ActivationScreen from '../screens/Common/ActivationScreen';
 
 const Stack = createNativeStackNavigator();

@@ -244,7 +244,11 @@ export default function App() {
 
   const handleStateChange = async (state) => {
     try {
-      await AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
+      if (state === undefined || state === null) {
+        await AsyncStorage.removeItem(PERSISTENCE_KEY);
+      } else {
+        await AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
+      }
     } catch (e) {
       console.error('Failed to persist navigation state', e);
     }
