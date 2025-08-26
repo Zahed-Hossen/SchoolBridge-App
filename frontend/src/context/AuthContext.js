@@ -74,9 +74,11 @@ export const AuthProvider = ({ children }) => {
       if (userData) {
         let parsedUser = null;
         try {
-          parsedUser = JSON.parse(userData);
+          parsedUser =
+            typeof userData === 'string' ? JSON.parse(userData) : userData;
         } catch (err) {
-          console.error('❌ Error parsing userData:', err, userData);
+          console.error('Failed to parse userData from storage:', err);
+          parsedUser = null;
         }
         console.log('👤 Parsed userData:', parsedUser);
 
@@ -102,18 +104,21 @@ export const AuthProvider = ({ children }) => {
             setRole(null);
             setIsAuthenticated(false);
           }
-        } else if (loginMethod === 'email') {
+        } else if (loginMethod && loginMethod !== 'google') {
+          // Accept any non-null loginMethod (including email addresses) as valid manual login
           if (userRole && (parsedUser?.role || userRole)) {
             setRole(parsedUser?.role || userRole);
             setIsAuthenticated(true);
             console.log(
-              '✅ Email user authenticated:',
+              '✅ Manual/email user authenticated:',
               parsedUser?.email,
               'Role:',
               parsedUser?.role || userRole,
+              'LoginMethod:',
+              loginMethod,
             );
           } else {
-            console.log('⚠️ Email user missing role data');
+            console.log('⚠️ Manual/email user missing role data');
             setRole(null);
             setIsAuthenticated(false);
           }
@@ -369,27 +374,37 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('🔧 Completing OAuth setup with role:', userRole);
 
-      if (!user) {
-        throw new Error('No user data found');
+      if (userData) {
+        let parsedUser = null;
+        try {
+          parsedUser = JSON.parse(userData);
+        } catch (err) {
+          console.error('❌ Error parsing userData:', err, userData);
+        }
+        console.log('👤 Parsed userData:', parsedUser);
+
+        // ✅ Always set user data first
+        setUser(parsedUser);
+
+        // ✅ Restore authentication if tokens and user data are present
+        if (accessToken && refreshToken && parsedUser) {
+          setIsAuthenticated(true);
+          setRole(parsedUser.role);
+        } else {
+          setIsAuthenticated(false);
+          setRole(null);
+        }
+      } else {
+        console.log('❌ No user data found');
+        setUser(null);
+        setRole(null);
+        setIsAuthenticated(false);
       }
-
-      // ✅ FIXED: Update user with selected role
-      const updatedUser = { ...user, role: userRole };
-
-      // ✅ FIXED: Store complete user data with role
-      await AsyncStorage.setItem(
-        '@schoolbridge_user_data',
-        JSON.stringify(updatedUser),
-      );
-      await AsyncStorage.setItem('@schoolbridge_user_role', userRole);
-
-      // ✅ FIXED: Now set authentication state
-      setUser(updatedUser);
-      setRole(userRole);
       setIsAuthenticated(true);
 
       console.log('✅ OAuth setup completed for role:', userRole);
-      console.log('✅ Updated user object:', updatedUser);
+      // Remove reference to updatedUser if not defined
+      // console.log('✅ Updated user object:', updatedUser);
       return { success: true };
     } catch (error) {
       console.error('❌ Error completing OAuth setup:', error);
