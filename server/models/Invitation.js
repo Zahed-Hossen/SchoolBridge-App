@@ -12,7 +12,7 @@ const invitationSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ['Teacher', 'Student', 'Parent', 'Admin'],
+      enum: ['Teacher', 'Student', 'Parent', 'Admin','staff'],
       validate: {
         validator: function (role) {
           if (

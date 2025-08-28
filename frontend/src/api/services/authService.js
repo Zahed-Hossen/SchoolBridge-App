@@ -1,6 +1,7 @@
 import { apiCall } from '../client';
 import { StorageUtils } from '../utils/storage';
 import { withErrorHandling } from '../utils/errorHandler';
+import { API_CONFIG } from '../../constants/config';
 
 const ROLES = {
   ADMIN: 'Admin',
@@ -10,45 +11,69 @@ const ROLES = {
 };
 
 const login = withErrorHandling(async (credentials) => {
-  const response = await apiCall('POST', '/auth/login', credentials);
-  // Accept both { data: { ... }, success, message } and flat { user, accessToken, ... }
-  let raw = response.data;
+  console.log("Logging in...");
+
+  // Make the API request using fetch
+  const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+  }
+
+  // Parse response JSON
+  const raw = await response.json();
   let data, success, message;
+
+  // Check if the response has the standard API shape
   if (raw && typeof raw === 'object' && ('data' in raw || 'success' in raw)) {
-    // Standard API shape
     data = raw.data || {};
     success = raw.success !== false;
     message = raw.message || 'Login successful';
   } else {
-    // Flat shape (user, accessToken, etc. at top level)
+    // Handle flat response structure (user, accessToken, etc. at top level)
     data = raw;
     success = true;
     message = 'Login successful';
   }
-  // Save tokens and user if present
+
+  // Save tokens and user data if present
   const tokens = {
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
   };
   const userData = data.user || data;
+  
   if (!userData.role) throw new Error('User role not found in response');
+  
   if (tokens.accessToken) {
     await StorageUtils.auth.saveTokens(tokens.accessToken, tokens.refreshToken);
-    await StorageUtils.auth.saveUserData(
-      userData,
-      userData.role,
-      credentials.email,
-    );
+    await StorageUtils.auth.saveUserData(userData, userData.role, credentials.email);
   }
+
   return { success, data, message };
 });
+
 
 const register = withErrorHandling(async (userData, role = ROLES.STUDENT) => {
   if (!Object.values(ROLES).includes(role))
     throw new Error('Invalid user role');
   const payload = { ...userData, role, signupType: 'visitor' };
-  const response = await apiCall('POST', '/auth/signup', payload);
-  const data = response.data.data || response.data;
+  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.auth.register}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+  }
+  const raw = await response.json();
+  const data = raw.data || raw;
   if (data.accessToken) {
     await StorageUtils.auth.saveTokens(data.accessToken, data.refreshToken);
     await StorageUtils.auth.saveUserData(
@@ -75,12 +100,20 @@ const googleAuth = withErrorHandling(async (googleData) => {
     tokens: googleData.tokens,
     idToken: googleData.tokens?.idToken,
   };
-  const response = await apiCall('POST', '/auth/google', payload);
+  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.auth.googleAuth}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+  }
+  const raw = await response.json();
   const tokens = {
-    accessToken: response.data?.accessToken || response.accessToken,
-    refreshToken: response.data?.refreshToken || response.refreshToken,
+    accessToken: raw.accessToken,
+    refreshToken: raw.refreshToken,
   };
-  const userData = response.data?.user || response.user;
+  const userData = raw.user || raw;
   if (tokens.accessToken) {
     await StorageUtils.auth.saveTokens(tokens.accessToken, tokens.refreshToken);
     await StorageUtils.auth.saveUserData(
@@ -96,7 +129,11 @@ const logout = withErrorHandling(async () => {
   const refreshToken = await StorageUtils.auth.getRefreshToken();
   if (refreshToken) {
     try {
-      await apiCall('POST', '/auth/logout', { refreshToken });
+      await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.auth.logout}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
     } catch (serverError) {}
   }
   await StorageUtils.auth.clearAll();
@@ -104,21 +141,42 @@ const logout = withErrorHandling(async () => {
 });
 
 const refresh = withErrorHandling(async (refreshToken) => {
-  const response = await apiCall('POST', '/auth/refresh', { refreshToken });
-  return response.data.data || response.data;
+  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.auth.refresh}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+  }
+  const raw = await response.json();
+  return raw.data || raw;
 });
 
 const forgotPassword = withErrorHandling(async (email) => {
-  const response = await apiCall('POST', '/auth/forgot-password', { email });
-  return response.data.data || response.data;
+  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.auth.forgotPassword}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+  }
+  const raw = await response.json();
+  return raw.data || raw;
 });
 
 const resetPassword = withErrorHandling(async (token, password) => {
-  const response = await apiCall('POST', '/auth/reset-password', {
-    token,
-    password,
+  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.auth.resetPassword}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
   });
-  return response.data.data || response.data;
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+  }
+  const raw = await response.json();
+  return raw.data || raw;
 });
 
 const getCurrentUser = withErrorHandling(async () => {

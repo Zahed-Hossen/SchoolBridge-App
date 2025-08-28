@@ -2,25 +2,21 @@ import NetworkDetectionService from '../services/NetworkDetectionService';
 
 // ✅ ENHANCED: API Configuration with dynamic IP detection
 export const API_CONFIG = {
-  BASE_URL: (() => {
-    if (__DEV__) {
-      // Enable auto-detection in development
-      return null; // Will be set dynamically
-    }
-    return 'https://your-production-api.com/api';
-  })(),
-
-  // ✅ Fallback URLs (your existing ones, now used as backup)
+//   BASE_URL: (() => {
+//     if (__DEV__) {
+//       // Enable auto-detection in development
+//       return null; // Will be set dynamically
+//     }
+//   // Use Render backend URL in production
+//   return 'https://schoolbridge-app-api.onrender.com/api';
+//   })(),
+BASE_URL: 'https://schoolbridge-app-api.onrender.com/api',
+AUTO_DETECT: false, // Only one AUTO_DETECT, always false
+  // ✅ Fallback URLs (now only deployed backend)
   FALLBACK_URLS: [
-    'http://192.168.0.101:5000/api',
-    'http://192.168.0.103:5000/api',
-    'http://192.168.0.105:5000/api',
-    'http://localhost:5000/api',
-    'http://10.0.2.2:5000/api',
+    'https://schoolbridge-app-api.onrender.com/api'
   ],
-
   // ✅ Auto-detection settings
-  AUTO_DETECT: __DEV__, // Enable in development
   DETECTION_TIMEOUT: 3000,
   HEALTH_CHECK_ENDPOINT: '/health',
   TIMEOUT: 15000,

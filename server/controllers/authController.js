@@ -10,6 +10,7 @@ import { HTTP_STATUS, MESSAGES, ROLES } from '../utils/constants.js';
 
 export const createInvitations = async (req, res) => {
   try {
+    console.log('Creating invitations...');
     const { users } = req.body; // Array of { school_id, email, role }
     const createdBy = req.user.userId;
 
@@ -260,6 +261,7 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    console.log("Login controller hit");
     const { email, password, role } = req.body;
     // Find user by email (include password for comparison)
     const user = await User.findByEmail(email.toLowerCase());

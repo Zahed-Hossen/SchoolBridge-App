@@ -40,17 +40,7 @@ app.use('/api', generalLimiter);
 
 // ✅ CORS configuration
 const corsOptions = {
-  origin: [
-    'http://localhost:19000',
-    'http://localhost:19001',
-    'http://localhost:19002',
-    `http://${getNetworkIP()}:19000`,
-    `http://${getNetworkIP()}:19001`,
-    `http://${getNetworkIP()}:19002`,
-    `exp://${getNetworkIP()}:19000`,
-    `exp://${getNetworkIP()}:19001`,
-    `exp://${getNetworkIP()}:19002`,
-  ],
+  origin: ['*'],
   credentials: true,
   exposedHeaders: ['Authorization'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

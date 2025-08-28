@@ -160,6 +160,7 @@ const AppContent = () => {
 
   // Handle network errors
   if (networkError && !detectedUrl) {
+    console.log('🛑 Rendering ErrorScreen: Network Error', networkError);
     return (
       <ErrorScreen
         error={`Network Error: ${networkError}`}
@@ -170,6 +171,7 @@ const AppContent = () => {
 
   // Handle tenant errors
   if (tenantError) {
+    console.log('🛑 Rendering ErrorScreen: Tenant Error', tenantError);
     return (
       <ErrorScreen
         error={`Initialization Error: ${tenantError}`}
@@ -187,12 +189,12 @@ const AppContent = () => {
       : authLoading
       ? '🔐 Checking authentication...'
       : '👤 Loading user profile...';
-
+    console.log('⏳ Rendering LoadingScreen:', loadingMessage);
     return <LoadingScreen message={loadingMessage} />;
   }
 
   // App is ready - show main navigation
-  console.log('✅ App initialized successfully');
+  console.log('✅ Rendering Navigation (App ready)');
   console.log('🌐 Server:', detectedUrl);
   console.log('👤 Role:', currentRole || 'guest');
 

@@ -6,6 +6,7 @@ export const setupInterceptors = (client) => {
   client.interceptors.request.use(
     async (config) => {
       let token = await StorageUtils.auth.getAccessToken();
+      
 
       // Handle missing tokens for Google OAuth users
       if (!token) {
